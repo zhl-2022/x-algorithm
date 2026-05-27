@@ -1,0 +1,2 @@
+model,k,evaluated_users,recall,hit_rate,precision,ndcg,coverage
+Popularity,20,6037,0.06725195,0.06725195,0.00336260,0.02614861,0.04532578
