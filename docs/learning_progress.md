@@ -11,6 +11,7 @@
 | 日期 | 阶段 | 状态 | 产出 |
 |---|---|---|---|
 | 2026-05-27 | MovieLens 1M 最小闭环 | 已完成 | 数据处理、统计报告、Popularity baseline、`Recall@20` |
+| 2026-06-01 | MovieLens 1M ItemCF baseline | 已完成 | ItemCF 召回、统一结果表、`Recall@20` 对比 |
 
 ## 已完成内容
 
@@ -21,6 +22,7 @@
 5. 生成数据统计报告。
 6. 实现 Popularity baseline。
 7. 输出 `Recall@20`、`HitRate@20`、`Precision@20`、`NDCG@20` 和 `Coverage@20`。
+8. 实现 ItemCF baseline，并输出模型对比结果。
 
 ## 当前实验结果
 
@@ -36,17 +38,22 @@
 | Popularity `Recall@20` | 0.067252 |
 | Popularity `HitRate@20` | 0.067252 |
 | Popularity `NDCG@20` | 0.026149 |
+| ItemCF `Recall@20` | 0.082160 |
+| ItemCF `HitRate@20` | 0.082160 |
+| ItemCF `NDCG@20` | 0.032793 |
+| ItemCF `Coverage@20` | 0.132372 |
 
 ## 当前理解沉淀
 
 - 推荐系统不是单个模型，而是数据、召回、排序、过滤、评测组成的系统工程。
 - 第一阶段的价值是建立可复现的离线评测闭环，而不是追求复杂模型。
 - Popularity baseline 指标不高是正常现象，它用于给后续 ItemCF、MF 和 Two-Tower 提供对比基准。
+- ItemCF 已经体现个性化召回价值，`Recall@20` 和 `NDCG@20` 均高于 Popularity baseline。
 - 按时间顺序切分比随机切分更接近真实推荐场景，因为模型只能利用用户过去行为预测未来偏好。
 
 ## 下一步计划
 
-1. 实现 ItemCF，并与 Popularity baseline 对比 `Recall@20` 和 `NDCG@20`。
-2. 将实验结果追加到统一结果表，例如 `outputs/experiment_results.csv`。
-3. 增加 `reports/itemcf_report.md`，记录相似度方法、超参数和指标。
-4. 准备 Matrix Factorization 的训练脚本，为后续 MLU 训练适配做铺垫。
+1. 准备 Matrix Factorization 的训练脚本，为后续 MLU 训练适配做铺垫。
+2. 在 `xalgorithm-mlu` 容器中验证 PyTorch/torch_mlu 训练最小样例。
+3. 将 MF 指标加入 `outputs/experiment_results.csv`。
+4. 开始设计 Two-Tower 召回模型。

@@ -34,6 +34,7 @@
 python scripts/download_movielens.py
 python scripts/prepare_movielens.py
 python scripts/popularity_baseline.py --k 20
+python scripts/itemcf_baseline.py --k 20
 ```
 
 也可以在数据缺失时由准备脚本自动下载：
@@ -41,6 +42,7 @@ python scripts/popularity_baseline.py --k 20
 ```powershell
 python scripts/prepare_movielens.py --download
 python scripts/popularity_baseline.py --k 20
+python scripts/itemcf_baseline.py --k 20
 ```
 
 ## 输出文件
@@ -54,13 +56,22 @@ python scripts/popularity_baseline.py --k 20
 | `data/processed/item_metadata.csv` | 电影标题和类别元数据 |
 | `reports/data_report.md` | 数据统计和切分报告 |
 | `reports/baseline_report.md` | Popularity baseline 指标报告 |
+| `reports/itemcf_report.md` | ItemCF baseline 指标报告 |
 | `outputs/popularity_results.csv` | 机器可读的指标结果 |
+| `outputs/itemcf_results.csv` | ItemCF 机器可读指标结果 |
+| `outputs/experiment_results.csv` | 多模型统一指标表 |
+
+## 当前结果
+
+| 模型 | Recall@20 | NDCG@20 | Coverage@20 |
+|---|---:|---:|---:|
+| Popularity | 0.067252 | 0.026149 | 0.045326 |
+| ItemCF | 0.082160 | 0.032793 | 0.132372 |
 
 ## 后续模型
 
 当前 baseline 稳定后，建议按顺序增加以下模型：
 
-1. ItemCF
-2. Matrix Factorization 矩阵分解
-3. Two-Tower 召回模型
-4. DNN Ranker 排序模型
+1. Matrix Factorization 矩阵分解
+2. Two-Tower 召回模型
+3. DNN Ranker 排序模型

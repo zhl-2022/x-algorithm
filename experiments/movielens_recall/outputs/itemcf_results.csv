@@ -1,0 +1,2 @@
+model,k,evaluated_users,recall,hit_rate,precision,ndcg,coverage
+ItemCF,20,6037,0.08216001,0.08216001,0.00410800,0.03279295,0.13237188
