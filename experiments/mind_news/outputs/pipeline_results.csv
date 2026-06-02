@@ -1,0 +1,2 @@
+model,scope,train_rows,valid_rows,evaluated_impressions,avg_candidates,auc,mrr,ndcg5,ndcg10,hitrate5,hitrate10,coverage5,coverage10,train_seconds,eval_seconds,notes
+TwoTower+DNN-Rerank,sample,100000,100000,2695,37.10575139,0.55543948,0.27333014,0.24398563,0.31906123,0.41706865,0.65009276,0.00853797,0.01425550,4.2142,0.1865,Two-Tower 在每个曝光组内筛选 Top 20 候选，DNN Ranker 再重排。

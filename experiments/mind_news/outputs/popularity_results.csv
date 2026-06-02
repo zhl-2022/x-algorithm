@@ -1,0 +1,2 @@
+model,train_rows,train_positive_rows,train_ctr,valid_rows,valid_positive_rows,evaluated_impressions,avg_candidates,auc,mrr,ndcg5,ndcg10,hitrate5,hitrate10,coverage5,coverage10
+Popularity,5843444,236344,0.04044601,2740998,111383,73152,37.46989829,0.52225177,0.26607437,0.24726065,0.30846457,0.42343340,0.61198600,0.01706061,0.02638033

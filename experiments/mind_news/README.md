@@ -49,6 +49,18 @@ python scripts/download_mind.py --source reczoo
 python scripts/prepare_mind.py --source reczoo --sample-rows 100000
 ```
 
+运行 MIND Popularity baseline：
+
+```powershell
+python scripts/popularity_baseline.py
+```
+
+运行当前 MIND 阶段全部实验：
+
+```powershell
+python scripts/run_all_experiments.py
+```
+
 ## 输出文件
 
 | 路径 | 说明 |
@@ -60,7 +72,15 @@ python scripts/prepare_mind.py --source reczoo --sample-rows 100000
 | `data/processed/train_sample.csv` | 训练样本前 100,000 行，用于快速调试 |
 | `data/processed/valid_sample.csv` | 验证样本前 100,000 行，用于快速调试 |
 | `reports/data_report.md` | MIND-small 数据统计报告 |
+| `reports/baseline_report.md` | MIND Popularity baseline 报告 |
+| `reports/all_experiments_report.md` | MIND 阶段全部实验汇总报告 |
+| `reports/category_report.md` | Category baseline 报告 |
+| `reports/ranker_report.md` | DNN Ranker 报告 |
+| `reports/two_tower_report.md` | 内容感知 Two-Tower 报告 |
+| `reports/pipeline_report.md` | Two-Tower + DNN Ranker pipeline 报告 |
 | `reports/试验解析.md` | 面向初学者的 MIND 阶段完整学习说明和实验清单 |
+| `outputs/popularity_results.csv` | Popularity baseline 机器可读结果 |
+| `outputs/experiment_results.csv` | 当前 MIND 阶段统一实验结果表 |
 
 ## 当前数据统计
 
@@ -76,10 +96,24 @@ python scripts/prepare_mind.py --source reczoo --sample-rows 100000
 | 训练 CTR | 4.0446% |
 | 验证 CTR | 4.0636% |
 
+## 当前实验结果
+
+统计类 baseline 使用全量 `train.csv` 和 `valid.csv`；神经网络模型默认使用
+`train_sample.csv` 和 `valid_sample.csv` 各 100,000 行，用于本地快速复现实验闭环。
+
+| 模型 | 范围 | AUC | MRR | NDCG@5 | NDCG@10 | HitRate@10 |
+|---|---|---:|---:|---:|---:|---:|
+| Popularity | full | 0.522252 | 0.266074 | 0.247261 | 0.308465 | 0.611986 |
+| Category | full | 0.588720 | 0.291866 | 0.274974 | 0.338507 | 0.657152 |
+| DNNRanker | sample | 0.546448 | 0.266533 | 0.238774 | 0.311597 | 0.633766 |
+| ContentTwoTower | sample | 0.585406 | 0.289335 | 0.276951 | 0.339823 | 0.669759 |
+| TwoTower+DNN-Rerank | sample | 0.555439 | 0.273330 | 0.243986 | 0.319061 | 0.650093 |
+
 ## 后续模型
 
-1. 内容感知 Two-Tower：用户塔编码点击历史，新闻塔编码标题、摘要和类别。
-2. 内容感知 DNN Ranker：融合用户、新闻、类别、热度和文本 embedding。
-3. 两阶段 pipeline：Two-Tower 召回 TopN，Ranker 重排 TopK。
+1. 将 DNN Ranker 和 ContentTwoTower 从 100k 样本训练扩展到全量训练。
+2. 迁移到 MLU 容器，记录训练耗时、吞吐和显存占用。
+3. 引入更强文本 encoder，把标题和摘要从统计特征升级为语义向量。
+4. 做 `candidate_k` 消融，分析 Two-Tower 候选规模对重排效果的影响。
 
 详细学习清单见 `reports/试验解析.md`。

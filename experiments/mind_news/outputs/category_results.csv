@@ -1,0 +1,3 @@
+model,scope,train_rows,valid_rows,evaluated_impressions,avg_candidates,auc,mrr,ndcg5,ndcg10,hitrate5,hitrate10,coverage5,coverage10,train_seconds,eval_seconds,notes
+Category,full,5843444,2740998,73152,37.46989829,0.58871978,0.29186566,0.27497357,0.33850675,0.46511374,0.65715223,0.01971244,0.03128545,57.7596,63.2927,全量新闻热度 + 类别 CTR + 用户历史类别偏好。
+Category-Sample,sample,100000,100000,2695,37.10575139,0.59142294,0.28912823,0.27418424,0.33571631,0.46307978,0.64786642,0.00726570,0.01134308,57.7596,2.3625,全量类别增强分数在样本验证集上的结果。
