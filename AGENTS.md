@@ -34,6 +34,13 @@
 - KuaiRec `small_matrix.csv` 第一轮完整训练已完成：Popularity、Category、ItemCF、MF、
   Two-Tower、DNN Ranker、Two-Tower + DNN Ranker pipeline。当前最佳 `NDCG@20`
   为 Two-Tower 的 `0.143577`。
+- KuaiRec 阶段二已完成：标签阈值消融、`small_matrix.csv` 全量训练、`big_matrix.csv`
+  采样放大、Two-Tower 与 Ranker 分数融合重排。当前阶段二最佳是
+  `watch_ratio >= 0.8` 下 Two-Tower 的 `NDCG@20=0.153744`。
+- 当前 Ranker 重排尚未稳定超过单独 Two-Tower；下一阶段优先优化 Ranker 特征、负采样、
+  排序 loss，以及 `big_matrix.csv` 上的神经召回 TopK。
+- 总体项目路线记录在 `docs/project_roadmap.md`，KuaiRec 阶段二总结记录在
+  `experiments/kuairec_short_video/reports/stage2_summary_report.md`。
 
 ## 服务器与 MLU 训练环境
 
@@ -126,6 +133,9 @@ source /torch/venv3/pytorch/bin/activate
 1. MovieLens 1M：Popularity、ItemCF、MF、Two-Tower、DNN Ranker、两阶段 pipeline。
 2. MIND-small：Popularity、Category、DNNRanker、ContentTwoTower、TwoTower+DNN-Rerank、MLU 放大实验。
 3. KuaiRec：短视频推荐数据准备、观看反馈建模、Popularity/Category/Two-Tower/Ranker 迁移。
-4. KuaiRec MLU 放大实验：记录 batch size、吞吐、显存、`AUC`、`NDCG@K`、`HitRate@K`。
-5. 如需要继续扩展，再考虑 Tenrec 或 KuaiRand。
-6. 整理最终项目 README、实验报告、架构图、简历描述和面试问答。
+4. KuaiRec 阶段二：标签阈值、训练规模、候选集和融合重排消融。
+5. KuaiRec 下一阶段：优化 Ranker，使 `TwoTower+DNN-Rerank` 的 `NDCG@20` 超过单独 Two-Tower。
+6. KuaiRec 规模化：在 `big_matrix.csv` 上加强负采样和召回训练，解决神经模型 TopK 偏弱问题。
+7. MLU 双卡：如需要体现工程能力，再做 DDP 或 `torchrun --nproc_per_node=2`。
+8. 如需要继续扩展，再考虑 Tenrec 或 KuaiRand。
+9. 整理最终项目 README、实验报告、架构图、简历描述和面试问答。

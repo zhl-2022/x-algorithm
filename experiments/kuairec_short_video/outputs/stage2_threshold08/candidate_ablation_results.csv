@@ -1,0 +1,16 @@
+model,scope,k,train_rows,eval_users,recall,hit_rate,precision,ndcg,coverage,auc,logloss,train_seconds,eval_seconds,device,notes
+TwoTower+DNN-Blend@50a0,small_matrix,20,1200000,1411,0.01747589,0.90999291,0.12735648,0.15374407,0.19567178,0.51551214,,7.0404,1.6899,mlu,Two-Tower 先取 Top50 候选，再按 0*Ranker + 1*TwoTower 融合重排 Top20。
+TwoTower+DNN-Blend@50a0.25,small_matrix,20,1200000,1411,0.01739340,0.91211906,0.12700213,0.14751099,0.17583408,0.51551447,,7.0404,1.6899,mlu,Two-Tower 先取 Top50 候选，再按 0.25*Ranker + 0.75*TwoTower 融合重排 Top20。
+TwoTower+DNN-Blend@50a0.5,small_matrix,20,1200000,1411,0.01789826,0.91070163,0.13065202,0.14841455,0.16651638,0.51551219,,7.0404,1.6899,mlu,Two-Tower 先取 Top50 候选，再按 0.5*Ranker + 0.5*TwoTower 融合重排 Top20。
+TwoTower+DNN-Blend@50a0.75,small_matrix,20,1200000,1411,0.01817611,0.91566265,0.13313253,0.14675617,0.16681695,0.51550823,,7.0404,1.6899,mlu,Two-Tower 先取 Top50 候选，再按 0.75*Ranker + 0.25*TwoTower 融合重排 Top20。
+TwoTower+DNN-Rerank@50,small_matrix,20,1200000,1411,0.01846089,0.92062367,0.13497519,0.14501873,0.16801924,0.51550405,,7.0404,1.6899,mlu,Two-Tower 先取 Top50 候选，再按 1*Ranker + 0*TwoTower 融合重排 Top20。
+TwoTower+DNN-Blend@100a0,small_matrix,20,1200000,1411,0.01747589,0.90999291,0.12735648,0.15374407,0.19567178,0.52894108,,7.0404,1.6899,mlu,Two-Tower 先取 Top100 候选，再按 0*Ranker + 1*TwoTower 融合重排 Top20。
+TwoTower+DNN-Blend@100a0.25,small_matrix,20,1200000,1411,0.01740324,0.91282778,0.12710843,0.14761072,0.17553351,0.52895226,,7.0404,1.6899,mlu,Two-Tower 先取 Top100 候选，再按 0.25*Ranker + 0.75*TwoTower 融合重排 Top20。
+TwoTower+DNN-Blend@100a0.5,small_matrix,20,1200000,1411,0.01792147,0.91141035,0.13072289,0.14861064,0.16050496,0.52895360,,7.0404,1.6899,mlu,Two-Tower 先取 Top100 候选，再按 0.5*Ranker + 0.5*TwoTower 融合重排 Top20。
+TwoTower+DNN-Blend@100a0.75,small_matrix,20,1200000,1411,0.01806082,0.91566265,0.13182140,0.14591548,0.15509468,0.52894730,,7.0404,1.6899,mlu,Two-Tower 先取 Top100 候选，再按 0.75*Ranker + 0.25*TwoTower 融合重排 Top20。
+TwoTower+DNN-Rerank@100,small_matrix,20,1200000,1411,0.01814771,0.91353650,0.13245925,0.14238180,0.15569582,0.52893580,,7.0404,1.6899,mlu,Two-Tower 先取 Top100 候选，再按 1*Ranker + 0*TwoTower 融合重排 Top20。
+TwoTower+DNN-Blend@200a0,small_matrix,20,1200000,1411,0.01747589,0.90999291,0.12735648,0.15374407,0.19567178,0.53803447,,7.0404,1.6899,mlu,Two-Tower 先取 Top200 候选，再按 0*Ranker + 1*TwoTower 融合重排 Top20。
+TwoTower+DNN-Blend@200a0.25,small_matrix,20,1200000,1411,0.01740813,0.91282778,0.12714387,0.14763401,0.17553351,0.53808451,,7.0404,1.6899,mlu,Two-Tower 先取 Top200 候选，再按 0.25*Ranker + 0.75*TwoTower 融合重排 Top20。
+TwoTower+DNN-Blend@200a0.5,small_matrix,20,1200000,1411,0.01795103,0.91211906,0.13093551,0.14888399,0.16020439,0.53811377,,7.0404,1.6899,mlu,Two-Tower 先取 Top200 候选，再按 0.5*Ranker + 0.5*TwoTower 融合重排 Top20。
+TwoTower+DNN-Blend@200a0.75,small_matrix,20,1200000,1411,0.01809432,0.91778880,0.13206945,0.14620930,0.15238954,0.53811861,,7.0404,1.6899,mlu,Two-Tower 先取 Top200 候选，再按 0.75*Ranker + 0.25*TwoTower 融合重排 Top20。
+TwoTower+DNN-Rerank@200,small_matrix,20,1200000,1411,0.01816160,0.91708009,0.13253012,0.14249979,0.15269011,0.53809613,,7.0404,1.6899,mlu,Two-Tower 先取 Top200 候选，再按 1*Ranker + 0*TwoTower 融合重排 Top20。

@@ -76,6 +76,8 @@ python experiments/kuairec_short_video/scripts/run_all_experiments.py \
   --hidden-dim 128 \
   --ranker-hidden-dims 128,64 \
   --candidate-ks 50,100,200 \
+  --rerank-blend-alphas 0,0.25,0.5,0.75,1 \
+  --ranker-positive-weight 2 \
   --device auto
 ```
 
@@ -95,6 +97,27 @@ python experiments/kuairec_short_video/scripts/run_all_experiments.py \
 
 当前 `NDCG@20` 最好的是 `Two-Tower`，说明短视频场景下用户塔和视频塔的向量召回已经明显超过热度和协同过滤 baseline。
 
+## 第二轮结果
+
+第二轮围绕“标签阈值、训练规模、候选重排、big_matrix 放大”做系统实验。
+
+| 实验 | 数据 | 标签 | 神经训练样本 | 当前最佳模型 | 最佳 NDCG@20 | 结论 |
+|---|---|---|---:|---|---:|---|
+| 标签阈值消融 | `small_matrix.csv` | `watch_ratio >= 0.8` | 1,200,000 | Two-Tower | 0.153744 | 放宽到接近完播后，双塔效果提升 |
+| 全量 small 训练 | `small_matrix.csv` | `watch_ratio >= 1.0` | 3,595,097 | Two-Tower | 0.149288 | 扩大训练样本后双塔继续提升 |
+| big 采样放大 | `big_matrix.csv` | `watch_ratio >= 1.0` | 2,000,000 | ItemCF | 0.058148 | 大候选池下神经模型 TopK 还不稳定 |
+
+阶段二详细解释见：
+
+- `reports/stage2_summary_report.md`
+- `reports/stage2_threshold08/all_experiments_report.md`
+- `reports/stage2_full_small/all_experiments_report.md`
+- `reports/stage2_big_sample/all_experiments_report.md`
+
+当前最重要的结论是：`watch_ratio >= 0.8` 更适合 `small_matrix.csv` 的 TopK 推荐，
+但 Ranker 重排还没有稳定超过单独 Two-Tower；`big_matrix.csv` 上神经模型 AUC 较高但 TopK 偏弱，
+后续应优先做 hard negative、in-batch negative 或更强召回训练。
+
 ## 当前状态
 
 - [x] 新建 KuaiRec 实验目录。
@@ -107,3 +130,7 @@ python experiments/kuairec_short_video/scripts/run_all_experiments.py \
 - [x] 实现 KuaiRec Popularity、Category、ItemCF baseline。
 - [x] 完成 KuaiRec MF、Two-Tower、DNN Ranker 和两阶段 pipeline 训练。
 - [x] 在 srv4 MLU 容器完成第一轮训练验证。
+- [x] 完成标签阈值消融：`watch_ratio >= 1.0` 对比 `watch_ratio >= 0.8`。
+- [x] 完成 `small_matrix.csv` 全量神经训练实验。
+- [x] 完成 `big_matrix.csv` 采样放大实验。
+- [x] 完成 Two-Tower 与 DNNRanker 融合重排实验。

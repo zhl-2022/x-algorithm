@@ -23,6 +23,9 @@
 | 2026-06-02 | MIND MLU 训练验证 | 已完成 | srv4 容器训练、MLU 结果表、训练记录报告 |
 | 2026-06-02 | MIND MLU 放大与 Candidate K 消融 | 已完成 | 1M/500k 训练评估、文本哈希 encoder、`candidate_k=10/20/50/100` 对比 |
 | 2026-06-02 | KuaiRec 短视频推荐实验启动 | 已完成 | 第三批数据集方案、数据下载、数据盘点、全套 baseline 与 MLU 训练 |
+| 2026-06-02 | KuaiRec 标签阈值消融 | 已完成 | `watch_ratio >= 1.0` 对比 `watch_ratio >= 0.8`，双塔 `NDCG@20` 提升到 `0.153744` |
+| 2026-06-02 | KuaiRec small 全量训练 | 已完成 | 神经训练样本扩展到 3,595,097，双塔 `NDCG@20=0.149288` |
+| 2026-06-02 | KuaiRec big 采样放大 | 已完成 | `big_matrix.csv` 200 万神经样本，发现 AUC 高但 TopK 弱的问题 |
 
 ## 已完成内容
 
@@ -49,6 +52,11 @@
 21. 编写 KuaiRec 下载脚本、数据盘点脚本和面向小白的试验方案。
 22. 在 srv4 的 `xalgorithm-mlu` 容器内下载并解压 KuaiRec 数据，生成第一版数据盘点报告。
 23. 完成 KuaiRec `small_matrix.csv` 第一轮完整训练：Popularity、Category、ItemCF、MF、Two-Tower、DNN Ranker 和 Two-Tower + DNN Ranker pipeline。
+24. 完成 KuaiRec 标签阈值消融，验证 `watch_ratio >= 0.8` 比严格完播更适合当前 TopK 推荐。
+25. 完成 KuaiRec `small_matrix.csv` 全量神经训练，验证更多训练交互能提升 Two-Tower。
+26. 完成 KuaiRec `big_matrix.csv` 采样放大实验，定位神经模型 AUC 高但 TopK 弱的问题。
+27. 新增 Two-Tower 与 Ranker 融合重排参数，支持 `alpha * Ranker + (1 - alpha) * TwoTower` 的 pipeline 消融。
+28. 新增项目总路线文档 `docs/project_roadmap.md`。
 
 ## 当前实验结果
 
@@ -137,6 +145,16 @@
 | KuaiRec DNNRanker `NDCG@20` | 0.113215 |
 | KuaiRec best `candidate_k` | 50 |
 | KuaiRec TwoTower+DNN-Rerank@50 `NDCG@20` | 0.113354 |
+| KuaiRec `watch_ratio >= 0.8` Two-Tower `NDCG@20` | 0.153744 |
+| KuaiRec `watch_ratio >= 0.8` DNNRanker `AUC` | 0.647959 |
+| KuaiRec full small Two-Tower `Recall@20` | 0.027291 |
+| KuaiRec full small Two-Tower `NDCG@20` | 0.149288 |
+| KuaiRec full small DNNRanker `Recall@20` | 0.028359 |
+| KuaiRec full small DNNRanker `NDCG@20` | 0.146904 |
+| KuaiRec big sample ItemCF `NDCG@20` | 0.058148 |
+| KuaiRec big sample MF `AUC` | 0.776112 |
+| KuaiRec big sample DNNRanker `AUC` | 0.764070 |
+| KuaiRec big sample Two-Tower `NDCG@20` | 0.001448 |
 
 ## 当前理解沉淀
 
@@ -164,14 +182,18 @@
 - KuaiRec 核心交互表包含 `watch_ratio`，第一轮可以将 `watch_ratio >= 1.0` 定义为正反馈，表示完播或重复观看。
 - KuaiRec 第一轮完整训练已完成，当前 `NDCG@20` 最好的是 Two-Tower，说明用户兴趣塔和视频内容塔在短视频 TopK 推荐上已经超过统计 baseline 和 ItemCF。
 - KuaiRec DNNRanker 的 `AUC=0.656796`，但 `NDCG@20` 未超过 Two-Tower，说明点击/完播概率排序和最终 TopK 推荐效果并不完全等价。
+- KuaiRec 标签阈值消融显示，`watch_ratio >= 0.8` 的 Two-Tower `NDCG@20=0.153744`，高于严格完播第一轮的 `0.143577`，说明“接近完播”能提供更密集、更适合 TopK 的正反馈。
+- KuaiRec 全量 `small_matrix.csv` 训练显示，扩大训练样本能让 Two-Tower 从更多交互中受益，`NDCG@20` 提升到 `0.149288`。
+- KuaiRec `big_matrix.csv` 采样放大显示，神经模型虽然 AUC 较高，但全量 TopK 推荐很弱；这说明后续重点不是继续只优化二分类 AUC，而是改进召回 loss、负采样和候选生成质量。
+- 当前 Ranker 重排还没有稳定超过 Two-Tower，后续应优先围绕 hard negative、特征增强和排序 loss 做实验。
 
 ## 下一步计划
 
-1. 做 KuaiRec 标签阈值消融：`watch_ratio >= 1.0` 对比 `watch_ratio >= 0.8`。
-2. 将神经模型训练样本从 120 万扩展到 `small_matrix.csv` 全量训练。
-3. 将 KuaiRec 从 `small_matrix.csv` 扩展到 `big_matrix.csv`。
-4. 优化 DNN Ranker 特征和损失，使重排 TopK 指标超过单独 Two-Tower。
-5. 如果要体现双卡能力，再做 DDP 或 `torchrun --nproc_per_node=2`。
+1. 优化 KuaiRec Ranker 特征和损失，使重排 TopK 指标超过单独 Two-Tower。
+2. 在 `big_matrix.csv` 上做 in-batch negative、hard negative 或更强召回 loss，解决神经模型 TopK 偏弱问题。
+3. 如果要体现双卡能力，再做 DDP 或 `torchrun --nproc_per_node=2`。
+4. 整理 KuaiRec 阶段报告，形成可直接写进简历的短视频推荐实验总结。
+5. 后续如需继续扩大，再选择 Tenrec 或 KuaiRand。
 
 ## 后续总体规划
 

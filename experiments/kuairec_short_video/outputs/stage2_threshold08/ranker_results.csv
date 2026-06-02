@@ -1,0 +1,2 @@
+model,scope,k,train_rows,eval_users,recall,hit_rate,precision,ndcg,coverage,auc,logloss,train_seconds,eval_seconds,device,notes
+DNNRanker,small_matrix_sample,20,1200000,1411,0.01823969,0.91778880,0.13313253,0.14289074,0.15148783,0.64795871,0.75918512,3.4813,1.6248,mlu,融合用户、视频、类别、caption 哈希文本和统计特征的 MLP 排序模型。

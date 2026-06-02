@@ -273,6 +273,10 @@ def parse_int_list(value: str) -> tuple[int, ...]:
     return tuple(int(part.strip()) for part in value.split(",") if part.strip())
 
 
+def parse_float_list(value: str) -> tuple[float, ...]:
+    return tuple(float(part.strip()) for part in value.split(",") if part.strip())
+
+
 def parse_category_list(value: str) -> tuple[str, ...]:
     if not value:
         return ("unknown",)
@@ -606,6 +610,7 @@ def train_neural_model(
     lr: float,
     weight_decay: float,
     seed: int,
+    positive_weight: float,
 ) -> tuple[nn.Module, float, float]:
     model.to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
@@ -624,7 +629,15 @@ def train_neural_model(
             batch = move_batch(train_data, batch_indices, device)
             optimizer.zero_grad(set_to_none=True)
             logits = model(batch)
-            loss = F.binary_cross_entropy_with_logits(logits, batch.labels)
+            if positive_weight == 1.0:
+                loss = F.binary_cross_entropy_with_logits(logits, batch.labels)
+            else:
+                weights = torch.where(
+                    batch.labels > 0.5,
+                    torch.full_like(batch.labels, positive_weight),
+                    torch.ones_like(batch.labels),
+                )
+                loss = F.binary_cross_entropy_with_logits(logits, batch.labels, weight=weights)
             loss.backward()
             optimizer.step()
             total_loss += float(loss.detach().cpu())
@@ -828,8 +841,11 @@ def add_auc_logloss(metric: ExperimentMetric, rows: list[RawInteraction], score_
         position = user_position.get(user_index)
         if position is None:
             continue
+        score = float(score_matrix[position, item_index])
+        if not math.isfinite(score):
+            continue
         labels.append(row.label)
-        scores.append(float(score_matrix[position, item_index]))
+        scores.append(score)
     return ExperimentMetric(
         model=metric.model,
         scope=metric.scope,
@@ -897,35 +913,65 @@ def score_itemcf_matrix(data: PreparedData, max_history: int, max_neighbors: int
     return torch.stack(rows, dim=0)
 
 
+def normalize_score_rows(score_matrix: torch.Tensor) -> torch.Tensor:
+    finite = torch.isfinite(score_matrix)
+    safe_scores = torch.where(finite, score_matrix, torch.zeros_like(score_matrix))
+    counts = finite.sum(dim=1, keepdim=True).clamp_min(1)
+    means = safe_scores.sum(dim=1, keepdim=True) / counts
+    centered = torch.where(finite, score_matrix - means, torch.zeros_like(score_matrix))
+    variances = (centered * centered).sum(dim=1, keepdim=True) / counts
+    std = variances.sqrt().clamp_min(1e-6)
+    return torch.where(finite, centered / std, torch.full_like(score_matrix, -float("inf")))
+
+
 def evaluate_pipeline(
     two_tower_scores: torch.Tensor,
     ranker_scores: torch.Tensor,
     data: PreparedData,
     candidate_k: int,
+    blend_alpha: float,
     k: int,
     train_rows: int,
     train_seconds: float,
     eval_seconds: float,
     device: str,
-) -> ExperimentMetric:
+    scope: str,
+) -> tuple[ExperimentMetric, torch.Tensor]:
+    normalized_two_tower = normalize_score_rows(two_tower_scores)
+    normalized_ranker = normalize_score_rows(ranker_scores)
     pipeline_scores = torch.full_like(ranker_scores, -float("inf"))
     for row_index, user_index in enumerate(data.eval_user_indices):
         scores = two_tower_scores[row_index].clone()
         for seen_item in data.train_seen_by_user.get(user_index, set()):
             scores[seen_item] = -float("inf")
         top_candidates = torch.topk(scores, k=min(candidate_k, len(scores))).indices
-        pipeline_scores[row_index, top_candidates] = ranker_scores[row_index, top_candidates]
-    return evaluate_topk(
-        score_matrix=pipeline_scores,
-        data=data,
-        model=f"TwoTower+DNN-Rerank@{candidate_k}",
-        scope="small_matrix",
-        k=k,
-        train_rows=train_rows,
-        train_seconds=train_seconds,
-        eval_seconds=eval_seconds,
-        device=device,
-        notes=f"Two-Tower 先取 Top{candidate_k} 候选，再由 DNN Ranker 重排 Top{k}。",
+        blended_scores = (
+            blend_alpha * normalized_ranker[row_index, top_candidates]
+            + (1.0 - blend_alpha) * normalized_two_tower[row_index, top_candidates]
+        )
+        pipeline_scores[row_index, top_candidates] = blended_scores
+    model_name = (
+        f"TwoTower+DNN-Rerank@{candidate_k}"
+        if blend_alpha == 1.0
+        else f"TwoTower+DNN-Blend@{candidate_k}a{blend_alpha:g}"
+    )
+    return (
+        evaluate_topk(
+            score_matrix=pipeline_scores,
+            data=data,
+            model=model_name,
+            scope=scope,
+            k=k,
+            train_rows=train_rows,
+            train_seconds=train_seconds,
+            eval_seconds=eval_seconds,
+            device=device,
+            notes=(
+                f"Two-Tower 先取 Top{candidate_k} 候选，再按 "
+                f"{blend_alpha:g}*Ranker + {1.0 - blend_alpha:g}*TwoTower 融合重排 Top{k}。"
+            ),
+        ),
+        pipeline_scores,
     )
 
 
@@ -965,8 +1011,8 @@ def write_metric_csv(path: Path, metrics: list[ExperimentMetric]) -> None:
                     "precision": f"{metric.precision:.8f}",
                     "ndcg": f"{metric.ndcg:.8f}",
                     "coverage": f"{metric.coverage:.8f}",
-                    "auc": f"{metric.auc:.8f}",
-                    "logloss": f"{metric.logloss:.8f}",
+                    "auc": format_csv_float(metric.auc, 8),
+                    "logloss": format_csv_float(metric.logloss, 8),
                     "train_seconds": f"{metric.train_seconds:.4f}",
                     "eval_seconds": f"{metric.eval_seconds:.4f}",
                     "device": metric.device,
@@ -975,7 +1021,15 @@ def write_metric_csv(path: Path, metrics: list[ExperimentMetric]) -> None:
             )
 
 
+def format_csv_float(value: float, digits: int) -> str:
+    if not math.isfinite(value):
+        return ""
+    return f"{value:.{digits}f}"
+
+
 def format_metric(value: float) -> str:
+    if not math.isfinite(value):
+        return "N/A"
     return f"{value:.6f}"
 
 
@@ -1009,13 +1063,14 @@ def write_all_report(path: Path, data: PreparedData, metrics: list[ExperimentMet
     positives_train = sum(row.label for row in data.train_rows)
     positives_test = sum(row.label for row in data.test_rows)
     best = max(metrics, key=lambda metric: metric.ndcg)
+    neural_train_rows = next((metric.train_rows for metric in metrics if metric.model == "MF"), args.neural_train_rows)
     lines = [
         "# KuaiRec 全套训练报告",
         "",
         "## 实验范围",
         "",
-        "本报告汇总 KuaiRec 短视频推荐第一轮完整训练。当前使用 `small_matrix.csv`",
-        "跑通 Popularity、Category、ItemCF、MF、Two-Tower、DNN Ranker 和两阶段 pipeline。",
+        "本报告汇总 KuaiRec 短视频推荐训练。当前跑通 Popularity、Category、ItemCF、MF、",
+        "Two-Tower、DNN Ranker 和两阶段 pipeline，并支持标签阈值、训练规模、候选集和融合权重消融。",
         "",
         "## 数据切分",
         "",
@@ -1030,9 +1085,11 @@ def write_all_report(path: Path, data: PreparedData, metrics: list[ExperimentMet
         f"| 训练正样本 | {positives_train:,} |",
         f"| 测试正样本 | {positives_test:,} |",
         f"| 正反馈阈值 | `watch_ratio >= {args.positive_threshold}` |",
-        f"| 神经模型训练样本 | {args.neural_train_rows:,} |",
+        f"| 神经模型训练样本 | {neural_train_rows:,} |",
         f"| Epochs | {args.epochs} |",
         f"| Batch size | {args.batch_size:,} |",
+        f"| Ranker 正样本权重 | {args.ranker_positive_weight:g} |",
+        f"| 融合重排 alpha | `{','.join(str(item) for item in args.rerank_blend_alphas)}` |",
         "",
         "## 结果汇总",
         "",
@@ -1057,7 +1114,8 @@ def write_all_report(path: Path, data: PreparedData, metrics: list[ExperimentMet
             "- Category baseline 开始利用用户历史类别偏好，适合解释短视频兴趣迁移。",
             "- ItemCF 利用用户共同完播视频构造 item-item 相似度，是第一版个性化召回。",
             "- MF、Two-Tower 和 DNN Ranker 已完成 MLU 训练链路验证。",
-            "- 两阶段 pipeline 模拟企业推荐的召回后排序流程，后续可以继续做 `candidate_k` 消融。",
+            "- 两阶段 pipeline 模拟企业推荐的召回后排序流程，本轮支持 Ranker-only 与 Two-Tower/Ranker 融合重排。",
+            "- Pipeline 只对召回候选打重排分；候选外视频没有概率分数，因此候选外样本不参与 `AUC` 和 `LogLoss` 计算。",
         ]
     )
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -1079,7 +1137,7 @@ def write_outputs(data: PreparedData, metrics: list[ExperimentMetric], args: arg
         if selected:
             write_metric_csv(args.outputs_dir / f"{filename}_results.csv", selected)
             write_single_report(args.reports_dir / f"{filename}_report.md", title, selected, description)
-    pipeline_metrics = [metric for metric in metrics if metric.model.startswith("TwoTower+DNN-Rerank")]
+    pipeline_metrics = [metric for metric in metrics if metric.model.startswith("TwoTower+DNN-")]
     if pipeline_metrics:
         write_metric_csv(args.outputs_dir / "pipeline_results.csv", pipeline_metrics)
         write_metric_csv(args.outputs_dir / "candidate_ablation_results.csv", pipeline_metrics)
@@ -1110,6 +1168,12 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--valid-ratio", type=float, default=0.1)
     parser.add_argument("--k", type=int, default=20)
     parser.add_argument("--candidate-ks", type=parse_int_list, default=(50, 100, 200))
+    parser.add_argument(
+        "--rerank-blend-alphas",
+        type=parse_float_list,
+        default=(1.0,),
+        help="Comma-separated alpha values for alpha*Ranker + (1-alpha)*TwoTower rerank scores.",
+    )
     parser.add_argument("--itemcf-history", type=int, default=80)
     parser.add_argument("--itemcf-neighbors", type=int, default=100)
     parser.add_argument("--neural-train-rows", type=int, default=1_200_000)
@@ -1126,6 +1190,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--temperature", type=float, default=0.2)
     parser.add_argument("--lr", type=float, default=0.003)
     parser.add_argument("--weight-decay", type=float, default=1e-6)
+    parser.add_argument("--ranker-positive-weight", type=float, default=1.0)
     parser.add_argument("--text-buckets", type=int, default=8192)
     parser.add_argument("--max-text-tokens", type=int, default=16)
     parser.add_argument("--device", default="auto", help="auto, cpu, cuda, or mlu.")
@@ -1147,6 +1212,7 @@ def main(argv: list[str]) -> int:
         f"eval_users={len(data.eval_user_indices):,}",
         flush=True,
     )
+    scope_name = args.matrix.replace(".csv", "")
 
     metrics: list[ExperimentMetric] = []
 
@@ -1156,7 +1222,7 @@ def main(argv: list[str]) -> int:
         popularity_scores,
         data,
         "Popularity",
-        "small_matrix",
+        scope_name,
         args.k,
         len(data.train_rows),
         time.perf_counter() - start,
@@ -1172,7 +1238,7 @@ def main(argv: list[str]) -> int:
         category_scores,
         data,
         "Category",
-        "small_matrix",
+        scope_name,
         args.k,
         len(data.train_rows),
         time.perf_counter() - start,
@@ -1188,7 +1254,7 @@ def main(argv: list[str]) -> int:
         itemcf_scores,
         data,
         "ItemCF",
-        "small_matrix",
+        scope_name,
         args.k,
         len(data.train_rows),
         time.perf_counter() - start,
@@ -1211,6 +1277,7 @@ def main(argv: list[str]) -> int:
         args.lr,
         args.weight_decay,
         args.seed + 1,
+        1.0,
     )
     start = time.perf_counter()
     mf_scores = score_mf_matrix(mf_model, data, data.eval_user_indices, device, args.score_batch_users)
@@ -1219,7 +1286,7 @@ def main(argv: list[str]) -> int:
         mf_scores,
         data,
         "MF",
-        "small_matrix_sample",
+        f"{scope_name}_sample",
         args.k,
         len(train_features.labels),
         mf_train_seconds,
@@ -1250,6 +1317,7 @@ def main(argv: list[str]) -> int:
         args.lr,
         args.weight_decay,
         args.seed + 2,
+        1.0,
     )
     start = time.perf_counter()
     two_tower_scores = score_two_tower_matrix(
@@ -1265,7 +1333,7 @@ def main(argv: list[str]) -> int:
         two_tower_scores,
         data,
         "Two-Tower",
-        "small_matrix_sample",
+        f"{scope_name}_sample",
         args.k,
         len(train_features.labels),
         two_tower_train_seconds,
@@ -1295,6 +1363,7 @@ def main(argv: list[str]) -> int:
         args.lr,
         args.weight_decay,
         args.seed + 3,
+        args.ranker_positive_weight,
     )
     start = time.perf_counter()
     ranker_scores = score_ranker_matrix(ranker_model, data, data.eval_user_indices, device, args.score_batch_users)
@@ -1303,7 +1372,7 @@ def main(argv: list[str]) -> int:
         ranker_scores,
         data,
         "DNNRanker",
-        "small_matrix_sample",
+        f"{scope_name}_sample",
         args.k,
         len(train_features.labels),
         ranker_train_seconds,
@@ -1314,18 +1383,21 @@ def main(argv: list[str]) -> int:
     metrics.append(add_auc_logloss(ranker_metric, data.test_rows[: args.auc_rows], ranker_scores, data))
 
     for candidate_k in args.candidate_ks:
-        pipeline_metric = evaluate_pipeline(
-            two_tower_scores,
-            ranker_scores,
-            data,
-            candidate_k,
-            args.k,
-            len(train_features.labels),
-            two_tower_train_seconds + ranker_train_seconds,
-            two_tower_eval_seconds + ranker_eval_seconds,
-            str(device),
-        )
-        metrics.append(add_auc_logloss(pipeline_metric, data.test_rows[: args.auc_rows], ranker_scores, data))
+        for blend_alpha in args.rerank_blend_alphas:
+            pipeline_metric, pipeline_scores = evaluate_pipeline(
+                two_tower_scores,
+                ranker_scores,
+                data,
+                candidate_k,
+                blend_alpha,
+                args.k,
+                len(train_features.labels),
+                two_tower_train_seconds + ranker_train_seconds,
+                two_tower_eval_seconds + ranker_eval_seconds,
+                str(device),
+                scope_name,
+            )
+            metrics.append(add_auc_logloss(pipeline_metric, data.test_rows[: args.auc_rows], pipeline_scores, data))
 
     write_outputs(data, metrics, args)
     print("Wrote KuaiRec experiment suite outputs.")

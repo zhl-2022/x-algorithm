@@ -1,0 +1,2 @@
+model,scope,k,train_rows,eval_users,recall,hit_rate,precision,ndcg,coverage,auc,logloss,train_seconds,eval_seconds,device,notes
+Two-Tower,small_matrix_sample,20,1200000,1411,0.01747589,0.90999291,0.12735648,0.15374407,0.19567178,0.51320630,0.73223017,3.5592,0.0651,mlu,用户塔和视频塔分别编码，视频塔融合类别、caption 哈希文本和统计特征。
