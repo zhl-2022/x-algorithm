@@ -1,2 +1,2 @@
 model,scope,train_rows,valid_rows,evaluated_impressions,avg_candidates,auc,mrr,ndcg5,ndcg10,hitrate5,hitrate10,coverage5,coverage10,train_seconds,eval_seconds,notes
-DNNRanker,sample,100000,100000,2695,37.10575139,0.54796145,0.26710722,0.24128597,0.31156961,0.41818182,0.63525046,0.00752629,0.01240075,0.7257,0.0714,MLP Ranker，融合用户、新闻、类别、小时 embedding 和内容/统计 dense 特征。
+DNNRanker,sample,1000000,500000,13390,37.34129948,0.59274913,0.31226885,0.28997784,0.35350729,0.48954444,0.68117999,0.01814893,0.02627303,3.9687,0.3279,MLP Ranker，融合用户、新闻、类别、小时 embedding、标题/摘要哈希文本 embedding 和内容/统计 dense 特征。

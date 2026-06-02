@@ -79,9 +79,13 @@ python scripts/run_all_experiments.py
 | `reports/two_tower_report.md` | 内容感知 Two-Tower 报告 |
 | `reports/pipeline_report.md` | Two-Tower + DNN Ranker pipeline 报告 |
 | `reports/mlu_training_report.md` | srv4 MLU 训练记录 |
+| `reports/mlu_scale_report.md` | MLU 500k 放大实验与 Candidate K 消融报告 |
+| `reports/candidate_ablation_report.md` | Candidate K 消融报告 |
 | `reports/试验解析.md` | 面向初学者的 MIND 阶段完整学习说明和实验清单 |
 | `outputs/popularity_results.csv` | Popularity baseline 机器可读结果 |
 | `outputs/experiment_results.csv` | 当前 MIND 阶段统一实验结果表 |
+| `outputs/candidate_ablation_results.csv` | Candidate K 消融结果表 |
+| `outputs/mind_mlu_final_cnmon.csv` | 1M MLU 实验期间 Card 2/3 的 `cnmon` 显存采样 |
 
 ## 当前数据统计
 
@@ -99,23 +103,32 @@ python scripts/run_all_experiments.py
 
 ## 当前实验结果
 
-统计类 baseline 使用全量 `train.csv` 和 `valid.csv`；神经网络模型默认使用
-`train_sample.csv` 和 `valid_sample.csv` 各 100,000 行。当前神经模型结果已在
-srv4 的 `xalgorithm-mlu` 容器中使用 `MLU_VISIBLE_DEVICES=2,3` 跑通。
+统计类 baseline 使用全量 `train.csv` 和 `valid.csv`；神经网络模型当前已在
+srv4 的 `xalgorithm-mlu` 容器中使用 `MLU_VISIBLE_DEVICES=2,3` 完成 1,000,000
+训练样本和 500,000 验证样本的最终放大实验，并加入标题/摘要哈希文本 embedding。
 
 | 模型 | 范围 | AUC | MRR | NDCG@5 | NDCG@10 | HitRate@10 |
 |---|---|---:|---:|---:|---:|---:|
 | Popularity | full | 0.522252 | 0.266074 | 0.247261 | 0.308465 | 0.611986 |
 | Category | full | 0.588720 | 0.291866 | 0.274974 | 0.338507 | 0.657152 |
-| DNNRanker | sample, MLU | 0.547961 | 0.267107 | 0.241286 | 0.311570 | 0.635250 |
-| ContentTwoTower | sample, MLU | 0.562748 | 0.281838 | 0.256427 | 0.324701 | 0.650835 |
-| TwoTower+DNN-Rerank | sample, MLU | 0.550229 | 0.271336 | 0.244329 | 0.316776 | 0.646011 |
+| DNNRanker | 1M/500k, MLU | 0.592749 | 0.312269 | 0.289978 | 0.353507 | 0.681180 |
+| ContentTwoTower | 1M/500k, MLU | 0.616641 | 0.331905 | 0.313456 | 0.374560 | 0.701867 |
+| TwoTower+DNN-Rerank@10 | 1M/500k, MLU | 0.602720 | 0.315350 | 0.294595 | 0.362443 | 0.701867 |
+
+## Candidate K 消融
+
+| Candidate K | AUC | MRR | NDCG@5 | NDCG@10 | HitRate@10 |
+|---:|---:|---:|---:|---:|---:|
+| 10 | 0.602720 | 0.315350 | 0.294595 | 0.362443 | 0.701867 |
+| 20 | 0.597145 | 0.313291 | 0.290818 | 0.355927 | 0.687901 |
+| 50 | 0.594094 | 0.312461 | 0.290026 | 0.353712 | 0.682151 |
+| 100 | 0.593528 | 0.312284 | 0.289967 | 0.353502 | 0.681180 |
 
 ## 后续模型
 
-1. 将 DNN Ranker 和 ContentTwoTower 从 100k 样本训练扩展到百万级或全量训练。
-2. 在 MLU 容器中补充 `candidate_k=10/20/50/100` pipeline 消融。
-3. 引入更强文本 encoder，把标题和摘要从统计特征升级为语义向量。
+1. 将 DNN Ranker 和 ContentTwoTower 从 1M 样本训练扩展到全量训练。
+2. 如需体现双卡能力，改造为 `torchrun --nproc_per_node=2` 的 DDP 训练。
+3. 引入更强文本 encoder，把标题和摘要从哈希词向量升级为预训练语义向量。
 4. 后续切换 MIND-large、KuaiRec 或 Tenrec，做更大规模训练性能记录。
 
 详细学习清单见 `reports/试验解析.md`。

@@ -11,6 +11,7 @@ import argparse
 import csv
 import math
 import random
+import re
 import sys
 import time
 import zlib
@@ -36,6 +37,7 @@ class NewsInfo:
     category: str
     subcategory: str
     title: str
+    abstract: str
     title_entities: str
     abstract_entities: str
     title_word_count: int
@@ -165,6 +167,8 @@ class FeatureData:
     history_subcategory_lengths: torch.Tensor
     entity_indices: torch.Tensor
     entity_lengths: torch.Tensor
+    text_token_indices: torch.Tensor
+    text_token_lengths: torch.Tensor
     dense_features: torch.Tensor
 
 
@@ -177,12 +181,16 @@ class FeatureBuilder:
         max_history: int,
         max_entities: int,
         entity_buckets: int,
+        max_text_tokens: int,
+        text_buckets: int,
     ) -> None:
         self.stats = stats
         self.news_metadata = news_metadata
         self.max_history = max_history
         self.max_entities = max_entities
         self.entity_buckets = entity_buckets
+        self.max_text_tokens = max_text_tokens
+        self.text_buckets = text_buckets
         self.user_to_index = self._build_mapping(row["user_id"] for row in rows)
         self.news_to_index = self._build_mapping(row["news_id"] for row in rows)
         self.category_to_index = self._build_mapping(
@@ -239,6 +247,28 @@ class FeatureBuilder:
             indices.extend([0] * (self.max_entities - len(indices)))
         return indices, length
 
+    def _text_token_indices(self, row: dict[str, str]) -> tuple[list[int], int]:
+        news_info = self.news_metadata.get(row["news_id"])
+        text = ""
+        if news_info:
+            text = f"{news_info.title} {news_info.abstract}"
+        tokens = text_tokens(text)
+
+        indices: list[int] = []
+        seen: set[str] = set()
+        for token in tokens:
+            if token in seen:
+                continue
+            seen.add(token)
+            bucket = zlib.crc32(token.encode("utf-8")) % self.text_buckets
+            indices.append(bucket + 1)
+            if len(indices) == self.max_text_tokens:
+                break
+        length = len(indices)
+        if len(indices) < self.max_text_tokens:
+            indices.extend([0] * (self.max_text_tokens - len(indices)))
+        return indices, length
+
     def _dense_features(self, row: dict[str, str]) -> list[float]:
         news_id = row["news_id"]
         category = row["cat"]
@@ -293,6 +323,8 @@ class FeatureBuilder:
         history_subcategory_lengths = []
         entity_indices = []
         entity_lengths = []
+        text_token_indices = []
+        text_token_lengths = []
         dense_features = []
 
         for row in rows:
@@ -309,12 +341,15 @@ class FeatureBuilder:
                 row.get("subcat_his", ""),
             )
             ent_indices, ent_len = self._entity_indices(row)
+            text_indices, text_len = self._text_token_indices(row)
             history_category_indices.append(cat_hist)
             history_subcategory_indices.append(subcat_hist)
             history_category_lengths.append(cat_len)
             history_subcategory_lengths.append(subcat_len)
             entity_indices.append(ent_indices)
             entity_lengths.append(ent_len)
+            text_token_indices.append(text_indices)
+            text_token_lengths.append(text_len)
             dense_features.append(self._dense_features(row))
 
         return FeatureData(
@@ -331,6 +366,8 @@ class FeatureBuilder:
             history_subcategory_lengths=torch.tensor(history_subcategory_lengths, dtype=torch.float32),
             entity_indices=torch.tensor(entity_indices, dtype=torch.long),
             entity_lengths=torch.tensor(entity_lengths, dtype=torch.float32),
+            text_token_indices=torch.tensor(text_token_indices, dtype=torch.long),
+            text_token_lengths=torch.tensor(text_token_lengths, dtype=torch.float32),
             dense_features=torch.tensor(dense_features, dtype=torch.float32),
         )
 
@@ -343,6 +380,7 @@ class MindDNNRanker(nn.Module):
         num_categories: int,
         num_subcategories: int,
         num_hours: int,
+        text_buckets: int,
         dense_dim: int,
         embedding_dim: int,
         hidden_dims: tuple[int, ...],
@@ -354,7 +392,8 @@ class MindDNNRanker(nn.Module):
         self.category_embedding = nn.Embedding(num_categories + 1, embedding_dim // 2, padding_idx=0)
         self.subcategory_embedding = nn.Embedding(num_subcategories + 1, embedding_dim // 2, padding_idx=0)
         self.hour_embedding = nn.Embedding(num_hours + 1, 4, padding_idx=0)
-        input_dim = embedding_dim * 2 + embedding_dim + 4 + dense_dim
+        self.text_embedding = nn.Embedding(text_buckets + 1, embedding_dim, padding_idx=0)
+        input_dim = embedding_dim * 3 + embedding_dim + 4 + dense_dim
         layers: list[nn.Module] = []
         current_dim = input_dim
         for hidden_dim in hidden_dims:
@@ -364,6 +403,8 @@ class MindDNNRanker(nn.Module):
         self.mlp = nn.Sequential(*layers)
 
     def forward(self, batch: dict[str, torch.Tensor]) -> torch.Tensor:
+        text_lengths = batch["text_token_lengths"].clamp_min(1).unsqueeze(1)
+        text_vector = self.text_embedding(batch["text_token_indices"]).sum(dim=1) / text_lengths
         features = torch.cat(
             [
                 self.user_embedding(batch["user_indices"]),
@@ -371,6 +412,7 @@ class MindDNNRanker(nn.Module):
                 self.category_embedding(batch["category_indices"]),
                 self.subcategory_embedding(batch["subcategory_indices"]),
                 self.hour_embedding(batch["hour_indices"]),
+                text_vector,
                 batch["dense_features"],
             ],
             dim=1,
@@ -386,6 +428,7 @@ class MindContentTwoTower(nn.Module):
         num_categories: int,
         num_subcategories: int,
         entity_buckets: int,
+        text_buckets: int,
         dense_dim: int,
         embedding_dim: int,
         tower_dim: int,
@@ -401,6 +444,7 @@ class MindContentTwoTower(nn.Module):
         self.category_embedding = nn.Embedding(num_categories + 1, half_dim, padding_idx=0)
         self.subcategory_embedding = nn.Embedding(num_subcategories + 1, half_dim, padding_idx=0)
         self.entity_embedding = nn.Embedding(entity_buckets + 1, embedding_dim, padding_idx=0)
+        self.text_embedding = nn.Embedding(text_buckets + 1, embedding_dim, padding_idx=0)
         self.news_dense_projection = nn.Linear(dense_dim, embedding_dim)
         self.user_tower = nn.Sequential(
             nn.Linear(embedding_dim + half_dim + half_dim, hidden_dim),
@@ -409,7 +453,7 @@ class MindContentTwoTower(nn.Module):
             nn.Linear(hidden_dim, tower_dim),
         )
         self.news_tower = nn.Sequential(
-            nn.Linear(embedding_dim * 3 + half_dim + half_dim, hidden_dim),
+            nn.Linear(embedding_dim * 4 + half_dim + half_dim, hidden_dim),
             nn.ReLU(),
             nn.Dropout(dropout),
             nn.Linear(hidden_dim, tower_dim),
@@ -447,6 +491,11 @@ class MindContentTwoTower(nn.Module):
             batch["entity_indices"],
             batch["entity_lengths"],
         )
+        text_vector = self._mean_embedding(
+            self.text_embedding,
+            batch["text_token_indices"],
+            batch["text_token_lengths"],
+        )
         dense_vector = self.news_dense_projection(batch["dense_features"])
         return F.normalize(
             self.news_tower(
@@ -456,6 +505,7 @@ class MindContentTwoTower(nn.Module):
                         category_vector,
                         subcategory_vector,
                         entity_vector,
+                        text_vector,
                         dense_vector,
                     ],
                     dim=1,
@@ -492,6 +542,10 @@ def validate_schema(path: Path, fieldnames: list[str] | None) -> None:
 
 def split_history(value: str) -> list[str]:
     return [token for token in value.split("^") if token]
+
+
+def text_tokens(value: str) -> list[str]:
+    return re.findall(r"[a-z0-9]+", value.lower())
 
 
 def parse_hour_bucket(value: str) -> str:
@@ -556,6 +610,7 @@ def read_news_metadata(path: Path) -> dict[str, NewsInfo]:
             "category",
             "subcategory",
             "title",
+            "abstract",
             "title_entities",
             "abstract_entities",
             "title_word_count",
@@ -568,6 +623,7 @@ def read_news_metadata(path: Path) -> dict[str, NewsInfo]:
                 category=row["category"],
                 subcategory=row["subcategory"],
                 title=row["title"],
+                abstract=row["abstract"],
                 title_entities=row["title_entities"],
                 abstract_entities=row["abstract_entities"],
                 title_word_count=int(row["title_word_count"] or 0),
@@ -737,6 +793,54 @@ def evaluate_streaming_scorers(
     return [accumulator.finish(total_news, eval_seconds) for accumulator in accumulators.values()]
 
 
+def evaluate_rows_scorers(
+    rows: list[dict[str, str]],
+    scorers: dict[str, Callable[[dict[str, str]], float]],
+    total_news: int,
+    train_rows: int,
+    scope: str,
+    notes_by_model: dict[str, str],
+    train_seconds_by_model: dict[str, float] | None = None,
+) -> list[EvalMetrics]:
+    start = time.perf_counter()
+    train_seconds_by_model = train_seconds_by_model or {}
+    accumulators = {
+        model: MetricAccumulator(
+            model=model,
+            scope=scope,
+            train_rows=train_rows,
+            train_seconds=train_seconds_by_model.get(model, 0.0),
+            notes=notes_by_model.get(model, ""),
+        )
+        for model in scorers
+    }
+    current_rows: list[dict[str, str]] = []
+    current_key: tuple[str, str] | None = None
+
+    def consume_group(group_rows: list[dict[str, str]]) -> None:
+        if not group_rows:
+            return
+        labels = [int(row["click"]) for row in group_rows]
+        news_ids = [row["news_id"] for row in group_rows]
+        for model, scorer in scorers.items():
+            scores = [scorer(row) for row in group_rows]
+            accumulators[model].add_group(labels, news_ids, scores)
+
+    for row in rows:
+        key = (row["imp_id"], row["user_id"])
+        if current_key is not None and key != current_key:
+            consume_group(current_rows)
+            current_rows = []
+        current_key = key
+        current_rows.append(row)
+        for accumulator in accumulators.values():
+            accumulator.valid_rows += 1
+    consume_group(current_rows)
+
+    eval_seconds = time.perf_counter() - start
+    return [accumulator.finish(total_news, eval_seconds) for accumulator in accumulators.values()]
+
+
 def read_rows(path: Path, max_rows: int | None) -> list[dict[str, str]]:
     rows: list[dict[str, str]] = []
     with path.open("r", newline="", encoding="utf-8") as file:
@@ -777,6 +881,8 @@ def batch_from_features(data: FeatureData, indices: torch.Tensor, device: torch.
         "history_subcategory_lengths": data.history_subcategory_lengths[indices].to(device),
         "entity_indices": data.entity_indices[indices].to(device),
         "entity_lengths": data.entity_lengths[indices].to(device),
+        "text_token_indices": data.text_token_indices[indices].to(device),
+        "text_token_lengths": data.text_token_lengths[indices].to(device),
         "dense_features": data.dense_features[indices].to(device),
     }
 
@@ -930,6 +1036,18 @@ def evaluate_pipeline(
     return accumulator.finish(total_news, eval_seconds)
 
 
+def parse_int_list(value: str) -> tuple[int, ...]:
+    try:
+        values = tuple(int(part.strip()) for part in value.split(",") if part.strip())
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("candidate ks must be comma-separated integers") from exc
+    if not values:
+        raise argparse.ArgumentTypeError("candidate ks cannot be empty")
+    if any(item <= 0 for item in values):
+        raise argparse.ArgumentTypeError("candidate ks must be positive")
+    return values
+
+
 def format_float(value: float) -> str:
     return f"{value:.6f}"
 
@@ -1042,8 +1160,8 @@ def write_report(
             "|---|---|---|",
             "| Popularity | 新闻全局点击次数 | 只看新闻是不是热门，不看用户是谁 |",
             "| Category | 新闻热度、类别点击率、用户历史类别 | 开始利用用户过去喜欢的新闻类别 |",
-            "| DNNRanker | 用户、新闻、类别、小时、热度、历史偏好、标题/摘要长度 | 用 MLP 学习点击概率 |",
-            "| ContentTwoTower | 用户历史类别、新闻 ID、类别、实体和内容统计 | 将用户和新闻映射到同一向量空间后点积打分 |",
+            "| DNNRanker | 用户、新闻、类别、小时、热度、历史偏好、标题/摘要文本哈希 embedding | 用 MLP 学习点击概率 |",
+            "| ContentTwoTower | 用户历史类别、新闻 ID、类别、实体、标题/摘要文本哈希 embedding | 将用户和新闻映射到同一向量空间后点积打分 |",
             "| TwoTower+DNN-Rerank | Two-Tower 候选选择 + DNN 排序 | 模拟企业推荐中的召回后排序流程 |",
             "",
             "## 当前结论",
@@ -1086,6 +1204,88 @@ def write_single_report(path: Path, title: str, metrics: list[EvalMetrics], desc
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def write_scale_report(
+    path: Path,
+    metrics: list[EvalMetrics],
+    args: argparse.Namespace,
+    device: torch.device,
+) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    lines = [
+        "# MIND MLU 放大实验与 Candidate K 消融报告",
+        "",
+        "## 实验设置",
+        "",
+        "| 项目 | 数值 |",
+        "|---|---:|",
+        f"| 神经模型训练样本 | {args.sample_train_rows:,} |",
+        f"| 神经模型验证样本 | {args.sample_valid_rows:,} |",
+        f"| Epochs | {args.epochs} |",
+        f"| Batch size | {args.batch_size:,} |",
+        f"| Embedding dim | {args.embedding_dim} |",
+        f"| 训练设备 | `{device}` |",
+        f"| Candidate K | `{','.join(str(item) for item in args.candidate_ks)}` |",
+        f"| Text hash buckets | {args.text_buckets:,} |",
+        f"| Max text tokens | {args.max_text_tokens} |",
+        "",
+        "## 放大实验结果",
+        "",
+        "| 模型 | AUC | MRR | NDCG@5 | NDCG@10 | HitRate@10 | 训练耗时秒 | 评估耗时秒 |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|",
+    ]
+    scale_models = {"Popularity-Sample", "Category-Sample", "DNNRanker", "ContentTwoTower"}
+    for metric in metrics:
+        if metric.model not in scale_models:
+            continue
+        lines.append(
+            "| "
+            f"{metric.model} | "
+            f"{format_float(metric.auc)} | "
+            f"{format_float(metric.mrr)} | "
+            f"{format_float(metric.ndcg5)} | "
+            f"{format_float(metric.ndcg10)} | "
+            f"{format_float(metric.hitrate10)} | "
+            f"{format_seconds(metric.train_seconds)} | "
+            f"{format_seconds(metric.eval_seconds)} |"
+        )
+
+    lines.extend(
+        [
+            "",
+            "## Candidate K 消融结果",
+            "",
+            "| Candidate K | AUC | MRR | NDCG@5 | NDCG@10 | HitRate@10 | Coverage@10 |",
+            "|---:|---:|---:|---:|---:|---:|---:|",
+        ]
+    )
+    for metric in metrics:
+        if not metric.model.startswith("TwoTower+DNN-Rerank@"):
+            continue
+        candidate_k = metric.model.rsplit("@", 1)[-1]
+        lines.append(
+            "| "
+            f"{candidate_k} | "
+            f"{format_float(metric.auc)} | "
+            f"{format_float(metric.mrr)} | "
+            f"{format_float(metric.ndcg5)} | "
+            f"{format_float(metric.ndcg10)} | "
+            f"{format_float(metric.hitrate10)} | "
+            f"{format_float(metric.coverage10)} |"
+        )
+
+    lines.extend(
+        [
+            "",
+            "## 说明",
+            "",
+            "- 放大实验使用更大的训练/验证样本，目标是验证 MLU 训练链路能支撑更大规模数据。",
+            "- Candidate K 表示 Two-Tower 先在每个曝光候选组内保留多少个候选，再交给 DNN Ranker 重排。",
+            "- 如果 K 太小，真实点击新闻可能在召回阶段被过滤；如果 K 太大，Ranker 需要处理更多噪声候选。",
+        ]
+    )
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--raw-dir", type=Path, default=DEFAULT_RAW_DIR)
@@ -1110,7 +1310,15 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--max-history", type=int, default=30)
     parser.add_argument("--max-entities", type=int, default=8)
     parser.add_argument("--entity-buckets", type=int, default=2048)
+    parser.add_argument("--max-text-tokens", type=int, default=32)
+    parser.add_argument("--text-buckets", type=int, default=8192)
     parser.add_argument("--candidate-k", type=int, default=20)
+    parser.add_argument(
+        "--candidate-ks",
+        type=parse_int_list,
+        default=(20,),
+        help="Comma-separated candidate_k values for TwoTower+DNN rerank ablation.",
+    )
     parser.add_argument("--device", type=str, default="auto")
     parser.add_argument("--seed", type=int, default=2026)
     return parser.parse_args(argv)
@@ -1156,8 +1364,8 @@ def main(argv: list[str]) -> int:
 
     train_rows = read_rows(sample_train_path, args.sample_train_rows)
     valid_rows = read_rows(sample_valid_path, args.sample_valid_rows)
-    sample_metrics = evaluate_streaming_scorers(
-        valid_path=sample_valid_path,
+    sample_metrics = evaluate_rows_scorers(
+        rows=valid_rows,
         scorers={
             "Popularity-Sample": lambda row: popularity_score(row, full_stats),
             "Category-Sample": lambda row: category_score(row, full_stats),
@@ -1179,6 +1387,8 @@ def main(argv: list[str]) -> int:
         max_history=args.max_history,
         max_entities=args.max_entities,
         entity_buckets=args.entity_buckets,
+        max_text_tokens=args.max_text_tokens,
+        text_buckets=args.text_buckets,
     )
     train_data = feature_builder.transform(train_rows)
     valid_data = feature_builder.transform(valid_rows)
@@ -1191,6 +1401,7 @@ def main(argv: list[str]) -> int:
         num_categories=len(feature_builder.category_to_index),
         num_subcategories=len(feature_builder.subcategory_to_index),
         num_hours=len(feature_builder.hour_to_index),
+        text_buckets=args.text_buckets,
         dense_dim=train_data.dense_features.shape[1],
         embedding_dim=args.embedding_dim,
         hidden_dims=hidden_dims,
@@ -1217,7 +1428,7 @@ def main(argv: list[str]) -> int:
         train_rows=len(train_rows),
         train_seconds=ranker_train_seconds,
         eval_seconds=ranker_eval_seconds,
-        notes="MLP Ranker，融合用户、新闻、类别、小时 embedding 和内容/统计 dense 特征。",
+        notes="MLP Ranker，融合用户、新闻、类别、小时 embedding、标题/摘要哈希文本 embedding 和内容/统计 dense 特征。",
     )
 
     two_tower = MindContentTwoTower(
@@ -1226,6 +1437,7 @@ def main(argv: list[str]) -> int:
         num_categories=len(feature_builder.category_to_index),
         num_subcategories=len(feature_builder.subcategory_to_index),
         entity_buckets=args.entity_buckets,
+        text_buckets=args.text_buckets,
         dense_dim=train_data.dense_features.shape[1],
         embedding_dim=args.embedding_dim,
         tower_dim=args.tower_dim,
@@ -1254,27 +1466,50 @@ def main(argv: list[str]) -> int:
         train_rows=len(train_rows),
         train_seconds=two_tower_train_seconds,
         eval_seconds=two_tower_eval_seconds,
-        notes="内容感知双塔，使用用户历史类别、新闻类别、实体和内容统计特征。",
+        notes="内容感知双塔，使用用户历史类别、新闻类别、实体、标题/摘要哈希文本和内容统计特征。",
     )
 
-    pipeline_metric = evaluate_pipeline(
-        rows=valid_rows,
-        two_tower_scores=two_tower_scores,
-        ranker_scores=ranker_scores,
-        candidate_k=args.candidate_k,
-        total_news=total_news,
-        train_rows=len(train_rows),
-        train_seconds=ranker_train_seconds + two_tower_train_seconds,
-        eval_seconds=ranker_eval_seconds + two_tower_eval_seconds,
-    )
+    pipeline_metrics = []
+    for candidate_k in args.candidate_ks:
+        pipeline_metric = evaluate_pipeline(
+            rows=valid_rows,
+            two_tower_scores=two_tower_scores,
+            ranker_scores=ranker_scores,
+            candidate_k=candidate_k,
+            total_news=total_news,
+            train_rows=len(train_rows),
+            train_seconds=ranker_train_seconds + two_tower_train_seconds,
+            eval_seconds=ranker_eval_seconds + two_tower_eval_seconds,
+        )
+        pipeline_metric = EvalMetrics(
+            model=f"TwoTower+DNN-Rerank@{candidate_k}",
+            scope=pipeline_metric.scope,
+            train_rows=pipeline_metric.train_rows,
+            valid_rows=pipeline_metric.valid_rows,
+            evaluated_impressions=pipeline_metric.evaluated_impressions,
+            avg_candidates=pipeline_metric.avg_candidates,
+            auc=pipeline_metric.auc,
+            mrr=pipeline_metric.mrr,
+            ndcg5=pipeline_metric.ndcg5,
+            ndcg10=pipeline_metric.ndcg10,
+            hitrate5=pipeline_metric.hitrate5,
+            hitrate10=pipeline_metric.hitrate10,
+            coverage5=pipeline_metric.coverage5,
+            coverage10=pipeline_metric.coverage10,
+            train_seconds=pipeline_metric.train_seconds,
+            eval_seconds=pipeline_metric.eval_seconds,
+            notes=pipeline_metric.notes,
+        )
+        pipeline_metrics.append(pipeline_metric)
 
-    all_metrics = [*full_metrics, *sample_metrics, ranker_metric, two_tower_metric, pipeline_metric]
+    all_metrics = [*full_metrics, *sample_metrics, ranker_metric, two_tower_metric, *pipeline_metrics]
     args.outputs_dir.mkdir(parents=True, exist_ok=True)
     write_metric_csv(args.outputs_dir / "experiment_results.csv", all_metrics)
     write_metric_csv(args.outputs_dir / "category_results.csv", [metric for metric in all_metrics if "Category" in metric.model])
     write_metric_csv(args.outputs_dir / "ranker_results.csv", [ranker_metric])
     write_metric_csv(args.outputs_dir / "two_tower_results.csv", [two_tower_metric])
-    write_metric_csv(args.outputs_dir / "pipeline_results.csv", [pipeline_metric])
+    write_metric_csv(args.outputs_dir / "pipeline_results.csv", pipeline_metrics)
+    write_metric_csv(args.outputs_dir / "candidate_ablation_results.csv", pipeline_metrics)
 
     write_report(args.reports_dir / "all_experiments_report.md", all_metrics, args, full_stats)
     write_single_report(
@@ -1298,8 +1533,20 @@ def main(argv: list[str]) -> int:
     write_single_report(
         args.reports_dir / "pipeline_report.md",
         "MIND Two-Tower + DNN Ranker Pipeline 报告",
-        [pipeline_metric],
+        pipeline_metrics,
         "Pipeline 先用 Two-Tower 在曝光候选内筛选 TopK，再用 DNN Ranker 重排。",
+    )
+    write_single_report(
+        args.reports_dir / "candidate_ablation_report.md",
+        "MIND Candidate K 消融报告",
+        pipeline_metrics,
+        "Candidate K 消融用于比较 Two-Tower 召回候选规模对 DNN Ranker 重排结果的影响。",
+    )
+    write_scale_report(
+        args.reports_dir / "mlu_scale_report.md",
+        all_metrics,
+        args,
+        device,
     )
 
     print("Wrote MIND experiment suite outputs.")

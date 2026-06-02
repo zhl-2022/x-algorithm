@@ -1,6 +1,6 @@
-# MIND Two-Tower + DNN Ranker Pipeline 报告
+# MIND Candidate K 消融报告
 
-Pipeline 先用 Two-Tower 在曝光候选内筛选 TopK，再用 DNN Ranker 重排。
+Candidate K 消融用于比较 Two-Tower 召回候选规模对 DNN Ranker 重排结果的影响。
 
 | 模型 | 范围 | 训练样本 | 验证样本 | 曝光组 | AUC | MRR | NDCG@5 | NDCG@10 | HitRate@10 | 训练耗时秒 | 评估耗时秒 |
 |---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|

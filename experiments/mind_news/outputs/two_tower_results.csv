@@ -1,2 +1,2 @@
 model,scope,train_rows,valid_rows,evaluated_impressions,avg_candidates,auc,mrr,ndcg5,ndcg10,hitrate5,hitrate10,coverage5,coverage10,train_seconds,eval_seconds,notes
-ContentTwoTower,sample,100000,100000,2695,37.10575139,0.56274815,0.28183780,0.25642697,0.32470112,0.43525046,0.65083488,0.01022410,0.01506791,0.8208,0.1786,内容感知双塔，使用用户历史类别、新闻类别、实体和内容统计特征。
+ContentTwoTower,sample,1000000,500000,13390,37.34129948,0.61664055,0.33190537,0.31345562,0.37456042,0.51979089,0.70186706,0.01825623,0.02582850,5.5355,0.3865,内容感知双塔，使用用户历史类别、新闻类别、实体、标题/摘要哈希文本和内容统计特征。

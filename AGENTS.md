@@ -16,12 +16,24 @@
 
 ## 当前阶段
 
-当前重点是 `experiments/movielens_recall/`：
+当前已完成两批数据集实验：
 
-- 使用 MovieLens 1M 作为入门数据集。
-- 将 `rating >= 4` 定义为正反馈。
-- 按用户时间序列切分训练集、验证集和测试集。
-- 已完成 Popularity baseline 与 `Recall@20` 评测。
+1. `experiments/movielens_recall/`：MovieLens 1M 入门推荐闭环。
+2. `experiments/mind_news/`：MIND 新闻推荐、MLU 放大训练和内容感知双塔实验。
+
+当前进入第三批数据集：
+
+- `experiments/kuairec_short_video/`
+- 数据集：KuaiRec 短视频推荐数据。
+- 目标：从电影推荐、新闻推荐进一步迁移到短视频/信息流推荐，重点研究观看时长、完播率、
+  类别、多模态文本描述和高密度曝光矩阵下的离线评测。
+- 2026-06-02 已在 srv4 的 `/root/zhl/x-algorithm` 下载并解压 KuaiRec，原始数据保存在
+  `experiments/kuairec_short_video/data/raw/`，该目录已被 `.gitignore` 忽略。
+- 第一版标签口径：`watch_ratio >= 1.0` 作为正反馈；第一轮 baseline 建议先用
+  `small_matrix.csv` 跑通，再扩展到 `big_matrix.csv`。
+- KuaiRec `small_matrix.csv` 第一轮完整训练已完成：Popularity、Category、ItemCF、MF、
+  Two-Tower、DNN Ranker、Two-Tower + DNN Ranker pipeline。当前最佳 `NDCG@20`
+  为 Two-Tower 的 `0.143577`。
 
 ## 服务器与 MLU 训练环境
 
@@ -79,8 +91,9 @@ source /torch/venv3/pytorch/bin/activate
 
 1. 训练前执行 `cnmon`，确认 Card `2`、`3` 仍然空闲。
 2. 使用 `MLU_VISIBLE_DEVICES=2,3` 限定训练进程只看到两张空闲卡。
-3. 当前 MovieLens Popularity baseline 不需要 MLU；等实现 MF 或 Two-Tower 后再迁移训练。
-4. 先做单卡 MLU 跑通，再做两卡 `torchrun --nproc_per_node=2` 或 DDP。
+3. 统计类 baseline 不需要 MLU；MF、Two-Tower、Ranker 和文本 encoder 训练优先迁移到 MLU。
+4. 当前 MIND 训练脚本已跑通单进程 MLU；如需体现双卡能力，再做两卡
+   `torchrun --nproc_per_node=2` 或 DDP。
 5. 训练日志至少记录：命令、模型、数据集、batch size、embedding dim、训练耗时、显存占用、`Recall@K`、`NDCG@K`。
 6. `srv3` 当前存在 SSH host key changed 警告，不自动清理 `known_hosts`，除非人工确认后再使用。
 7. 容器方案细节记录在 `docs/mlu_training_container.md`。
@@ -110,11 +123,9 @@ source /torch/venv3/pytorch/bin/activate
 
 ## 推荐执行顺序
 
-1. MovieLens 1M：Popularity baseline。
-2. MovieLens 1M：ItemCF。
-3. MovieLens 1M：Matrix Factorization。
-4. MovieLens 1M：Two-Tower 召回。
-5. MIND-small：新闻推荐迁移实验。
-6. MLU 单卡训练适配。
-7. MLU 双卡训练和性能对比。
-8. 整理最终项目 README、实验报告和简历描述。
+1. MovieLens 1M：Popularity、ItemCF、MF、Two-Tower、DNN Ranker、两阶段 pipeline。
+2. MIND-small：Popularity、Category、DNNRanker、ContentTwoTower、TwoTower+DNN-Rerank、MLU 放大实验。
+3. KuaiRec：短视频推荐数据准备、观看反馈建模、Popularity/Category/Two-Tower/Ranker 迁移。
+4. KuaiRec MLU 放大实验：记录 batch size、吞吐、显存、`AUC`、`NDCG@K`、`HitRate@K`。
+5. 如需要继续扩展，再考虑 Tenrec 或 KuaiRand。
+6. 整理最终项目 README、实验报告、架构图、简历描述和面试问答。

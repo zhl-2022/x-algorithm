@@ -1,0 +1,4 @@
+model,scope,k,train_rows,eval_users,recall,hit_rate,precision,ndcg,coverage,auc,logloss,train_seconds,eval_seconds,device,notes
+TwoTower+DNN-Rerank@50,small_matrix,20,1200000,1410,0.02549652,0.88865248,0.11783688,0.11335448,0.14968440,0.65679582,0.75942039,6.0833,1.6906,mlu,Two-Tower 先取 Top50 候选，再由 DNN Ranker 重排 Top20。
+TwoTower+DNN-Rerank@100,small_matrix,20,1200000,1410,0.02547888,0.89148936,0.11773050,0.11316631,0.14938383,0.65679582,0.75942039,6.0833,1.6906,mlu,Two-Tower 先取 Top100 候选，再由 DNN Ranker 重排 Top20。
+TwoTower+DNN-Rerank@200,small_matrix,20,1200000,1410,0.02545827,0.89148936,0.11744681,0.11295771,0.14818154,0.65679582,0.75942039,6.0833,1.6906,mlu,Two-Tower 先取 Top200 候选，再由 DNN Ranker 重排 Top20。
