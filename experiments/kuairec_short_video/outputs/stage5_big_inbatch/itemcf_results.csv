@@ -1,0 +1,2 @@
+model,scope,k,train_rows,eval_users,recall,hit_rate,precision,ndcg,coverage,auc,logloss,train_seconds,eval_seconds,device,notes
+ItemCF,big_matrix,20,10021757,7174,0.01977732,0.57443546,0.06538890,0.06592107,0.13944817,0.60742744,0.72843300,752.7227,0.0000,cpu,基于共同完播视频的余弦归一化共现相似度。

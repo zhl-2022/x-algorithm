@@ -114,9 +114,8 @@ python experiments/kuairec_short_video/scripts/run_all_experiments.py \
 - `reports/stage2_full_small/all_experiments_report.md`
 - `reports/stage2_big_sample/all_experiments_report.md`
 
-当前最重要的结论是：`watch_ratio >= 0.8` 更适合 `small_matrix.csv` 的 TopK 推荐，
-但 Ranker 重排还没有稳定超过单独 Two-Tower；`big_matrix.csv` 上神经模型 AUC 较高但 TopK 偏弱，
-后续应优先做 hard negative、in-batch negative 或更强召回训练。
+第二轮最重要的结论是：`watch_ratio >= 0.8` 更适合 `small_matrix.csv` 的 TopK 推荐；
+当时 Ranker 重排尚未稳定超过单独 Two-Tower，因此后续进入 hard negative 优化。
 
 ## 第三轮结果
 
@@ -132,6 +131,35 @@ python experiments/kuairec_short_video/scripts/run_all_experiments.py \
 
 本轮已解决“Ranker 重排没有超过 Two-Tower”的问题。详细说明见
 `reports/stage3_ranker_optimization_report.md`。
+
+## 第四到第六轮结果
+
+后三轮迁移到 `big_matrix.csv` 并补充 MLU 工程实验。
+
+| 轮次 | 实验 | 最好结果 | 结论 |
+|---|---|---:|---|
+| 第 4 轮 | big hard negative Ranker | Pipeline `NDCG@20=0.004991` | Ranker 有提升，但未超过 ItemCF |
+| 第 5 轮 | big in-batch Two-Tower | Pipeline `NDCG@20=0.005245` | Two-Tower 有改善，但仍弱于 ItemCF |
+| 第 6 轮 | MLU 单卡/双卡 benchmark | 双卡 `908,159 samples/s` | 双卡 DDP 跑通，吞吐比单卡高约 25.6% |
+
+当前 `big_matrix.csv` 的关键对比如下：
+
+| 模型/配置 | NDCG@20 | 说明 |
+|---|---:|---|
+| ItemCF | 0.065921 | 目前 big TopK 最强 |
+| Stage 4 DNNRanker hard negative | 0.006151 | 比旧 big 神经模型有提升 |
+| Stage 4 TwoTower+DNN-Rerank@500 | 0.004991 | hard negative pipeline 最好 |
+| Stage 5 Two-Tower in-batch | 0.004706 | 召回底座相对 BCE 明显提升 |
+| Stage 5 TwoTower+DNN-Rerank@100 | 0.005245 | in-batch pipeline 最好 |
+
+详细说明见：
+
+- `reports/stage4_big_hardneg_report.md`
+- `reports/stage5_big_inbatch_report.md`
+- `reports/stage6_mlu_ddp_report.md`
+
+阶段结论：KuaiRec `small_matrix.csv` 已经完成并取得明确收益；`big_matrix.csv` 上统计协同过滤
+仍明显强于当前神经召回，说明大规模短视频推荐还需要更强的图召回、序列建模或蒸馏方案。
 
 ## 当前状态
 
@@ -150,3 +178,6 @@ python experiments/kuairec_short_video/scripts/run_all_experiments.py \
 - [x] 完成 `big_matrix.csv` 采样放大实验。
 - [x] 完成 Two-Tower 与 DNNRanker 融合重排实验。
 - [x] 完成 Ranker hard negative 优化实验，使两阶段 pipeline 超过单独 Two-Tower。
+- [x] 完成 `big_matrix.csv` hard negative 迁移实验。
+- [x] 完成 `big_matrix.csv` Two-Tower in-batch negative 实验。
+- [x] 完成 MLU 单卡/双卡 DDP 吞吐实验。

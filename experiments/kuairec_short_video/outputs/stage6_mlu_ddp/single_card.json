@@ -1,0 +1,19 @@
+{
+  "matrix": "big_matrix.csv",
+  "positive_threshold": 0.8,
+  "loss": "inbatch",
+  "device": "mlu:0",
+  "world_size": 1,
+  "local_rank": 0,
+  "train_rows": 2000000,
+  "processed_samples": 4000000,
+  "epochs": 2,
+  "per_process_batch_size": 8192,
+  "global_batch_size": 8192,
+  "embedding_dim": 64,
+  "tower_dim": 64,
+  "hidden_dim": 128,
+  "train_seconds": 5.529942091554403,
+  "samples_per_second": 723334.8801444041,
+  "final_loss": 6.032500941412789
+}

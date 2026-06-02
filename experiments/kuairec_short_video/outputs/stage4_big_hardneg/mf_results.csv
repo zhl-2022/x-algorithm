@@ -1,0 +1,2 @@
+model,scope,k,train_rows,eval_users,recall,hit_rate,precision,ndcg,coverage,auc,logloss,train_seconds,eval_seconds,device,notes
+MF,big_matrix_sample,20,2000000,7174,0.00119386,0.07652635,0.00420268,0.00417646,0.22156972,0.77957580,0.55624670,5.0258,0.2443,mlu,用户和视频 embedding 点积 + bias，使用 BCE 学习完播正反馈。

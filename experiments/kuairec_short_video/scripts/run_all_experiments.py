@@ -575,10 +575,15 @@ def build_feature_tensors(
     rows: list[RawInteraction],
     max_rows: int,
     seed: int,
+    positive_only: bool = False,
 ) -> FeatureTensors:
+    if positive_only:
+        rows = [row for row in rows if row.label]
     if max_rows and len(rows) > max_rows:
         rng = random.Random(seed)
         rows = rng.sample(rows, max_rows)
+    if not rows:
+        raise ValueError("No rows available for feature tensor construction.")
 
     users = torch.tensor([data.user_to_index[row.user_id] for row in rows], dtype=torch.long)
     items = torch.tensor([data.item_to_index[row.video_id] for row in rows], dtype=torch.long)
@@ -660,6 +665,54 @@ def train_neural_model(
             batches += 1
         final_loss = total_loss / batches if batches else 0.0
         print(f"epoch={epoch} loss={final_loss:.6f}", flush=True)
+    return model, final_loss, time.perf_counter() - started
+
+
+def train_two_tower_inbatch_model(
+    model: KuaiRecTwoTower,
+    train_data: FeatureTensors,
+    device: torch.device,
+    epochs: int,
+    batch_size: int,
+    lr: float,
+    weight_decay: float,
+    seed: int,
+) -> tuple[KuaiRecTwoTower, float, float]:
+    model.to(device)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
+    rng = torch.Generator().manual_seed(seed)
+    started = time.perf_counter()
+    final_loss = 0.0
+    n = len(train_data.labels)
+
+    for epoch in range(1, epochs + 1):
+        order = torch.randperm(n, generator=rng)
+        total_loss = 0.0
+        batches = 0
+        model.train()
+        for start in range(0, n, batch_size):
+            batch_indices = order[start : start + batch_size]
+            if len(batch_indices) < 2:
+                continue
+            batch = move_batch(train_data, batch_indices, device)
+            optimizer.zero_grad(set_to_none=True)
+            user_vectors = model.encode_user(batch.users, batch.dense)
+            item_vectors = model.encode_item(
+                batch.items,
+                batch.categories,
+                batch.text_indices,
+                batch.text_lengths,
+                batch.dense,
+            )
+            logits = (user_vectors @ item_vectors.T) / model.temperature
+            labels = torch.arange(len(batch_indices), dtype=torch.long, device=device)
+            loss = F.cross_entropy(logits, labels)
+            loss.backward()
+            optimizer.step()
+            total_loss += float(loss.detach().cpu())
+            batches += 1
+        final_loss = total_loss / batches if batches else 0.0
+        print(f"epoch={epoch} inbatch_loss={final_loss:.6f}", flush=True)
     return model, final_loss, time.perf_counter() - started
 
 
@@ -1135,6 +1188,10 @@ def write_all_report(path: Path, data: PreparedData, metrics: list[ExperimentMet
     positives_test = sum(row.label for row in data.test_rows)
     best = max(metrics, key=lambda metric: metric.ndcg)
     neural_train_rows = next((metric.train_rows for metric in metrics if metric.model == "MF"), args.neural_train_rows)
+    two_tower_train_rows = next(
+        (metric.train_rows for metric in metrics if metric.model == "Two-Tower"),
+        args.two_tower_train_rows if args.two_tower_train_rows >= 0 else args.neural_train_rows,
+    )
     ranker_train_rows = next((metric.train_rows for metric in metrics if metric.model == "DNNRanker"), args.neural_train_rows)
     lines = [
         "# KuaiRec 全套训练报告",
@@ -1158,6 +1215,8 @@ def write_all_report(path: Path, data: PreparedData, metrics: list[ExperimentMet
         f"| 测试正样本 | {positives_test:,} |",
         f"| 正反馈阈值 | `watch_ratio >= {args.positive_threshold}` |",
         f"| 神经模型训练样本 | {neural_train_rows:,} |",
+        f"| Two-Tower loss | `{args.two_tower_loss}` |",
+        f"| Two-Tower 训练样本 | {two_tower_train_rows:,} |",
         f"| Ranker 训练样本 | {ranker_train_rows:,} |",
         f"| Epochs | {args.epochs} |",
         f"| Batch size | {args.batch_size:,} |",
@@ -1252,6 +1311,18 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--itemcf-history", type=int, default=80)
     parser.add_argument("--itemcf-neighbors", type=int, default=100)
     parser.add_argument("--neural-train-rows", type=int, default=1_200_000)
+    parser.add_argument(
+        "--two-tower-loss",
+        choices=["bce", "inbatch"],
+        default="bce",
+        help="Two-Tower training loss. inbatch trains on positive rows with in-batch negatives.",
+    )
+    parser.add_argument(
+        "--two-tower-train-rows",
+        type=int,
+        default=-1,
+        help="Rows sampled for Two-Tower training. -1 reuses --neural-train-rows.",
+    )
     parser.add_argument(
         "--ranker-train-rows",
         type=int,
@@ -1389,6 +1460,20 @@ def main(argv: list[str]) -> int:
     )
     metrics.append(add_auc_logloss(mf_metric, data.test_rows[: args.auc_rows], mf_scores, data))
 
+    two_tower_train_limit = args.neural_train_rows if args.two_tower_train_rows < 0 else args.two_tower_train_rows
+    two_tower_train_features = build_feature_tensors(
+        data,
+        data.train_rows,
+        two_tower_train_limit,
+        args.seed + 22,
+        positive_only=args.two_tower_loss == "inbatch",
+    )
+    print(
+        f"Two-Tower train rows: {len(two_tower_train_features.labels):,} "
+        f"loss={args.two_tower_loss}",
+        flush=True,
+    )
+
     two_tower_model = KuaiRecTwoTower(
         num_users=len(data.index_to_user),
         num_items=len(data.index_to_item),
@@ -1401,17 +1486,29 @@ def main(argv: list[str]) -> int:
         dropout=args.dropout,
         temperature=args.temperature,
     )
-    two_tower_model, _, two_tower_train_seconds = train_neural_model(
-        two_tower_model,
-        train_features,
-        device,
-        args.epochs,
-        args.batch_size,
-        args.lr,
-        args.weight_decay,
-        args.seed + 2,
-        1.0,
-    )
+    if args.two_tower_loss == "inbatch":
+        two_tower_model, _, two_tower_train_seconds = train_two_tower_inbatch_model(
+            two_tower_model,
+            two_tower_train_features,
+            device,
+            args.epochs,
+            args.batch_size,
+            args.lr,
+            args.weight_decay,
+            args.seed + 2,
+        )
+    else:
+        two_tower_model, _, two_tower_train_seconds = train_neural_model(
+            two_tower_model,
+            two_tower_train_features,
+            device,
+            args.epochs,
+            args.batch_size,
+            args.lr,
+            args.weight_decay,
+            args.seed + 2,
+            1.0,
+        )
     start = time.perf_counter()
     two_tower_scores = score_two_tower_matrix(
         two_tower_model,
@@ -1428,11 +1525,15 @@ def main(argv: list[str]) -> int:
         "Two-Tower",
         f"{scope_name}_sample",
         args.k,
-        len(train_features.labels),
+        len(two_tower_train_features.labels),
         two_tower_train_seconds,
         two_tower_eval_seconds,
         str(device),
-        "用户塔和视频塔分别编码，视频塔融合类别、caption 哈希文本和统计特征。",
+        (
+            "用户塔和视频塔分别编码，视频塔融合类别、caption 哈希文本和统计特征。"
+            if args.two_tower_loss == "bce"
+            else "用户塔和视频塔分别编码，使用正样本 batch 内其他视频作为负样本训练召回。"
+        ),
     )
     metrics.append(add_auc_logloss(two_tower_metric, data.test_rows[: args.auc_rows], two_tower_scores, data))
 
@@ -1507,7 +1608,7 @@ def main(argv: list[str]) -> int:
                 candidate_k,
                 blend_alpha,
                 args.k,
-                len(train_features.labels),
+                len(two_tower_train_features.labels),
                 two_tower_train_seconds + ranker_train_seconds,
                 two_tower_eval_seconds + ranker_eval_seconds,
                 str(device),

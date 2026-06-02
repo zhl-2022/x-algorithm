@@ -27,6 +27,9 @@
 | 2026-06-02 | KuaiRec small 全量训练 | 已完成 | 神经训练样本扩展到 3,595,097，双塔 `NDCG@20=0.149288` |
 | 2026-06-02 | KuaiRec big 采样放大 | 已完成 | `big_matrix.csv` 200 万神经样本，发现 AUC 高但 TopK 弱的问题 |
 | 2026-06-02 | KuaiRec Ranker hard negative 优化 | 已完成 | `DNNRanker NDCG@20=0.240050`，`TwoTower+DNN-Rerank@200 NDCG@20=0.203215` |
+| 2026-06-03 | KuaiRec big hard negative 迁移 | 已完成 | `DNNRanker NDCG@20=0.006151`，pipeline 最好 `NDCG@20=0.004991` |
+| 2026-06-03 | KuaiRec big in-batch 召回训练 | 已完成 | Two-Tower 从 `0.000937` 提升到 `0.004706`，pipeline 最好 `0.005245` |
+| 2026-06-03 | KuaiRec MLU 单卡/双卡吞吐 | 已完成 | 单卡 `723,335 samples/s`，双卡 `908,159 samples/s` |
 
 ## 已完成内容
 
@@ -60,6 +63,9 @@
 28. 新增项目总路线文档 `docs/project_roadmap.md`。
 29. 新增 Ranker hard negative 训练能力，用 Two-Tower 高分负样本强化 Ranker。
 30. 在 srv4 MLU 上完成 KuaiRec 阶段三 Ranker 优化实验，两阶段 pipeline 已超过单独 Two-Tower。
+31. 在 `big_matrix.csv` 上完成 hard negative 迁移实验，确认 Ranker 有提升但仍未追上 ItemCF。
+32. 在 `big_matrix.csv` 上完成 Two-Tower in-batch negative 实验，确认召回底座有改善但仍不足。
+33. 完成 MLU 单卡/双卡 DDP benchmark，验证双卡训练链路和吞吐提升。
 
 ## 当前实验结果
 
@@ -163,6 +169,12 @@
 | KuaiRec stage3 DNNRanker `NDCG@20` | 0.240050 |
 | KuaiRec stage3 TwoTower+DNN-Rerank@200 `Recall@20` | 0.022686 |
 | KuaiRec stage3 TwoTower+DNN-Rerank@200 `NDCG@20` | 0.203215 |
+| KuaiRec stage4 big DNNRanker `NDCG@20` | 0.006151 |
+| KuaiRec stage4 big best pipeline `NDCG@20` | 0.004991 |
+| KuaiRec stage5 big Two-Tower `NDCG@20` | 0.004706 |
+| KuaiRec stage5 big best pipeline `NDCG@20` | 0.005245 |
+| KuaiRec stage6 MLU single-card throughput | 723,335 samples/s |
+| KuaiRec stage6 MLU two-card throughput | 908,159 samples/s |
 
 ## 当前理解沉淀
 
@@ -184,7 +196,7 @@
 - MIND DNNRanker、ContentTwoTower 和 TwoTower+DNN-Rerank 已在 srv4 MLU 容器完成 1M/500k 放大实验，并加入标题/摘要哈希文本 embedding。
 - 当前 MLU 放大口径下 ContentTwoTower 的 `AUC=0.616641`、`NDCG@10=0.374560`，高于 DNNRanker 的 `AUC=0.592749`、`NDCG@10=0.353507`。
 - Candidate K 消融显示当前 `candidate_k=10` 最好，`NDCG@10=0.362443`；继续增大候选数会引入更多噪声，重排效果反而下降。
-- 当前训练脚本是单进程 MLU，主要使用容器逻辑 MLU0，也就是宿主 Card 2；Card 3 尚未参与 DDP。
+- 当前已完成 MLU 单卡和双卡 DDP benchmark；双卡使用容器逻辑 MLU0/MLU1，也就是宿主 Card 2/3。
 - 按时间顺序切分比随机切分更接近真实推荐场景，因为模型只能利用用户过去行为预测未来偏好。
 - 第三批数据集选择 KuaiRec，是因为它比 MovieLens/MIND 更接近短视频信息流推荐，可学习观看时长、完播率、视频类别和内容描述等行为信号。
 - KuaiRec 核心交互表包含 `watch_ratio`，第一轮可以将 `watch_ratio >= 1.0` 定义为正反馈，表示完播或重复观看。
@@ -193,16 +205,16 @@
 - KuaiRec 标签阈值消融显示，`watch_ratio >= 0.8` 的 Two-Tower `NDCG@20=0.153744`，高于严格完播第一轮的 `0.143577`，说明“接近完播”能提供更密集、更适合 TopK 的正反馈。
 - KuaiRec 全量 `small_matrix.csv` 训练显示，扩大训练样本能让 Two-Tower 从更多交互中受益，`NDCG@20` 提升到 `0.149288`。
 - KuaiRec `big_matrix.csv` 采样放大显示，神经模型虽然 AUC 较高，但全量 TopK 推荐很弱；这说明后续重点不是继续只优化二分类 AUC，而是改进召回 loss、负采样和候选生成质量。
-- 当前 Ranker 重排还没有稳定超过 Two-Tower，后续应优先围绕 hard negative、特征增强和排序 loss 做实验。
+- KuaiRec 阶段三已解决 small 场景 Ranker 重排问题；`TwoTower+DNN-Rerank@200` 明显超过单独 Two-Tower。
 - KuaiRec 阶段三已经验证 hard negative 有效：Ranker 追加 141,100 条 Two-Tower 高分难负样本后，`DNNRanker NDCG@20=0.240050`，两阶段 `TwoTower+DNN-Rerank@200 NDCG@20=0.203215`，明显超过单独 Two-Tower。
+- KuaiRec 阶段四和阶段五说明，big 场景下 hard negative 和 in-batch negative 都有局部收益，但当前神经 TopK 仍没有追上 ItemCF，后续需要更强的图召回、序列建模或蒸馏方案。
+- KuaiRec 阶段六完成 MLU 双卡 DDP benchmark，双卡吞吐比单卡高约 25.6%，工程链路已打通。
 
 ## 下一步计划
 
-1. 将 Ranker hard negative 方案迁移到 `big_matrix.csv`，验证大规模短视频场景是否也能提升 TopK。
-2. 在 `big_matrix.csv` 上做 in-batch negative、hard negative 或更强召回 loss，解决神经模型召回 TopK 偏弱问题。
-3. 如果要体现双卡能力，再做 DDP 或 `torchrun --nproc_per_node=2`。
-4. 整理 KuaiRec 阶段报告，形成可直接写进简历的短视频推荐实验总结。
-5. 后续如需继续扩大，再选择 Tenrec 或 KuaiRand。
+1. 整理 KuaiRec 阶段报告，形成可直接写进简历的短视频推荐实验总结。
+2. 如继续优化 big 场景，优先尝试 LightGCN、序列兴趣模型或 item-to-item 蒸馏。
+3. 如继续扩展数据集，再选择 Tenrec 或 KuaiRand。
 
 ## 后续总体规划
 

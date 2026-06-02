@@ -1,0 +1,2 @@
+model,scope,k,train_rows,eval_users,recall,hit_rate,precision,ndcg,coverage,auc,logloss,train_seconds,eval_seconds,device,notes
+Two-Tower,big_matrix_sample,20,2000000,7174,0.00172017,0.08823529,0.00484388,0.00470647,0.26854959,0.47945070,0.69855141,14.2123,0.2858,mlu,用户塔和视频塔分别编码，使用正样本 batch 内其他视频作为负样本训练召回。

@@ -43,7 +43,8 @@
 | KuaiRec 第一轮 | `Two-Tower` 在 `small_matrix.csv` 上达到当前最佳 `NDCG@20=0.143577`，短视频双塔召回有效。 |
 | KuaiRec 阶段二 | `watch_ratio >= 0.8` 和全量 `small_matrix` 训练都提升了双塔，但 Ranker 重排仍未稳定超过 Two-Tower。 |
 | KuaiRec 阶段三 | Ranker hard negative 训练生效，`TwoTower+DNN-Rerank@200 NDCG@20=0.203215`，已超过单独 Two-Tower。 |
-| KuaiRec `big_matrix` | ItemCF 当前 TopK 最强，神经模型 AUC 高但 TopK 弱，说明大候选池下需要更强负采样和召回训练。 |
+| KuaiRec `big_matrix` | hard negative 与 in-batch 都有局部收益，但 ItemCF 仍最强，说明需要图召回、序列建模或蒸馏。 |
+| MLU 工程 | 单卡/双卡 DDP benchmark 已跑通，双卡吞吐约比单卡高 25.6%。 |
 
 ## 5. KuaiRec 后续路线
 
@@ -54,13 +55,12 @@
      达到 `0.203215`，超过单独 `Two-Tower` 的 `0.159630`。
 
 2. **提升 `big_matrix.csv` 上的神经 TopK**
-   - 当前 `big_matrix` 采样实验中 ItemCF 的 `NDCG@20=0.058148` 最好。
-   - 神经模型 AUC 高但 TopK 弱，后续应做 in-batch negative、hard negative 或全量候选召回训练。
+   - 已尝试 hard negative 和 in-batch negative，best pipeline `NDCG@20=0.005245`，仍低于 ItemCF `0.065921`。
+   - 后续若继续深挖，应转向 LightGCN、序列兴趣模型或 item-to-item 蒸馏。
 
 3. **补齐双卡 MLU 工程能力**
-   - 当前训练是单进程 MLU，主要使用容器逻辑 MLU0。
-   - 后续可把神经训练改造成 DDP，使用 `torchrun --nproc_per_node=2`。
-   - 成功标准：记录单卡/双卡吞吐、显存和指标对比。
+   - 已完成：单卡 `723,335 samples/s`，双卡 `908,159 samples/s`。
+   - 可作为简历中的 MLU 多卡训练适配与性能记录。
 
 ## 6. 最终简历表达方向
 

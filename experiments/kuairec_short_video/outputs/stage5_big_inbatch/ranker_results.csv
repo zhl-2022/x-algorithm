@@ -1,0 +1,2 @@
+model,scope,k,train_rows,eval_users,recall,hit_rate,precision,ndcg,coverage,auc,logloss,train_seconds,eval_seconds,device,notes
+DNNRanker,big_matrix_sample,20,2559393,7174,0.00055726,0.05213270,0.00271118,0.00200502,0.02460850,0.77451165,0.63267339,13.8489,19.9046,mlu,"融合用户、视频、类别、caption 哈希文本和统计特征的 MLP 排序模型，并追加 559,393 条 Two-Tower 高分难负样本训练。"

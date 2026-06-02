@@ -1,0 +1,2 @@
+model,scope,k,train_rows,eval_users,recall,hit_rate,precision,ndcg,coverage,auc,logloss,train_seconds,eval_seconds,device,notes
+Popularity,big_matrix,20,10021757,7174,0.00221939,0.14231949,0.01046836,0.01007545,0.03868382,0.60648655,0.74978914,0.0219,0.0000,cpu,视频全局完播正反馈热度。
