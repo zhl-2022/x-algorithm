@@ -1,0 +1,2 @@
+model,k,candidate_k,evaluated_users,recall,hit_rate,precision,ndcg,coverage,candidate_recall,candidate_hit_rate,auc,logloss
+TwoTower+DNN-Rerank,20,200,6037,0.10882889,0.10882889,0.00544144,0.04187683,0.43523049,0.47175750,0.47175750,0.89973670,0.13891681

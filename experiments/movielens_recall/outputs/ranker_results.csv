@@ -1,0 +1,2 @@
+model,k,evaluated_users,recall,hit_rate,precision,ndcg,coverage,auc,logloss
+DNN-Ranker,20,6037,0.10684115,0.10684115,0.00534206,0.04130241,0.52588205,0.89973670,0.13891681

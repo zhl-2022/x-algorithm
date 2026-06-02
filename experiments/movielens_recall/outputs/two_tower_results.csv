@@ -1,0 +1,2 @@
+model,k,evaluated_users,recall,hit_rate,precision,ndcg,coverage
+Two-Tower,20,6037,0.10187179,0.10187179,0.00509359,0.04024421,0.34097347

@@ -1,0 +1,2 @@
+model,k,evaluated_users,recall,hit_rate,precision,ndcg,coverage
+MF,20,6037,0.10402518,0.10402518,0.00520126,0.03980698,0.48184394

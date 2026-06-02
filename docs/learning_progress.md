@@ -12,6 +12,12 @@
 |---|---|---|---|
 | 2026-05-27 | MovieLens 1M 最小闭环 | 已完成 | 数据处理、统计报告、Popularity baseline、`Recall@20` |
 | 2026-06-01 | MovieLens 1M ItemCF baseline | 已完成 | ItemCF 召回、统一结果表、`Recall@20` 对比 |
+| 2026-06-01 | MovieLens 1M MF baseline | 已完成 | PyTorch MF 训练脚本、MLU 容器训练验证、`Recall@20` 对比 |
+| 2026-06-01 | MovieLens 1M Two-Tower 召回 | 已完成 | 双塔召回训练脚本、MLU 训练结果、与 MF/ItemCF 对比 |
+| 2026-06-01 | MovieLens 1M DNN Ranker 排序 | 已完成 | 排序模型训练脚本、AUC/LogLoss、TopK 对比 |
+| 2026-06-01 | Two-Tower + DNN Ranker 两阶段 pipeline | 已完成 | Top 200 召回候选、Ranker 重排 Top 20、pipeline 指标 |
+| 2026-06-01 | Candidate K 消融实验 | 已完成 | `candidate_k=50/100/200/500` 对比，分析召回上限和重排效果 |
+| 2026-06-01 | MIND-small 数据准备 | 已完成 | RecZoo 镜像下载、新闻元数据、样本 CSV、数据报告 |
 
 ## 已完成内容
 
@@ -23,6 +29,13 @@
 6. 实现 Popularity baseline。
 7. 输出 `Recall@20`、`HitRate@20`、`Precision@20`、`NDCG@20` 和 `Coverage@20`。
 8. 实现 ItemCF baseline，并输出模型对比结果。
+9. 启动 `xalgorithm-mlu` 后台容器，验证 `torch_mlu` 可见 2 张 MLU。
+10. 实现 Matrix Factorization baseline，并在 MLU 上完成训练和评估。
+11. 实现 Two-Tower 召回模型，并在 MLU 上完成训练和评估。
+12. 实现 DNN Ranker 排序模型，并在 MLU 上完成训练和评估。
+13. 实现 Two-Tower 召回候选集 + DNN Ranker 重排的两阶段 pipeline。
+14. 完成候选集大小消融实验，验证不同 `candidate_k` 对最终 Top20 效果的影响。
+15. 新建 `experiments/mind_news/`，完成 MIND-small 新闻推荐数据准备和数据报告。
 
 ## 当前实验结果
 
@@ -42,6 +55,33 @@
 | ItemCF `HitRate@20` | 0.082160 |
 | ItemCF `NDCG@20` | 0.032793 |
 | ItemCF `Coverage@20` | 0.132372 |
+| MF `Recall@20` | 0.104025 |
+| MF `HitRate@20` | 0.104025 |
+| MF `NDCG@20` | 0.039807 |
+| MF `Coverage@20` | 0.481844 |
+| Two-Tower `Recall@20` | 0.101872 |
+| Two-Tower `HitRate@20` | 0.101872 |
+| Two-Tower `NDCG@20` | 0.040244 |
+| Two-Tower `Coverage@20` | 0.340973 |
+| DNN-Ranker `Recall@20` | 0.106841 |
+| DNN-Ranker `HitRate@20` | 0.106841 |
+| DNN-Ranker `NDCG@20` | 0.041302 |
+| DNN-Ranker `Coverage@20` | 0.525882 |
+| DNN-Ranker `AUC` | 0.899737 |
+| DNN-Ranker `LogLoss` | 0.138917 |
+| TwoTower+DNN-Rerank `Candidate Recall@200` | 0.471757 |
+| TwoTower+DNN-Rerank `Recall@20` | 0.108829 |
+| TwoTower+DNN-Rerank `HitRate@20` | 0.108829 |
+| TwoTower+DNN-Rerank `NDCG@20` | 0.041877 |
+| TwoTower+DNN-Rerank `Coverage@20` | 0.435230 |
+| Best Rerank Ablation `candidate_k` | 50 |
+| Best Rerank Ablation `Recall@20` | 0.109988 |
+| Best Rerank Ablation `NDCG@20` | 0.042451 |
+| MIND-small 新闻数 | 65,238 |
+| MIND-small 训练样本行数 | 5,843,444 |
+| MIND-small 验证样本行数 | 2,740,998 |
+| MIND-small 训练 CTR | 4.0446% |
+| MIND-small 验证 CTR | 4.0636% |
 
 ## 当前理解沉淀
 
@@ -49,11 +89,37 @@
 - 第一阶段的价值是建立可复现的离线评测闭环，而不是追求复杂模型。
 - Popularity baseline 指标不高是正常现象，它用于给后续 ItemCF、MF 和 Two-Tower 提供对比基准。
 - ItemCF 已经体现个性化召回价值，`Recall@20` 和 `NDCG@20` 均高于 Popularity baseline。
+- MF 在 MLU 上完成训练，`Recall@20` 继续高于 ItemCF，说明可训练 embedding 模型已经带来更强召回能力。
+- Two-Tower 使用用户塔和物品塔分别生成向量，更接近企业推荐系统中的向量召回范式；当前 `Recall@20` 接近 MF，`NDCG@20` 略高于 MF。
+- 当前 Two-Tower 不是 Transformer 架构，而是 embedding + MLP 的双塔结构；每个塔包含 2 个线性层，其中 1 个隐藏层和 1 个输出投影层。
+- DNN Ranker 将项目从召回推进到排序阶段，开始补充 `AUC` 和 `LogLoss` 这类 CTR 排序指标。
+- Two-Tower + DNN Ranker 两阶段 pipeline 已跑通：候选召回决定重排上限，Ranker 在 Top 200 候选中重排 Top 20 后继续提升 `Recall@20` 和 `NDCG@20`。
+- 候选集大小消融显示：`Candidate Recall` 随 `candidate_k` 增大而上升，但最终 Top20 指标不线性上升；当前 `candidate_k=50` 的 `Recall@20` 和 `NDCG@20` 最好。
+- MIND-small 阶段已经完成数据入口；相比 MovieLens，它额外提供新闻标题、摘要、类别和用户点击历史，更适合做内容推荐。
+- 官方 MIND Azure Blob 当前不可直接公开访问，本阶段使用 RecZoo `MIND_small_x1` 镜像继续推进。
 - 按时间顺序切分比随机切分更接近真实推荐场景，因为模型只能利用用户过去行为预测未来偏好。
 
 ## 下一步计划
 
-1. 准备 Matrix Factorization 的训练脚本，为后续 MLU 训练适配做铺垫。
-2. 在 `xalgorithm-mlu` 容器中验证 PyTorch/torch_mlu 训练最小样例。
-3. 将 MF 指标加入 `outputs/experiment_results.csv`。
-4. 开始设计 Two-Tower 召回模型。
+1. 在 MIND-small 上实现 Popularity / Category baseline，建立新闻推荐最低基准。
+2. 在 MIND 上加入标题、摘要、类别等内容特征，升级 Two-Tower 和 Ranker。
+3. 复用 MovieLens 的两阶段 pipeline：新闻召回 TopN，再用 Ranker 重排 TopK。
+4. 后续再切换 KuaiRec 或 Tenrec，做更接近信息流/短视频推荐的大规模实验。
+
+## 后续总体规划
+
+MovieLens 阶段已经完成初步验证：数据处理、召回、排序、两阶段 pipeline、MLU 训练、
+指标报告和消融实验都已经跑通。下一阶段不建议继续在 MovieLens 上堆复杂模型，
+而应该迁移到更接近真实内容推荐的数据集。
+
+建议路线：
+
+1. `MIND-small`：做新闻推荐，重点引入标题、摘要、类别和用户点击历史。
+2. 内容感知 Two-Tower：用户塔编码点击历史，新闻塔编码新闻文本和类别。
+3. 内容感知 Ranker：融合用户行为、新闻文本 embedding、类别、热度和时序特征。
+4. 两阶段 pipeline：新闻召回 TopN，再用 Ranker 重排 TopK。
+5. `MIND-large`、KuaiRec 或 Tenrec：扩大数据规模，开始体现 MLU 训练性能和工程能力。
+
+如果要结合“Grok / X”方向，当前更合理的目标不是从零训练大语言模型基座，
+而是构建一个小型内容推荐基座表征模型：用文本编码器理解内容，用用户行为序列建模兴趣，
+再通过召回和排序任务联合评估。这样更贴近 X/Twitter 推荐系统，也更适合当前两张 80GB MLU 的学习目标。
