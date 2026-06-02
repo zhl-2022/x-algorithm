@@ -20,6 +20,7 @@
 | 2026-06-01 | MIND-small 数据准备 | 已完成 | RecZoo 镜像下载、新闻元数据、样本 CSV、数据报告 |
 | 2026-06-02 | MIND Popularity baseline | 已完成 | 新闻热度排序、AUC/MRR/NDCG@K、MIND 基线报告 |
 | 2026-06-02 | MIND 本地完整实验闭环 | 已完成 | Category、DNNRanker、ContentTwoTower、TwoTower+DNN-Rerank、统一结果表 |
+| 2026-06-02 | MIND MLU 训练验证 | 已完成 | srv4 容器训练、MLU 结果表、训练记录报告 |
 
 ## 已完成内容
 
@@ -40,6 +41,7 @@
 15. 新建 `experiments/mind_news/`，完成 MIND-small 新闻推荐数据准备和数据报告。
 16. 实现 MIND Popularity baseline，在验证集曝光候选列表内按新闻点击热度排序并完成评估。
 17. 实现 MIND Category baseline、DNN Ranker、内容感知 Two-Tower 和 Two-Tower + DNN Ranker pipeline。
+18. 将 MIND 神经模型同步到 srv4 的 `xalgorithm-mlu` 容器，在 `MLU_VISIBLE_DEVICES=2,3` 下完成训练验证。
 
 ## 当前实验结果
 
@@ -96,12 +98,12 @@
 | MIND Popularity `Coverage@10` | 0.026380 |
 | MIND Category `AUC` full | 0.588720 |
 | MIND Category `NDCG@10` full | 0.338507 |
-| MIND DNNRanker `AUC` sample | 0.546448 |
-| MIND DNNRanker `NDCG@10` sample | 0.311597 |
-| MIND ContentTwoTower `AUC` sample | 0.585406 |
-| MIND ContentTwoTower `NDCG@10` sample | 0.339823 |
-| MIND TwoTower+DNN-Rerank `AUC` sample | 0.555439 |
-| MIND TwoTower+DNN-Rerank `NDCG@10` sample | 0.319061 |
+| MIND DNNRanker `AUC` sample, MLU | 0.547961 |
+| MIND DNNRanker `NDCG@10` sample, MLU | 0.311570 |
+| MIND ContentTwoTower `AUC` sample, MLU | 0.562748 |
+| MIND ContentTwoTower `NDCG@10` sample, MLU | 0.324701 |
+| MIND TwoTower+DNN-Rerank `AUC` sample, MLU | 0.550229 |
+| MIND TwoTower+DNN-Rerank `NDCG@10` sample, MLU | 0.316776 |
 
 ## 当前理解沉淀
 
@@ -120,14 +122,14 @@
 - MIND Popularity baseline 已完成；它只按新闻全局点击热度排序，`AUC=0.522252`，说明热门程度只有弱收益，后续需要引入类别、用户历史和文本内容。
 - MIND 当前评估方式和 MovieLens 不同：MovieLens 是从全量物品推荐 TopK，MIND 是在一次真实曝光候选列表内排序。
 - MIND Category baseline 已在全量数据上超过 Popularity，说明类别 CTR 和用户历史类别偏好是有效特征。
-- MIND DNNRanker、ContentTwoTower 和 TwoTower+DNN-Rerank 已完成 100k 样本口径实验，证明新闻推荐排序、双塔和两阶段 pipeline 的代码路径已经跑通。
-- 当前样本口径下 ContentTwoTower 的 `NDCG@10=0.339823`，高于 DNNRanker 的 `0.311597`；第一版 pipeline 还未超过单独双塔，后续应加强 Ranker 和做 `candidate_k` 消融。
+- MIND DNNRanker、ContentTwoTower 和 TwoTower+DNN-Rerank 已在 srv4 MLU 容器完成 100k 样本口径实验，证明新闻推荐排序、双塔和两阶段 pipeline 的 MLU 训练路径已经跑通。
+- 当前 MLU 样本口径下 ContentTwoTower 的 `NDCG@10=0.324701`，高于 DNNRanker 的 `0.311570`；第一版 pipeline 还未超过单独双塔，后续应加强 Ranker 和做 `candidate_k` 消融。
 - 按时间顺序切分比随机切分更接近真实推荐场景，因为模型只能利用用户过去行为预测未来偏好。
 
 ## 下一步计划
 
 1. 将 MIND DNNRanker 和 ContentTwoTower 从 100k 样本训练扩展到百万级或全量训练。
-2. 在 MLU 容器中运行 MIND 神经模型，记录训练耗时、吞吐和显存占用。
+2. 在 MLU 容器中补充训练吞吐、显存峰值和 `candidate_k=10/20/50/100` 消融。
 3. 对 MIND pipeline 做 `candidate_k=10/20/50/100` 消融。
 4. 后续再切换 KuaiRec 或 Tenrec，做更接近信息流/短视频推荐的大规模实验。
 

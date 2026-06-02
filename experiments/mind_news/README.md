@@ -78,6 +78,7 @@ python scripts/run_all_experiments.py
 | `reports/ranker_report.md` | DNN Ranker 报告 |
 | `reports/two_tower_report.md` | 内容感知 Two-Tower 报告 |
 | `reports/pipeline_report.md` | Two-Tower + DNN Ranker pipeline 报告 |
+| `reports/mlu_training_report.md` | srv4 MLU 训练记录 |
 | `reports/试验解析.md` | 面向初学者的 MIND 阶段完整学习说明和实验清单 |
 | `outputs/popularity_results.csv` | Popularity baseline 机器可读结果 |
 | `outputs/experiment_results.csv` | 当前 MIND 阶段统一实验结果表 |
@@ -99,21 +100,22 @@ python scripts/run_all_experiments.py
 ## 当前实验结果
 
 统计类 baseline 使用全量 `train.csv` 和 `valid.csv`；神经网络模型默认使用
-`train_sample.csv` 和 `valid_sample.csv` 各 100,000 行，用于本地快速复现实验闭环。
+`train_sample.csv` 和 `valid_sample.csv` 各 100,000 行。当前神经模型结果已在
+srv4 的 `xalgorithm-mlu` 容器中使用 `MLU_VISIBLE_DEVICES=2,3` 跑通。
 
 | 模型 | 范围 | AUC | MRR | NDCG@5 | NDCG@10 | HitRate@10 |
 |---|---|---:|---:|---:|---:|---:|
 | Popularity | full | 0.522252 | 0.266074 | 0.247261 | 0.308465 | 0.611986 |
 | Category | full | 0.588720 | 0.291866 | 0.274974 | 0.338507 | 0.657152 |
-| DNNRanker | sample | 0.546448 | 0.266533 | 0.238774 | 0.311597 | 0.633766 |
-| ContentTwoTower | sample | 0.585406 | 0.289335 | 0.276951 | 0.339823 | 0.669759 |
-| TwoTower+DNN-Rerank | sample | 0.555439 | 0.273330 | 0.243986 | 0.319061 | 0.650093 |
+| DNNRanker | sample, MLU | 0.547961 | 0.267107 | 0.241286 | 0.311570 | 0.635250 |
+| ContentTwoTower | sample, MLU | 0.562748 | 0.281838 | 0.256427 | 0.324701 | 0.650835 |
+| TwoTower+DNN-Rerank | sample, MLU | 0.550229 | 0.271336 | 0.244329 | 0.316776 | 0.646011 |
 
 ## 后续模型
 
-1. 将 DNN Ranker 和 ContentTwoTower 从 100k 样本训练扩展到全量训练。
-2. 迁移到 MLU 容器，记录训练耗时、吞吐和显存占用。
+1. 将 DNN Ranker 和 ContentTwoTower 从 100k 样本训练扩展到百万级或全量训练。
+2. 在 MLU 容器中补充 `candidate_k=10/20/50/100` pipeline 消融。
 3. 引入更强文本 encoder，把标题和摘要从统计特征升级为语义向量。
-4. 做 `candidate_k` 消融，分析 Two-Tower 候选规模对重排效果的影响。
+4. 后续切换 MIND-large、KuaiRec 或 Tenrec，做更大规模训练性能记录。
 
 详细学习清单见 `reports/试验解析.md`。
