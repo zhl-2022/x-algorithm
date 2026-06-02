@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import ast
 import csv
+import heapq
 import math
 import random
 import sys
@@ -601,6 +602,21 @@ def move_batch(batch: FeatureTensors, indices: torch.Tensor, device: torch.devic
     )
 
 
+def concat_feature_tensors(*batches: FeatureTensors) -> FeatureTensors:
+    non_empty = [batch for batch in batches if len(batch.labels)]
+    if not non_empty:
+        raise ValueError("Cannot concatenate empty feature tensors.")
+    return FeatureTensors(
+        users=torch.cat([batch.users for batch in non_empty], dim=0),
+        items=torch.cat([batch.items for batch in non_empty], dim=0),
+        labels=torch.cat([batch.labels for batch in non_empty], dim=0),
+        categories=torch.cat([batch.categories for batch in non_empty], dim=0),
+        text_indices=torch.cat([batch.text_indices for batch in non_empty], dim=0),
+        text_lengths=torch.cat([batch.text_lengths for batch in non_empty], dim=0),
+        dense=torch.cat([batch.dense for batch in non_empty], dim=0),
+    )
+
+
 def train_neural_model(
     model: nn.Module,
     train_data: FeatureTensors,
@@ -645,6 +661,61 @@ def train_neural_model(
         final_loss = total_loss / batches if batches else 0.0
         print(f"epoch={epoch} loss={final_loss:.6f}", flush=True)
     return model, final_loss, time.perf_counter() - started
+
+
+def score_feature_tensors(
+    model: nn.Module,
+    features: FeatureTensors,
+    device: torch.device,
+    batch_size: int,
+) -> torch.Tensor:
+    model.eval()
+    scores: list[torch.Tensor] = []
+    with torch.no_grad():
+        for start in range(0, len(features.labels), batch_size):
+            end = min(start + batch_size, len(features.labels))
+            indices = torch.arange(start, end, dtype=torch.long)
+            batch = move_batch(features, indices, device)
+            scores.append(model(batch).detach().cpu())
+    return torch.cat(scores, dim=0)
+
+
+def select_hard_negative_rows(
+    data: PreparedData,
+    two_tower_model: KuaiRecTwoTower,
+    rows: list[RawInteraction],
+    max_pool_rows: int,
+    negatives_per_user: int,
+    seed: int,
+    device: torch.device,
+    batch_size: int,
+) -> list[RawInteraction]:
+    if negatives_per_user <= 0:
+        return []
+
+    negative_rows = [row for row in rows if row.label == 0]
+    if max_pool_rows and len(negative_rows) > max_pool_rows:
+        rng = random.Random(seed)
+        negative_rows = rng.sample(negative_rows, max_pool_rows)
+    if not negative_rows:
+        return []
+
+    features = build_feature_tensors(data, negative_rows, 0, seed)
+    scores = score_feature_tensors(two_tower_model, features, device, batch_size)
+    selected: dict[int, list[tuple[float, int, RawInteraction]]] = defaultdict(list)
+    for offset, (row, score) in enumerate(zip(negative_rows, scores.tolist())):
+        user_index = data.user_to_index[row.user_id]
+        heap = selected[user_index]
+        entry = (float(score), offset, row)
+        if len(heap) < negatives_per_user:
+            heapq.heappush(heap, entry)
+        elif entry[0] > heap[0][0]:
+            heapq.heapreplace(heap, entry)
+
+    hard_rows: list[RawInteraction] = []
+    for heap in selected.values():
+        hard_rows.extend(row for _, _, row in sorted(heap, reverse=True))
+    return hard_rows
 
 
 def score_mf_matrix(
@@ -1064,6 +1135,7 @@ def write_all_report(path: Path, data: PreparedData, metrics: list[ExperimentMet
     positives_test = sum(row.label for row in data.test_rows)
     best = max(metrics, key=lambda metric: metric.ndcg)
     neural_train_rows = next((metric.train_rows for metric in metrics if metric.model == "MF"), args.neural_train_rows)
+    ranker_train_rows = next((metric.train_rows for metric in metrics if metric.model == "DNNRanker"), args.neural_train_rows)
     lines = [
         "# KuaiRec 全套训练报告",
         "",
@@ -1086,9 +1158,12 @@ def write_all_report(path: Path, data: PreparedData, metrics: list[ExperimentMet
         f"| 测试正样本 | {positives_test:,} |",
         f"| 正反馈阈值 | `watch_ratio >= {args.positive_threshold}` |",
         f"| 神经模型训练样本 | {neural_train_rows:,} |",
+        f"| Ranker 训练样本 | {ranker_train_rows:,} |",
         f"| Epochs | {args.epochs} |",
         f"| Batch size | {args.batch_size:,} |",
         f"| Ranker 正样本权重 | {args.ranker_positive_weight:g} |",
+        f"| Ranker hard negatives/user | {args.ranker_hard_negatives_per_user:,} |",
+        f"| Ranker hard negative pool rows | {args.ranker_hard_negative_pool_rows:,} |",
         f"| 融合重排 alpha | `{','.join(str(item) for item in args.rerank_blend_alphas)}` |",
         "",
         "## 结果汇总",
@@ -1177,6 +1252,12 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--itemcf-history", type=int, default=80)
     parser.add_argument("--itemcf-neighbors", type=int, default=100)
     parser.add_argument("--neural-train-rows", type=int, default=1_200_000)
+    parser.add_argument(
+        "--ranker-train-rows",
+        type=int,
+        default=-1,
+        help="Rows sampled for Ranker training. -1 reuses --neural-train-rows.",
+    )
     parser.add_argument("--auc-rows", type=int, default=300_000)
     parser.add_argument("--epochs", type=int, default=2)
     parser.add_argument("--batch-size", type=int, default=8192)
@@ -1191,6 +1272,18 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--lr", type=float, default=0.003)
     parser.add_argument("--weight-decay", type=float, default=1e-6)
     parser.add_argument("--ranker-positive-weight", type=float, default=1.0)
+    parser.add_argument(
+        "--ranker-hard-negatives-per-user",
+        type=int,
+        default=0,
+        help="Append top-scored negative train rows per user according to the trained Two-Tower model.",
+    )
+    parser.add_argument(
+        "--ranker-hard-negative-pool-rows",
+        type=int,
+        default=0,
+        help="Optional cap for negative rows scored when mining hard negatives. 0 means all train negatives.",
+    )
     parser.add_argument("--text-buckets", type=int, default=8192)
     parser.add_argument("--max-text-tokens", type=int, default=16)
     parser.add_argument("--device", default="auto", help="auto, cpu, cuda, or mlu.")
@@ -1344,6 +1437,22 @@ def main(argv: list[str]) -> int:
     metrics.append(add_auc_logloss(two_tower_metric, data.test_rows[: args.auc_rows], two_tower_scores, data))
 
     hidden_dims = tuple(int(part.strip()) for part in args.ranker_hidden_dims.split(",") if part.strip())
+    ranker_train_limit = args.neural_train_rows if args.ranker_train_rows < 0 else args.ranker_train_rows
+    ranker_train_features = build_feature_tensors(data, data.train_rows, ranker_train_limit, args.seed + 101)
+    hard_negative_rows = select_hard_negative_rows(
+        data=data,
+        two_tower_model=two_tower_model,
+        rows=data.train_rows,
+        max_pool_rows=args.ranker_hard_negative_pool_rows,
+        negatives_per_user=args.ranker_hard_negatives_per_user,
+        seed=args.seed + 202,
+        device=device,
+        batch_size=args.batch_size,
+    )
+    if hard_negative_rows:
+        hard_negative_features = build_feature_tensors(data, hard_negative_rows, 0, args.seed + 303)
+        ranker_train_features = concat_feature_tensors(ranker_train_features, hard_negative_features)
+        print(f"Ranker hard negative rows: {len(hard_negative_rows):,}", flush=True)
     ranker_model = KuaiRecRanker(
         num_users=len(data.index_to_user),
         num_items=len(data.index_to_item),
@@ -1356,7 +1465,7 @@ def main(argv: list[str]) -> int:
     )
     ranker_model, _, ranker_train_seconds = train_neural_model(
         ranker_model,
-        train_features,
+        ranker_train_features,
         device,
         args.epochs,
         args.batch_size,
@@ -1374,11 +1483,18 @@ def main(argv: list[str]) -> int:
         "DNNRanker",
         f"{scope_name}_sample",
         args.k,
-        len(train_features.labels),
+        len(ranker_train_features.labels),
         ranker_train_seconds,
         ranker_eval_seconds,
         str(device),
-        "融合用户、视频、类别、caption 哈希文本和统计特征的 MLP 排序模型。",
+        (
+            "融合用户、视频、类别、caption 哈希文本和统计特征的 MLP 排序模型。"
+            if not hard_negative_rows
+            else (
+                "融合用户、视频、类别、caption 哈希文本和统计特征的 MLP 排序模型，"
+                f"并追加 {len(hard_negative_rows):,} 条 Two-Tower 高分难负样本训练。"
+            )
+        ),
     )
     metrics.append(add_auc_logloss(ranker_metric, data.test_rows[: args.auc_rows], ranker_scores, data))
 

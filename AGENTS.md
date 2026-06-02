@@ -37,10 +37,13 @@
 - KuaiRec 阶段二已完成：标签阈值消融、`small_matrix.csv` 全量训练、`big_matrix.csv`
   采样放大、Two-Tower 与 Ranker 分数融合重排。当前阶段二最佳是
   `watch_ratio >= 0.8` 下 Two-Tower 的 `NDCG@20=0.153744`。
-- 当前 Ranker 重排尚未稳定超过单独 Two-Tower；下一阶段优先优化 Ranker 特征、负采样、
-  排序 loss，以及 `big_matrix.csv` 上的神经召回 TopK。
+- KuaiRec 阶段三已完成 Ranker hard negative 优化：追加 141,100 条 Two-Tower 高分难负样本后，
+  `DNNRanker NDCG@20=0.240050`，`TwoTower+DNN-Rerank@200 NDCG@20=0.203215`。
+  当前小矩阵上的 Ranker 重排问题已解决，下一阶段应迁移到 `big_matrix.csv`。
 - 总体项目路线记录在 `docs/project_roadmap.md`，KuaiRec 阶段二总结记录在
   `experiments/kuairec_short_video/reports/stage2_summary_report.md`。
+  KuaiRec 阶段三总结记录在
+  `experiments/kuairec_short_video/reports/stage3_ranker_optimization_report.md`。
 
 ## 服务器与 MLU 训练环境
 
@@ -134,8 +137,8 @@ source /torch/venv3/pytorch/bin/activate
 2. MIND-small：Popularity、Category、DNNRanker、ContentTwoTower、TwoTower+DNN-Rerank、MLU 放大实验。
 3. KuaiRec：短视频推荐数据准备、观看反馈建模、Popularity/Category/Two-Tower/Ranker 迁移。
 4. KuaiRec 阶段二：标签阈值、训练规模、候选集和融合重排消融。
-5. KuaiRec 下一阶段：优化 Ranker，使 `TwoTower+DNN-Rerank` 的 `NDCG@20` 超过单独 Two-Tower。
-6. KuaiRec 规模化：在 `big_matrix.csv` 上加强负采样和召回训练，解决神经模型 TopK 偏弱问题。
+5. KuaiRec 阶段三：Ranker hard negative 优化，使 `TwoTower+DNN-Rerank` 的 `NDCG@20` 超过单独 Two-Tower。
+6. KuaiRec 下一阶段：迁移 hard negative 到 `big_matrix.csv`，并加强负采样和召回训练，解决神经模型 TopK 偏弱问题。
 7. MLU 双卡：如需要体现工程能力，再做 DDP 或 `torchrun --nproc_per_node=2`。
 8. 如需要继续扩展，再考虑 Tenrec 或 KuaiRand。
 9. 整理最终项目 README、实验报告、架构图、简历描述和面试问答。

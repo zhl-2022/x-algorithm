@@ -118,6 +118,21 @@ python experiments/kuairec_short_video/scripts/run_all_experiments.py \
 但 Ranker 重排还没有稳定超过单独 Two-Tower；`big_matrix.csv` 上神经模型 AUC 较高但 TopK 偏弱，
 后续应优先做 hard negative、in-batch negative 或更强召回训练。
 
+## 第三轮结果
+
+第三轮专门优化 Ranker，新增 Two-Tower hard negative 训练：
+
+| 模型 | Recall@20 | NDCG@20 | AUC | 结论 |
+|---|---:|---:|---:|---|
+| Two-Tower | 0.018152 | 0.159630 | 0.508734 | 召回底座 |
+| DNNRanker | 0.028238 | 0.240050 | 0.653649 | 全量打分 TopK 最强 |
+| TwoTower+DNN-Rerank@50 | 0.019543 | 0.170111 | 0.690666 | 重排超过 Two-Tower |
+| TwoTower+DNN-Rerank@100 | 0.022158 | 0.197553 | 0.654515 | 候选扩大后继续提升 |
+| TwoTower+DNN-Rerank@200 | 0.022686 | 0.203215 | 0.687100 | 本轮最佳两阶段 pipeline |
+
+本轮已解决“Ranker 重排没有超过 Two-Tower”的问题。详细说明见
+`reports/stage3_ranker_optimization_report.md`。
+
 ## 当前状态
 
 - [x] 新建 KuaiRec 实验目录。
@@ -134,3 +149,4 @@ python experiments/kuairec_short_video/scripts/run_all_experiments.py \
 - [x] 完成 `small_matrix.csv` 全量神经训练实验。
 - [x] 完成 `big_matrix.csv` 采样放大实验。
 - [x] 完成 Two-Tower 与 DNNRanker 融合重排实验。
+- [x] 完成 Ranker hard negative 优化实验，使两阶段 pipeline 超过单独 Two-Tower。

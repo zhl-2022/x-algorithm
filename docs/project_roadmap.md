@@ -42,6 +42,7 @@
 | MIND | 内容感知 Two-Tower 在 `NDCG@10` 上强于 DNNRanker，说明新闻文本和类别特征对内容推荐有效。 |
 | KuaiRec 第一轮 | `Two-Tower` 在 `small_matrix.csv` 上达到当前最佳 `NDCG@20=0.143577`，短视频双塔召回有效。 |
 | KuaiRec 阶段二 | `watch_ratio >= 0.8` 和全量 `small_matrix` 训练都提升了双塔，但 Ranker 重排仍未稳定超过 Two-Tower。 |
+| KuaiRec 阶段三 | Ranker hard negative 训练生效，`TwoTower+DNN-Rerank@200 NDCG@20=0.203215`，已超过单独 Two-Tower。 |
 | KuaiRec `big_matrix` | ItemCF 当前 TopK 最强，神经模型 AUC 高但 TopK 弱，说明大候选池下需要更强负采样和召回训练。 |
 
 ## 5. KuaiRec 后续路线
@@ -49,9 +50,8 @@
 当前优先级不是继续无目的加模型，而是解决三个明确问题：
 
 1. **让 Ranker 重排超过 Two-Tower**
-   - 加强用户历史类别偏好、视频热度、完播率、时长和 caption 文本特征。
-   - 调整 Ranker 正负样本分布和 loss 权重。
-   - 成功标准：`TwoTower+DNN-Rerank` 的 `NDCG@20` 超过单独 `Two-Tower`。
+   - 已完成：通过 Two-Tower hard negative 训练，`TwoTower+DNN-Rerank@200` 的 `NDCG@20`
+     达到 `0.203215`，超过单独 `Two-Tower` 的 `0.159630`。
 
 2. **提升 `big_matrix.csv` 上的神经 TopK**
    - 当前 `big_matrix` 采样实验中 ItemCF 的 `NDCG@20=0.058148` 最好。
@@ -71,4 +71,3 @@
 > pipeline，使用 `Recall@K`、`NDCG@K`、`AUC`、`LogLoss` 等指标评估召回与排序效果。
 > 在寒武纪 MLU 服务器上完成推荐模型训练适配，记录 batch size、训练吞吐、显存占用和模型效果，
 > 并通过标签阈值、候选集大小、训练样本规模等消融分析优化推荐效果。
-

@@ -1,0 +1,2 @@
+model,scope,k,train_rows,eval_users,recall,hit_rate,precision,ndcg,coverage,auc,logloss,train_seconds,eval_seconds,device,notes
+Category,small_matrix,20,3595097,1411,0.01231104,0.84124734,0.09234585,0.08508974,0.23264202,0.53941260,0.69769529,0.1294,0.0000,cpu,视频热度 + 类别 CTR + 用户历史类别偏好。

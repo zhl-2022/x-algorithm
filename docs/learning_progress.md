@@ -26,6 +26,7 @@
 | 2026-06-02 | KuaiRec 标签阈值消融 | 已完成 | `watch_ratio >= 1.0` 对比 `watch_ratio >= 0.8`，双塔 `NDCG@20` 提升到 `0.153744` |
 | 2026-06-02 | KuaiRec small 全量训练 | 已完成 | 神经训练样本扩展到 3,595,097，双塔 `NDCG@20=0.149288` |
 | 2026-06-02 | KuaiRec big 采样放大 | 已完成 | `big_matrix.csv` 200 万神经样本，发现 AUC 高但 TopK 弱的问题 |
+| 2026-06-02 | KuaiRec Ranker hard negative 优化 | 已完成 | `DNNRanker NDCG@20=0.240050`，`TwoTower+DNN-Rerank@200 NDCG@20=0.203215` |
 
 ## 已完成内容
 
@@ -57,6 +58,8 @@
 26. 完成 KuaiRec `big_matrix.csv` 采样放大实验，定位神经模型 AUC 高但 TopK 弱的问题。
 27. 新增 Two-Tower 与 Ranker 融合重排参数，支持 `alpha * Ranker + (1 - alpha) * TwoTower` 的 pipeline 消融。
 28. 新增项目总路线文档 `docs/project_roadmap.md`。
+29. 新增 Ranker hard negative 训练能力，用 Two-Tower 高分负样本强化 Ranker。
+30. 在 srv4 MLU 上完成 KuaiRec 阶段三 Ranker 优化实验，两阶段 pipeline 已超过单独 Two-Tower。
 
 ## 当前实验结果
 
@@ -155,6 +158,11 @@
 | KuaiRec big sample MF `AUC` | 0.776112 |
 | KuaiRec big sample DNNRanker `AUC` | 0.764070 |
 | KuaiRec big sample Two-Tower `NDCG@20` | 0.001448 |
+| KuaiRec stage3 Two-Tower `NDCG@20` | 0.159630 |
+| KuaiRec stage3 DNNRanker `Recall@20` | 0.028238 |
+| KuaiRec stage3 DNNRanker `NDCG@20` | 0.240050 |
+| KuaiRec stage3 TwoTower+DNN-Rerank@200 `Recall@20` | 0.022686 |
+| KuaiRec stage3 TwoTower+DNN-Rerank@200 `NDCG@20` | 0.203215 |
 
 ## 当前理解沉淀
 
@@ -186,11 +194,12 @@
 - KuaiRec 全量 `small_matrix.csv` 训练显示，扩大训练样本能让 Two-Tower 从更多交互中受益，`NDCG@20` 提升到 `0.149288`。
 - KuaiRec `big_matrix.csv` 采样放大显示，神经模型虽然 AUC 较高，但全量 TopK 推荐很弱；这说明后续重点不是继续只优化二分类 AUC，而是改进召回 loss、负采样和候选生成质量。
 - 当前 Ranker 重排还没有稳定超过 Two-Tower，后续应优先围绕 hard negative、特征增强和排序 loss 做实验。
+- KuaiRec 阶段三已经验证 hard negative 有效：Ranker 追加 141,100 条 Two-Tower 高分难负样本后，`DNNRanker NDCG@20=0.240050`，两阶段 `TwoTower+DNN-Rerank@200 NDCG@20=0.203215`，明显超过单独 Two-Tower。
 
 ## 下一步计划
 
-1. 优化 KuaiRec Ranker 特征和损失，使重排 TopK 指标超过单独 Two-Tower。
-2. 在 `big_matrix.csv` 上做 in-batch negative、hard negative 或更强召回 loss，解决神经模型 TopK 偏弱问题。
+1. 将 Ranker hard negative 方案迁移到 `big_matrix.csv`，验证大规模短视频场景是否也能提升 TopK。
+2. 在 `big_matrix.csv` 上做 in-batch negative、hard negative 或更强召回 loss，解决神经模型召回 TopK 偏弱问题。
 3. 如果要体现双卡能力，再做 DDP 或 `torchrun --nproc_per_node=2`。
 4. 整理 KuaiRec 阶段报告，形成可直接写进简历的短视频推荐实验总结。
 5. 后续如需继续扩大，再选择 Tenrec 或 KuaiRand。
