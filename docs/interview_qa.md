@@ -97,4 +97,16 @@ MLU 实验体现的是训练环境适配和工程验证能力：
 
 阶段八继续验证后，单独 2M 蒸馏 Two-Tower 的 `NDCG@20=0.027320`，反而低于 800k 蒸馏，说明不是样本越多越好；teacher 样本质量、软标签和正负样本比例更关键。
 
-但把蒸馏 Two-Tower 接回 DNNRanker 后，`DistillTwoTower+DNN-Rerank@200 NDCG@20=0.044560`，成为当前最佳神经 pipeline。结论是：蒸馏方向有效，但下一步应精调“蒸馏召回 + hard negative 排序”的两阶段组合，而不是直接盲目扩到 5M。
+但把蒸馏 Two-Tower 接回 DNNRanker 后，阶段八 `DistillTwoTower+DNN-Rerank@200 NDCG@20=0.044560`，阶段九继续把最佳结果提升到 `DistillTwoTower+DNN-Rerank@100 NDCG@20=0.048158`。结论是：蒸馏方向有效，但不是 teacher 样本越多越好；当前更有效的是降低 teacher 占比、增加随机负样本，并让 Ranker 在更干净的 `candidate_k=100` 候选集上重排。
+
+## 11. 阶段九为什么 `2m_t40n120` 最好？
+
+阶段九对比了三种蒸馏样本配比：
+
+| 配置 | NDCG@20 | 解释 |
+|---|---:|---|
+| `800k_t40n40` | 0.039138 | 训练量偏小，pipeline 没超过阶段八 |
+| `2m_t40n120` | 0.048158 | teacher 适中、随机负样本更多，召回边界更稳 |
+| `2m_t120n40` | 0.039845 | teacher 占比过高，可能放大了 ItemCF 噪声 |
+
+所以面试里可以这样解释：ItemCF 是强 teacher，但不能把它的 TopK 简单全部当成强正样本。适量 teacher 能提供协同过滤信号，更多随机负样本能帮助 Two-Tower 学会“哪些内容不该推”，二者平衡后 TopK 才提升。

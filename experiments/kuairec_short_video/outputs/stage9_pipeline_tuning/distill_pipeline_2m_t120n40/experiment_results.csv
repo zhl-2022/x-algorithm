@@ -1,0 +1,9 @@
+model,scope,k,train_rows,eval_users,recall,hit_rate,precision,ndcg,coverage,auc,logloss,train_seconds,eval_seconds,device,notes
+ItemCF-Distill-TwoTower,big_matrix,20,2000000,7174,0.00625037,0.32157792,0.02781572,0.02806536,0.03635347,0.59806579,0.68075173,7.2727,0.2706,mlu,用 ItemCF TopK teacher 样本和真实行为样本蒸馏训练 Two-Tower。
+DNNRanker,big_matrix,20,2559393,7174,0.00141301,0.06927795,0.00379844,0.00367046,0.01360925,0.76469998,0.62906787,6.9817,20.0822,mlu,"融合用户、视频、类别、caption 哈希文本和统计特征的 MLP 排序模型，并追加 559,393 条蒸馏 Two-Tower 高分难负样本训练。"
+DistillTwoTower+DNN-Blend@100a0.5,big_matrix,20,2000000,7174,0.00847413,0.37775300,0.03427655,0.03984488,0.06487696,0.69948069,0.67187843,14.2544,20.3528,mlu,Two-Tower 先取 Top100 候选，再按 0.5*Ranker + 0.5*TwoTower 融合重排 Top20。
+DistillTwoTower+DNN-Blend@100a0.75,big_matrix,20,2000000,7174,0.00850744,0.38193476,0.03430443,0.03947296,0.06972409,0.69942557,0.63060130,14.2544,20.3528,mlu,Two-Tower 先取 Top100 候选，再按 0.75*Ranker + 0.25*TwoTower 融合重排 Top20。
+DistillTwoTower+DNN-Rerank@100,big_matrix,20,2000000,7174,0.00849153,0.38277112,0.03426958,0.03913844,0.07168158,0.69850839,0.66953422,14.2544,20.3528,mlu,Two-Tower 先取 Top100 候选，再按 1*Ranker + 0*TwoTower 融合重排 Top20。
+DistillTwoTower+DNN-Blend@200a0.5,big_matrix,20,2000000,7174,0.00850062,0.39406189,0.03502927,0.03867790,0.07037658,0.68554813,0.68841807,14.2544,20.3528,mlu,Two-Tower 先取 Top200 候选，再按 0.5*Ranker + 0.5*TwoTower 融合重排 Top20。
+DistillTwoTower+DNN-Blend@200a0.75,big_matrix,20,2000000,7174,0.00859649,0.39866183,0.03562169,0.03790296,0.07401193,0.68404253,0.64062714,14.2544,20.3528,mlu,Two-Tower 先取 Top200 候选，再按 0.75*Ranker + 0.25*TwoTower 融合重排 Top20。
+DistillTwoTower+DNN-Rerank@200,big_matrix,20,2000000,7174,0.00865042,0.40047393,0.03566351,0.03726481,0.07624907,0.68237161,0.66346619,14.2544,20.3528,mlu,Two-Tower 先取 Top200 候选，再按 1*Ranker + 0*TwoTower 融合重排 Top20。

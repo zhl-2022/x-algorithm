@@ -33,6 +33,7 @@
 | 2026-06-03 | 项目阶段性总结与简历材料 | 已完成 | 总实验报告、简历写法、面试问答、KuaiRec big 补强方案 |
 | 2026-06-03 | KuaiRec big 升级实验 | 已完成 | ItemCF 蒸馏 Two-Tower、LightGCN、GRU 序列模型、TextCNN 双塔；蒸馏模型 `NDCG@20=0.033562` |
 | 2026-06-03 | KuaiRec 阶段八召回补强 | 已完成 | 2M 蒸馏、蒸馏 pipeline、LightGCN 调参、序列 padding 修复；最佳 pipeline `NDCG@20=0.044560` |
+| 2026-06-03 | KuaiRec 阶段九 pipeline 精调 | 已完成 | `2m_t40n120` 最佳，`DistillTwoTower+DNN-Rerank@100 NDCG@20=0.048158` |
 
 ## 已完成内容
 
@@ -71,6 +72,7 @@
 33. 完成 MLU 单卡/双卡 DDP benchmark，验证双卡训练链路和吞吐提升。
 34. 完成 KuaiRec big 四个补强方向的中等规模验证：ItemCF 蒸馏 Two-Tower、LightGCN、GRU 序列兴趣模型和 TextCNN 双塔。
 35. 完成 KuaiRec 阶段八召回补强：2M 蒸馏、蒸馏双塔 + DNNRanker pipeline、LightGCN 层数/轮数调参和序列 padding 修复验证。
+36. 完成 KuaiRec 阶段九 pipeline 精调：对比 `800k_t40n40`、`2m_t40n120` 和 `2m_t120n40`，验证随机负样本比例提升对 big 神经 TopK 有收益。
 
 ## 当前实验结果
 
@@ -189,6 +191,9 @@
 | KuaiRec stage8 LightGCN best `NDCG@20` | 0.011906 |
 | KuaiRec stage8 GRU fixed `NDCG@20` | 0.000914 |
 | KuaiRec stage8 best pipeline `NDCG@20` | 0.044560 |
+| KuaiRec stage9 `800k_t40n40` best pipeline `NDCG@20` | 0.039138 |
+| KuaiRec stage9 `2m_t40n120` best pipeline `NDCG@20` | 0.048158 |
+| KuaiRec stage9 `2m_t120n40` best pipeline `NDCG@20` | 0.039845 |
 
 ## 当前理解沉淀
 
@@ -225,11 +230,12 @@
 - KuaiRec 阶段六完成 MLU 双卡 DDP benchmark，双卡吞吐比单卡高约 25.6%，工程链路已打通。
 - KuaiRec 第七轮补强实验显示，ItemCF 蒸馏 Two-Tower 是目前最有效的大矩阵神经召回补强方向，`NDCG@20=0.033562` 明显高于 stage5 best pipeline `0.005245`；LightGCN、GRU 序列模型和 TextCNN 双塔第一版还没有追上蒸馏方案。
 - KuaiRec 阶段八显示，单独把蒸馏样本扩大到 2M 没有提升 TopK，`NDCG@20=0.027320` 低于 800k 蒸馏；但蒸馏双塔接 DNNRanker hard negative 后达到 `NDCG@20=0.044560`，说明 pipeline 精调比盲目扩样本更有效。
+- KuaiRec 阶段九显示，`2m_t40n120` 的蒸馏样本配比最有效，`DistillTwoTower+DNN-Rerank@100 NDCG@20=0.048158`，较阶段八提升约 `8.1%`；增加随机负样本比直接提高 ItemCF teacher 占比更有帮助。
 
 ## 下一步计划
 
 1. 当前先不立刻切换新数据集，优先使用 `docs/project_summary_report.md`、`docs/resume_project_writeup.md` 和 `docs/interview_qa.md` 完成简历与面试材料沉淀。
-2. 如继续优化 KuaiRec big 场景，默认优先精调蒸馏 pipeline：teacher 权重、soft label 形状、hard negative 配比、`candidate_k=100/200` 和 Ranker 分数融合。
+2. 如继续优化 KuaiRec big 场景，默认以阶段九 `2m_t40n120` 为起点，继续调 teacher/negative 配比和 teacher soft label，优先保持 `candidate_k=100`。
 3. 如果现有三批数据已经能支撑简历，再考虑 Tenrec 或 KuaiRand 作为第四批规模化数据集。
 
 ## 后续总体规划

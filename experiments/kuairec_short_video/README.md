@@ -201,16 +201,25 @@ python experiments/kuairec_short_video/scripts/run_all_experiments.py \
 
 详细报告见 `reports/stage8_recall_boost_report.md`。
 
-## 第九轮计划
+## 第九轮 Pipeline 精调结果
 
-下一轮不切换新数据集，也不直接扩到 5M。优先围绕阶段八最佳
-`DistillTwoTower+DNN-Rerank@200 NDCG@20=0.044560` 做 pipeline 精调：
+第九轮围绕阶段八最佳 `DistillTwoTower+DNN-Rerank@200 NDCG@20=0.044560` 做三组蒸馏样本配比实验，
+目标是判断 teacher 样本比例、随机负样本比例和 `candidate_k=100/200` 是否还能继续提升 big 场景 TopK。
 
-- `distill_pipeline_800k_t40n40`
-- `distill_pipeline_2m_t40n120`
-- `distill_pipeline_2m_t120n40`
+| 实验 | 最佳模型 | Recall@20 | NDCG@20 | AUC | 结论 |
+|---|---|---:|---:|---:|---|
+| `distill_pipeline_800k_t40n40` | `DistillTwoTower+DNN-Rerank@200` | 0.008508 | 0.039138 | 0.663471 | 未超过阶段八 |
+| `distill_pipeline_2m_t40n120` | `DistillTwoTower+DNN-Rerank@100` | 0.011560 | 0.048158 | 0.685021 | 本轮最佳 |
+| `distill_pipeline_2m_t120n40` | `DistillTwoTower+DNN-Blend@100a0.5` | 0.008474 | 0.039845 | 0.699481 | AUC 高但 TopK 不足 |
 
-详细计划见 `reports/stage9_pipeline_tuning_plan.md`。
+阶段结论：`2m_t40n120` 将当前最佳神经 pipeline 从 `NDCG@20=0.044560` 提升到
+`0.048158`，相对提升约 `8.1%`。这说明降低 teacher 占比、提高随机负样本比例比单纯增加
+teacher 样本更有效；但该结果仍低于 big ItemCF `NDCG@20=0.065921`。
+
+详细计划和报告见：
+
+- `reports/stage9_pipeline_tuning_plan.md`
+- `reports/stage9_pipeline_tuning_report.md`
 
 ## 当前状态
 
@@ -234,3 +243,4 @@ python experiments/kuairec_short_video/scripts/run_all_experiments.py \
 - [x] 完成 MLU 单卡/双卡 DDP 吞吐实验。
 - [x] 完成 KuaiRec big ItemCF 蒸馏 Two-Tower、LightGCN、序列兴趣模型和轻量文本 encoder 中等规模验证。
 - [x] 完成 KuaiRec 阶段八：2M 蒸馏放大、蒸馏 pipeline、LightGCN 调参和序列 padding 修复验证。
+- [x] 完成 KuaiRec 阶段九：蒸馏 pipeline 精调，最佳 `DistillTwoTower+DNN-Rerank@100 NDCG@20=0.048158`。

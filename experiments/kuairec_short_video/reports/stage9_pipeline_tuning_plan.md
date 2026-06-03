@@ -42,7 +42,14 @@
 
 ## 4. 建议执行命令
 
-在 srv4 容器内执行，三组建议分批跑，避免重复打分任务同时占用 Card 2。
+在 srv4 容器内执行，三组建议分批跑，避免重复打分任务同时占用 Card 2。当前已固化为脚本：
+
+```bash
+cd /root/zhl/x-algorithm
+bash experiments/kuairec_short_video/scripts/start_stage9_pipeline_tuning.sh
+```
+
+如果需要手动跑单组，可以使用下面的命令模板。
 
 ```bash
 cd /root/zhl/x-algorithm

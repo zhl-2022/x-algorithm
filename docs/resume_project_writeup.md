@@ -20,7 +20,7 @@
 - 在 MIND-small 新闻推荐中引入标题/摘要哈希文本 embedding，ContentTwoTower 在 MLU 放大实验中达到 `NDCG@10=0.374560`，高于 DNNRanker 的 `0.353507`。
 - 在 KuaiRec 短视频推荐中基于 `watch_ratio` 构造完播/接近完播标签，验证 `watch_ratio >= 0.8` 比严格完播更适合当前 TopK 推荐任务。
 - 通过 Two-Tower hard negative 优化 Ranker，使 KuaiRec small 上 `DNNRanker NDCG@20=0.240050`，TwoTower+DNN-Rerank@200 达到 `NDCG@20=0.203215`，超过单独 Two-Tower。
-- 在 KuaiRec big 上完成 hard negative、in-batch negative、ItemCF 蒸馏、LightGCN、序列兴趣模型和轻量文本 encoder 对比，并通过蒸馏召回 + Ranker pipeline 将神经 `NDCG@20` 提升到 `0.044560`。
+- 在 KuaiRec big 上完成 hard negative、in-batch negative、ItemCF 蒸馏、LightGCN、序列兴趣模型和轻量文本 encoder 对比，并通过蒸馏召回 + Ranker pipeline 精调将神经 `NDCG@20` 提升到 `0.048158`。
 - 在公司寒武纪 MLU 服务器上完成推荐模型训练适配和双卡 DDP benchmark，Two-Tower in-batch 训练单卡吞吐 `723,335 samples/s`，双卡吞吐 `908,159 samples/s`。
 
 ## 5. 面试开场讲法
@@ -38,7 +38,7 @@
 
 ## 7. 可以继续升级的方向
 
-1. 精调 ItemCF 蒸馏 Two-Tower + DNNRanker pipeline，优化 teacher 权重、hard negative 配比和 `candidate_k`。
+1. 继续基于阶段九最佳 `2m_t40n120` 精调 ItemCF 蒸馏 Two-Tower + DNNRanker pipeline，优化 teacher soft label、负样本比例和 `candidate_k=100`。
 2. 深调 LightGCN 的层数、采样策略和 BPR 训练轮数，判断图召回是否能追上 ItemCF。
 3. 修正和增强用户序列兴趣模型，加入最近观看类别、时间窗口和更强的负采样。
 4. 接入更强的轻量文本 encoder，替换当前哈希 caption embedding。
