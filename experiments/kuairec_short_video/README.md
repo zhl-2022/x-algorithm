@@ -161,6 +161,28 @@ python experiments/kuairec_short_video/scripts/run_all_experiments.py \
 阶段结论：KuaiRec `small_matrix.csv` 已经完成并取得明确收益；`big_matrix.csv` 上统计协同过滤
 仍明显强于当前神经召回，说明大规模短视频推荐还需要更强的图召回、序列建模或蒸馏方案。
 
+## 第七轮升级实验结果
+
+第七轮按“预处理缓存 + 分批启动”的方式完成四个 `big_matrix.csv` 补强方向。统一设置为
+`watch_ratio >= 0.8`、`800,000` 训练样本、`7,174` 个评估用户。
+
+| 方向 | 设备 | Recall@20 | NDCG@20 | AUC | 结论 |
+|---|---|---:|---:|---:|---|
+| ItemCF 蒸馏 Two-Tower | MLU | 0.006874 | 0.033562 | 0.604001 | 本轮最好，明显高于 stage5 big pipeline |
+| LightGCN / 图召回 | CPU | 0.002192 | 0.008166 | 0.509714 | 覆盖率高，但第一版排序质量不足 |
+| 序列兴趣模型 | MLU | 0.000490 | 0.000868 | 0.704649 | AUC 高但 TopK 弱，短期兴趣候选质量不足 |
+| 轻量文本 encoder | MLU | 0.003039 | 0.007997 | 0.554473 | 可运行，但单独文本增强收益有限 |
+
+本轮最重要结论是：ItemCF 蒸馏 Two-Tower 将 big 场景神经 TopK 从 stage5 最佳
+`NDCG@20=0.005245` 提升到 `0.033562`，方向有效；但仍低于 big ItemCF `NDCG@20=0.065921`，
+后续应优先扩大蒸馏规模，而不是继续盲目加深 MLP。
+
+详细设计和状态见：
+
+- `reports/big_matrix_improvement_plan.md`
+- `reports/upgrade_experiments_status.md`
+- `reports/upgrade_experiments_batched/*/experiment_report.md`
+
 ## 当前状态
 
 - [x] 新建 KuaiRec 实验目录。
@@ -181,3 +203,4 @@ python experiments/kuairec_short_video/scripts/run_all_experiments.py \
 - [x] 完成 `big_matrix.csv` hard negative 迁移实验。
 - [x] 完成 `big_matrix.csv` Two-Tower in-batch negative 实验。
 - [x] 完成 MLU 单卡/双卡 DDP 吞吐实验。
+- [x] 完成 KuaiRec big ItemCF 蒸馏 Two-Tower、LightGCN、序列兴趣模型和轻量文本 encoder 中等规模验证。

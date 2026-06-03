@@ -1,0 +1,2 @@
+model,scope,k,train_rows,eval_users,recall,hit_rate,precision,ndcg,coverage,auc,logloss,train_seconds,eval_seconds,device,notes
+TextCNN-TwoTower,big_matrix,20,800000,7174,0.00303947,0.15263451,0.00953443,0.00799704,0.12975391,0.55447329,0.69122784,3.2417,0.2928,mlu,用 TextCNN 编码 caption 哈希 token，替代简单均值文本池化。

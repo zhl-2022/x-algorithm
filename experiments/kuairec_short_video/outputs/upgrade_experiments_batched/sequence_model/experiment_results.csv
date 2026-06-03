@@ -1,0 +1,2 @@
+model,scope,k,train_rows,eval_users,recall,hit_rate,precision,ndcg,coverage,auc,logloss,train_seconds,eval_seconds,device,notes
+GRU-Sequence-Interest,big_matrix,20,800000,7174,0.00048987,0.02216337,0.00110817,0.00086811,0.00549963,0.70464853,0.65099634,5.5235,0.4145,mlu,用用户最近完播视频序列的 GRU 状态表示短期兴趣。

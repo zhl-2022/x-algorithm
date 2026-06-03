@@ -30,6 +30,8 @@
 | 2026-06-03 | KuaiRec big hard negative 迁移 | 已完成 | `DNNRanker NDCG@20=0.006151`，pipeline 最好 `NDCG@20=0.004991` |
 | 2026-06-03 | KuaiRec big in-batch 召回训练 | 已完成 | Two-Tower 从 `0.000937` 提升到 `0.004706`，pipeline 最好 `0.005245` |
 | 2026-06-03 | KuaiRec MLU 单卡/双卡吞吐 | 已完成 | 单卡 `723,335 samples/s`，双卡 `908,159 samples/s` |
+| 2026-06-03 | 项目阶段性总结与简历材料 | 已完成 | 总实验报告、简历写法、面试问答、KuaiRec big 补强方案 |
+| 2026-06-03 | KuaiRec big 升级实验 | 已完成 | ItemCF 蒸馏 Two-Tower、LightGCN、GRU 序列模型、TextCNN 双塔；蒸馏模型 `NDCG@20=0.033562` |
 
 ## 已完成内容
 
@@ -66,6 +68,7 @@
 31. 在 `big_matrix.csv` 上完成 hard negative 迁移实验，确认 Ranker 有提升但仍未追上 ItemCF。
 32. 在 `big_matrix.csv` 上完成 Two-Tower in-batch negative 实验，确认召回底座有改善但仍不足。
 33. 完成 MLU 单卡/双卡 DDP benchmark，验证双卡训练链路和吞吐提升。
+34. 完成 KuaiRec big 四个补强方向的中等规模验证：ItemCF 蒸馏 Two-Tower、LightGCN、GRU 序列兴趣模型和 TextCNN 双塔。
 
 ## 当前实验结果
 
@@ -175,6 +178,11 @@
 | KuaiRec stage5 big best pipeline `NDCG@20` | 0.005245 |
 | KuaiRec stage6 MLU single-card throughput | 723,335 samples/s |
 | KuaiRec stage6 MLU two-card throughput | 908,159 samples/s |
+| KuaiRec upgrade ItemCF-Distill-TwoTower `Recall@20` | 0.006874 |
+| KuaiRec upgrade ItemCF-Distill-TwoTower `NDCG@20` | 0.033562 |
+| KuaiRec upgrade LightGCN `NDCG@20` | 0.008166 |
+| KuaiRec upgrade GRU-Sequence-Interest `NDCG@20` | 0.000868 |
+| KuaiRec upgrade TextCNN-TwoTower `NDCG@20` | 0.007997 |
 
 ## 当前理解沉淀
 
@@ -207,14 +215,15 @@
 - KuaiRec `big_matrix.csv` 采样放大显示，神经模型虽然 AUC 较高，但全量 TopK 推荐很弱；这说明后续重点不是继续只优化二分类 AUC，而是改进召回 loss、负采样和候选生成质量。
 - KuaiRec 阶段三已解决 small 场景 Ranker 重排问题；`TwoTower+DNN-Rerank@200` 明显超过单独 Two-Tower。
 - KuaiRec 阶段三已经验证 hard negative 有效：Ranker 追加 141,100 条 Two-Tower 高分难负样本后，`DNNRanker NDCG@20=0.240050`，两阶段 `TwoTower+DNN-Rerank@200 NDCG@20=0.203215`，明显超过单独 Two-Tower。
-- KuaiRec 阶段四和阶段五说明，big 场景下 hard negative 和 in-batch negative 都有局部收益，但当前神经 TopK 仍没有追上 ItemCF，后续需要更强的图召回、序列建模或蒸馏方案。
+- KuaiRec 阶段四和阶段五说明，big 场景下 hard negative 和 in-batch negative 都有局部收益，但当前神经 TopK 仍没有追上 ItemCF。
 - KuaiRec 阶段六完成 MLU 双卡 DDP benchmark，双卡吞吐比单卡高约 25.6%，工程链路已打通。
+- KuaiRec 第七轮补强实验显示，ItemCF 蒸馏 Two-Tower 是目前最有效的大矩阵神经召回补强方向，`NDCG@20=0.033562` 明显高于 stage5 best pipeline `0.005245`；LightGCN、GRU 序列模型和 TextCNN 双塔第一版还没有追上蒸馏方案。
 
 ## 下一步计划
 
-1. 整理 KuaiRec 阶段报告，形成可直接写进简历的短视频推荐实验总结。
-2. 如继续优化 big 场景，优先尝试 LightGCN、序列兴趣模型或 item-to-item 蒸馏。
-3. 如继续扩展数据集，再选择 Tenrec 或 KuaiRand。
+1. 当前先不立刻切换新数据集，优先使用 `docs/project_summary_report.md`、`docs/resume_project_writeup.md` 和 `docs/interview_qa.md` 完成简历与面试材料沉淀。
+2. 如继续优化 KuaiRec big 场景，默认优先扩大 ItemCF 蒸馏 Two-Tower 的样本规模，并尝试 teacher 权重、hard negative 配比和候选评估策略。
+3. 如果现有三批数据已经能支撑简历，再考虑 Tenrec 或 KuaiRand 作为第四批规模化数据集。
 
 ## 后续总体规划
 

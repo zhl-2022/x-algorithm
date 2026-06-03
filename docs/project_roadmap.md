@@ -31,7 +31,7 @@
 | 1 | MovieLens 1M | 电影推荐 | 已完成 | 跑通推荐系统最小闭环 |
 | 2 | MIND-small | 新闻推荐 | 已完成 | 引入曝光候选、文本特征和内容推荐 |
 | 3 | KuaiRec `small_matrix` | 短视频推荐 | 已完成两轮 | 引入观看时长、完播率、类别和 caption |
-| 4 | KuaiRec `big_matrix` | 大规模短视频推荐 | 已完成采样实验 | 观察大候选池和训练规模带来的工程问题 |
+| 4 | KuaiRec `big_matrix` | 大规模短视频推荐 | 已完成多轮补强实验 | 观察大候选池、训练规模和神经召回瓶颈 |
 | 5 | Tenrec / KuaiRand | 更大规模信息流 | 待定 | 用于最终规模化证明 |
 
 ## 4. 已完成关键结论
@@ -44,6 +44,7 @@
 | KuaiRec 阶段二 | `watch_ratio >= 0.8` 和全量 `small_matrix` 训练都提升了双塔，但 Ranker 重排仍未稳定超过 Two-Tower。 |
 | KuaiRec 阶段三 | Ranker hard negative 训练生效，`TwoTower+DNN-Rerank@200 NDCG@20=0.203215`，已超过单独 Two-Tower。 |
 | KuaiRec `big_matrix` | hard negative 与 in-batch 都有局部收益，但 ItemCF 仍最强，说明需要图召回、序列建模或蒸馏。 |
+| KuaiRec 升级实验 | ItemCF 蒸馏 Two-Tower 在 big 上达到 `NDCG@20=0.033562`，明显高于 stage5 best pipeline `0.005245`。 |
 | MLU 工程 | 单卡/双卡 DDP benchmark 已跑通，双卡吞吐约比单卡高 25.6%。 |
 
 ## 5. KuaiRec 后续路线
@@ -56,7 +57,8 @@
 
 2. **提升 `big_matrix.csv` 上的神经 TopK**
    - 已尝试 hard negative 和 in-batch negative，best pipeline `NDCG@20=0.005245`，仍低于 ItemCF `0.065921`。
-   - 后续若继续深挖，应转向 LightGCN、序列兴趣模型或 item-to-item 蒸馏。
+   - 已完成 ItemCF 蒸馏 Two-Tower、LightGCN、序列模型和轻量文本 encoder 中等规模验证。
+   - 当前最有效方向是 ItemCF 蒸馏 Two-Tower，`NDCG@20=0.033562`；下一轮应优先扩大蒸馏样本和优化 teacher 权重。
 
 3. **补齐双卡 MLU 工程能力**
    - 已完成：单卡 `723,335 samples/s`，双卡 `908,159 samples/s`。
@@ -71,3 +73,17 @@
 > pipeline，使用 `Recall@K`、`NDCG@K`、`AUC`、`LogLoss` 等指标评估召回与排序效果。
 > 在寒武纪 MLU 服务器上完成推荐模型训练适配，记录 batch size、训练吞吐、显存占用和模型效果，
 > 并通过标签阈值、候选集大小、训练样本规模等消融分析优化推荐效果。
+
+## 7. 阶段性收尾产物
+
+当前不建议立刻切换第四批数据集。优先将现有三批实验沉淀为可讲清楚、可追溯、可写进简历的材料：
+
+| 文档 | 用途 |
+|---|---|
+| `docs/project_summary_report.md` | 汇总 MovieLens、MIND、KuaiRec 三批数据集的目标、模型、指标和结论 |
+| `docs/resume_project_writeup.md` | 提供简历标题、项目描述、可直接使用的简历要点和面试开场讲法 |
+| `docs/interview_qa.md` | 梳理面试中高频问题，例如 AUC 与 TopK 差异、hard negative、ItemCF 为什么强 |
+| `experiments/kuairec_short_video/reports/big_matrix_improvement_plan.md` | 设计 KuaiRec big 后续补强方案，默认优先 ItemCF 蒸馏 Two-Tower |
+| `experiments/kuairec_short_video/reports/upgrade_experiments_status.md` | 记录 KuaiRec big 四个升级实验的分批调度状态、正式指标和结论 |
+
+后续如果继续训练，建议优先扩大 KuaiRec big 的 ItemCF 蒸馏 Two-Tower；如果目标是简历完整度，则先完善总 README、架构图和面试材料。
