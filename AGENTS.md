@@ -68,6 +68,9 @@
   较阶段八最佳 `0.044560` 提升约 `8.1%`，但仍低于 big ItemCF `0.065921`。
   详细报告记录在 `experiments/kuairec_short_video/reports/stage9_pipeline_tuning_report.md`。
   后续若继续优化，优先设计 teacher soft label 和负样本比例消融。
+- KuaiRec 阶段十和阶段十一已完成：修正蒸馏负样本采样并加入 teacher soft label 后，
+  `soft_p30_t15_sqrt` 达到 `DistillTwoTower+DNN-Blend@100a0.5 NDCG@20=0.055883`，
+  换 `seed=2027` 复跑为 `0.052947`。当前 KuaiRec 模型实验收尾，不再继续加新模型方向。
 
 ## 服务器与 MLU 训练环境
 
@@ -166,5 +169,6 @@ source /torch/venv3/pytorch/bin/activate
 7. KuaiRec 阶段七：ItemCF 蒸馏 Two-Tower、LightGCN、序列兴趣模型和轻量文本 encoder 中等规模验证。
 8. KuaiRec 阶段八：2M 蒸馏放大、蒸馏 pipeline、LightGCN 调参和序列 padding 修复验证。
 9. KuaiRec 阶段九：已完成蒸馏召回 + Ranker pipeline 精调，当前最佳 `NDCG@20=0.048158`。
-10. 如需要继续扩展，再考虑 Tenrec 或 KuaiRand。
-11. 整理最终项目 README、实验报告、架构图、简历描述和面试问答。
+10. KuaiRec 阶段十和阶段十一：已完成 soft label 蒸馏精调与最终复跑，当前最佳 `NDCG@20=0.055883`。
+11. 如需要继续扩展，再考虑 Tenrec 或 KuaiRand。
+12. 整理最终项目 README、实验报告、架构图、简历描述和面试问答。

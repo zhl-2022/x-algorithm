@@ -203,6 +203,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--itemcf-neighbors", type=int, default=100)
     parser.add_argument("--teacher-items-per-user", type=int, default=40)
     parser.add_argument("--negative-items-per-user", type=int, default=40)
+    parser.add_argument("--distill-positive-fraction", type=float, default=None)
+    parser.add_argument("--distill-teacher-fraction", type=float, default=None)
+    parser.add_argument("--teacher-label-min", type=float, default=0.5)
+    parser.add_argument("--teacher-label-max", type=float, default=1.0)
+    parser.add_argument("--teacher-score-transform", choices=["linear", "sqrt", "log"], default="linear")
     parser.add_argument("--ranker-train-rows", type=int, default=800_000)
     parser.add_argument("--ranker-hidden-dims", default="256,128,64")
     parser.add_argument("--ranker-hard-negatives-per-user", type=int, default=80)
@@ -226,6 +231,40 @@ def parse_int_list(value: str) -> tuple[int, ...]:
 
 def parse_float_list(value: str) -> tuple[float, ...]:
     return tuple(float(part.strip()) for part in value.split(",") if part.strip())
+
+
+def teacher_label_from_score(score: float, max_score: float, args: argparse.Namespace) -> float:
+    if max_score <= 0:
+        normalized = 1.0
+    else:
+        normalized = max(0.0, min(score / max_score, 1.0))
+    if args.teacher_score_transform == "sqrt":
+        normalized = math.sqrt(normalized)
+    elif args.teacher_score_transform == "log":
+        normalized = math.log1p(9.0 * normalized) / math.log(10.0)
+    label_min = min(args.teacher_label_min, args.teacher_label_max)
+    label_max = max(args.teacher_label_min, args.teacher_label_max)
+    return label_min + (label_max - label_min) * normalized
+
+
+def distill_sampling_targets(args: argparse.Namespace) -> tuple[bool, int, int]:
+    explicit_fraction_mode = (
+        args.distill_positive_fraction is not None
+        or args.distill_teacher_fraction is not None
+    )
+    if not explicit_fraction_mode:
+        return False, max(1, args.train_rows // 3), max(0, args.train_rows * 2 // 3 - max(1, args.train_rows // 3))
+    if args.distill_positive_fraction is None or args.distill_teacher_fraction is None:
+        raise ValueError("Both --distill-positive-fraction and --distill-teacher-fraction are required together.")
+    if args.distill_positive_fraction < 0 or args.distill_teacher_fraction < 0:
+        raise ValueError("Distill fractions must be non-negative.")
+    if args.distill_positive_fraction + args.distill_teacher_fraction >= 1.0:
+        raise ValueError("Distill positive + teacher fractions must be less than 1.0 so negatives remain available.")
+    positive_target = int(round(args.train_rows * args.distill_positive_fraction))
+    teacher_target = int(round(args.train_rows * args.distill_teacher_fraction))
+    if positive_target <= 0 or teacher_target <= 0:
+        raise ValueError("Distill positive and teacher targets must both be positive.")
+    return True, positive_target, teacher_target
 
 
 def load_or_build_prepared_data(args: argparse.Namespace) -> PreparedData:
@@ -293,6 +332,7 @@ def build_distill_features(data: PreparedData, args: argparse.Namespace) -> Feat
     items: list[int] = []
     labels: list[float] = []
     target = args.train_rows
+    fraction_mode, positive_target, teacher_target = distill_sampling_targets(args)
 
     positive_pairs = [
         (user, item)
@@ -300,7 +340,7 @@ def build_distill_features(data: PreparedData, args: argparse.Namespace) -> Feat
         for item in history[-args.itemcf_history :]
     ]
     rng.shuffle(positive_pairs)
-    for user, item in positive_pairs[: max(1, target // 3)]:
+    for user, item in positive_pairs[:positive_target]:
         users.append(user)
         items.append(item)
         labels.append(1.0)
@@ -322,27 +362,42 @@ def build_distill_features(data: PreparedData, args: argparse.Namespace) -> Feat
         for item, score in ranked:
             users.append(user)
             items.append(item)
-            labels.append(0.5 + 0.5 * min(score / max_score, 1.0))
-            if len(labels) >= target * 2 // 3:
+            labels.append(teacher_label_from_score(score, max_score, args))
+            if len(labels) >= positive_count + teacher_target:
                 break
-        if len(labels) >= target * 2 // 3:
+        if len(labels) >= positive_count + teacher_target:
             break
     teacher_count = len(labels) - positive_count
 
     all_items = len(data.index_to_item)
-    max_attempts = max(target * 100, 10_000)
-    attempts = 0
-    while len(labels) < target and attempts < max_attempts:
-        attempts += 1
-        user = rng.choice(shuffled_users)
-        seen = data.train_seen_by_user.get(user, set())
-        item = rng.randrange(all_items)
-        if item in seen:
-            continue
-        users.append(user)
-        items.append(item)
-        labels.append(0.0)
+    negative_counts: Counter[int] = Counter()
     while len(labels) < target:
+        appended_this_cycle = 0
+        cycle_users = shuffled_users[:]
+        rng.shuffle(cycle_users)
+        for user in cycle_users:
+            if fraction_mode and negative_counts[user] >= args.negative_items_per_user:
+                continue
+            seen = data.train_seen_by_user.get(user, set())
+            for _ in range(20):
+                item = rng.randrange(all_items)
+                if item in seen:
+                    continue
+                users.append(user)
+                items.append(item)
+                labels.append(0.0)
+                negative_counts[user] += 1
+                appended_this_cycle += 1
+                break
+            if len(labels) >= target:
+                break
+        if appended_this_cycle:
+            continue
+        if fraction_mode:
+            raise ValueError(
+                "Unable to build enough capped negative samples. "
+                "Increase --negative-items-per-user or reduce the negative fraction."
+            )
         user = rng.choice(shuffled_users)
         item = rng.randrange(all_items)
         users.append(user)
@@ -352,7 +407,9 @@ def build_distill_features(data: PreparedData, args: argparse.Namespace) -> Feat
     print(
         f"Built distill features: positive={positive_count:,} "
         f"teacher={teacher_count:,} negative={target - positive_count - teacher_count:,} "
-        f"total={target:,}",
+        f"total={target:,} fraction_mode={fraction_mode} "
+        f"teacher_label=[{args.teacher_label_min:.3f},{args.teacher_label_max:.3f}] "
+        f"teacher_transform={args.teacher_score_transform}",
         flush=True,
     )
     return build_pair_features(data, users[:target], items[:target], labels[:target])

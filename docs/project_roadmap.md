@@ -47,6 +47,7 @@
 | KuaiRec 升级实验 | ItemCF 蒸馏 Two-Tower 在 big 上达到 `NDCG@20=0.033562`，明显高于 stage5 best pipeline `0.005245`。 |
 | KuaiRec 阶段八 | 蒸馏双塔接 DNNRanker 后达到 `NDCG@20=0.044560`，优于单独蒸馏双塔，pipeline 精调有效。 |
 | KuaiRec 阶段九 | `2m_t40n120` 达到 `NDCG@20=0.048158`，说明降低 teacher 占比、增加随机负样本比单纯加 teacher 更有效。 |
+| KuaiRec 最终收尾 | soft label 蒸馏精调达到 `NDCG@20=0.055883`，换 seed 复跑 `0.052947`，KuaiRec 模型实验收尾。 |
 | MLU 工程 | 单卡/双卡 DDP benchmark 已跑通，双卡吞吐约比单卡高 25.6%。 |
 
 ## 5. KuaiRec 后续路线
@@ -62,6 +63,7 @@
    - 已完成 ItemCF 蒸馏 Two-Tower、LightGCN、序列模型和轻量文本 encoder 中等规模验证。
    - 阶段八显示，2M 单独蒸馏 `NDCG@20=0.027320` 低于 800k 蒸馏，但蒸馏 pipeline 达到 `0.044560`。
    - 阶段九显示，`2m_t40n120` pipeline 达到 `0.048158`，后续应围绕负样本比例和 teacher soft label 继续精调。
+   - 阶段十和阶段十一已完成最终精调，best pipeline 达到 `0.055883`，复跑达到 `0.052947`。当前 KuaiRec 模型实验不再继续加轮次。
 
 3. **补齐双卡 MLU 工程能力**
    - 已完成：单卡 `723,335 samples/s`，双卡 `908,159 samples/s`。
@@ -91,5 +93,7 @@
 | `experiments/kuairec_short_video/reports/stage8_recall_boost_report.md` | 记录 2M 蒸馏、蒸馏 pipeline、LightGCN 调参和序列修正结果 |
 | `experiments/kuairec_short_video/reports/stage9_pipeline_tuning_plan.md` | 记录下一轮蒸馏 pipeline 精调的三组实验和成功标准 |
 | `experiments/kuairec_short_video/reports/stage9_pipeline_tuning_report.md` | 记录阶段九三组 pipeline 精调指标和结论 |
+| `experiments/kuairec_short_video/reports/stage10_soft_label_tuning_report.md` | 记录 soft label 蒸馏精调的四组最终消融 |
+| `experiments/kuairec_short_video/reports/stage11_final_kuairec_report.md` | 记录最终复跑和 KuaiRec 收尾结论 |
 
-后续如果继续训练，建议以阶段九 `2m_t40n120` 为起点，优先设计 teacher soft label 和负样本比例消融；如果目标是简历完整度，则先完善总 README、架构图和面试材料。
+KuaiRec 数据集当前已完成模型实验收尾。后续如果继续训练，建议切换到 Tenrec 或 KuaiRand；如果目标是简历完整度，则先完善总 README、架构图和面试材料。

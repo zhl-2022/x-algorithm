@@ -34,6 +34,7 @@
 | 2026-06-03 | KuaiRec big 升级实验 | 已完成 | ItemCF 蒸馏 Two-Tower、LightGCN、GRU 序列模型、TextCNN 双塔；蒸馏模型 `NDCG@20=0.033562` |
 | 2026-06-03 | KuaiRec 阶段八召回补强 | 已完成 | 2M 蒸馏、蒸馏 pipeline、LightGCN 调参、序列 padding 修复；最佳 pipeline `NDCG@20=0.044560` |
 | 2026-06-03 | KuaiRec 阶段九 pipeline 精调 | 已完成 | `2m_t40n120` 最佳，`DistillTwoTower+DNN-Rerank@100 NDCG@20=0.048158` |
+| 2026-06-03 | KuaiRec 最终收尾实验 | 已完成 | soft label 蒸馏精调最佳 `NDCG@20=0.055883`，换 seed 复跑 `0.052947` |
 
 ## 已完成内容
 
@@ -73,6 +74,7 @@
 34. 完成 KuaiRec big 四个补强方向的中等规模验证：ItemCF 蒸馏 Two-Tower、LightGCN、GRU 序列兴趣模型和 TextCNN 双塔。
 35. 完成 KuaiRec 阶段八召回补强：2M 蒸馏、蒸馏双塔 + DNNRanker pipeline、LightGCN 层数/轮数调参和序列 padding 修复验证。
 36. 完成 KuaiRec 阶段九 pipeline 精调：对比 `800k_t40n40`、`2m_t40n120` 和 `2m_t120n40`，验证随机负样本比例提升对 big 神经 TopK 有收益。
+37. 完成 KuaiRec 阶段十和阶段十一最终实验：修正蒸馏负样本采样、加入 teacher soft label，完成四组比例消融和换 seed 复跑。
 
 ## 当前实验结果
 
@@ -194,6 +196,11 @@
 | KuaiRec stage9 `800k_t40n40` best pipeline `NDCG@20` | 0.039138 |
 | KuaiRec stage9 `2m_t40n120` best pipeline `NDCG@20` | 0.048158 |
 | KuaiRec stage9 `2m_t120n40` best pipeline `NDCG@20` | 0.039845 |
+| KuaiRec stage10 `soft_replay_p29_t14_linear` best pipeline `NDCG@20` | 0.051595 |
+| KuaiRec stage10 `soft_p30_t10_linear` best pipeline `NDCG@20` | 0.052608 |
+| KuaiRec stage10 `soft_p30_t15_linear` best pipeline `NDCG@20` | 0.053271 |
+| KuaiRec stage10 `soft_p30_t15_sqrt` best pipeline `NDCG@20` | 0.055883 |
+| KuaiRec stage11 final replay best pipeline `NDCG@20` | 0.052947 |
 
 ## 当前理解沉淀
 
@@ -231,12 +238,13 @@
 - KuaiRec 第七轮补强实验显示，ItemCF 蒸馏 Two-Tower 是目前最有效的大矩阵神经召回补强方向，`NDCG@20=0.033562` 明显高于 stage5 best pipeline `0.005245`；LightGCN、GRU 序列模型和 TextCNN 双塔第一版还没有追上蒸馏方案。
 - KuaiRec 阶段八显示，单独把蒸馏样本扩大到 2M 没有提升 TopK，`NDCG@20=0.027320` 低于 800k 蒸馏；但蒸馏双塔接 DNNRanker hard negative 后达到 `NDCG@20=0.044560`，说明 pipeline 精调比盲目扩样本更有效。
 - KuaiRec 阶段九显示，`2m_t40n120` 的蒸馏样本配比最有效，`DistillTwoTower+DNN-Rerank@100 NDCG@20=0.048158`，较阶段八提升约 `8.1%`；增加随机负样本比直接提高 ItemCF teacher 占比更有帮助。
+- KuaiRec 阶段十和阶段十一显示，修正负样本采样并加入 `sqrt` teacher soft label 后，最佳神经 pipeline 达到 `NDCG@20=0.055883`，换 seed 复跑仍有 `0.052947`，说明提升具有一定稳定性。
 
 ## 下一步计划
 
-1. 当前先不立刻切换新数据集，优先使用 `docs/project_summary_report.md`、`docs/resume_project_writeup.md` 和 `docs/interview_qa.md` 完成简历与面试材料沉淀。
-2. 如继续优化 KuaiRec big 场景，默认以阶段九 `2m_t40n120` 为起点，继续调 teacher/negative 配比和 teacher soft label，优先保持 `candidate_k=100`。
-3. 如果现有三批数据已经能支撑简历，再考虑 Tenrec 或 KuaiRand 作为第四批规模化数据集。
+1. KuaiRec 模型实验已收尾，优先更新最终简历材料、总 README 和面试问答。
+2. 如果继续扩展，下一步不再深挖 KuaiRec，而是考虑 Tenrec 或 KuaiRand 作为第四批规模化数据集。
+3. 如果只服务简历，当前三批数据和 MLU 训练结果已经足够支撑完整项目表述。
 
 ## 后续总体规划
 

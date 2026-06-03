@@ -97,7 +97,7 @@ MLU 实验体现的是训练环境适配和工程验证能力：
 
 阶段八继续验证后，单独 2M 蒸馏 Two-Tower 的 `NDCG@20=0.027320`，反而低于 800k 蒸馏，说明不是样本越多越好；teacher 样本质量、软标签和正负样本比例更关键。
 
-但把蒸馏 Two-Tower 接回 DNNRanker 后，阶段八 `DistillTwoTower+DNN-Rerank@200 NDCG@20=0.044560`，阶段九继续把最佳结果提升到 `DistillTwoTower+DNN-Rerank@100 NDCG@20=0.048158`。结论是：蒸馏方向有效，但不是 teacher 样本越多越好；当前更有效的是降低 teacher 占比、增加随机负样本，并让 Ranker 在更干净的 `candidate_k=100` 候选集上重排。
+但把蒸馏 Two-Tower 接回 DNNRanker 后，阶段八 `DistillTwoTower+DNN-Rerank@200 NDCG@20=0.044560`，阶段九继续把最佳结果提升到 `DistillTwoTower+DNN-Rerank@100 NDCG@20=0.048158`。最后修正负样本采样并加入 `sqrt` teacher soft label 后，阶段十达到 `NDCG@20=0.055883`，换 seed 复跑仍有 `0.052947`。结论是：蒸馏方向有效，但不是 teacher 样本越多越好；当前更有效的是控制 teacher/negative 配比，并让 Ranker 在更干净的 `candidate_k=100` 候选集上融合重排。
 
 ## 11. 阶段九为什么 `2m_t40n120` 最好？
 
@@ -110,3 +110,17 @@ MLU 实验体现的是训练环境适配和工程验证能力：
 | `2m_t120n40` | 0.039845 | teacher 占比过高，可能放大了 ItemCF 噪声 |
 
 所以面试里可以这样解释：ItemCF 是强 teacher，但不能把它的 TopK 简单全部当成强正样本。适量 teacher 能提供协同过滤信号，更多随机负样本能帮助 Two-Tower 学会“哪些内容不该推”，二者平衡后 TopK 才提升。
+
+## 12. 最终为什么选择 `soft_p30_t15_sqrt` 作为 KuaiRec 收尾结果？
+
+阶段十修正了一个重要问题：之前 `negative_items_per_user` 只被解析，没有真正限制随机负样本采样。修正后重新做 soft label 消融，结果如下：
+
+| 配置 | NDCG@20 | 解释 |
+|---|---:|---|
+| `soft_replay_p29_t14_linear` | 0.051595 | 复刻阶段九附近配置，修正采样后已超过阶段九 |
+| `soft_p30_t10_linear` | 0.052608 | 降低 teacher 比例，提高负样本比例，有收益 |
+| `soft_p30_t15_linear` | 0.053271 | teacher 比例提高到 15%，继续提升 |
+| `soft_p30_t15_sqrt` | 0.055883 | 使用 `sqrt` soft label 强化高分 teacher，当前最优 |
+| Stage11 replay | 0.052947 | 换 seed 后仍超过阶段九，说明结果不是单次偶然 |
+
+可以这样回答：最终方案不是换更复杂模型，而是把训练信号做干净。ItemCF teacher 提供协同过滤排序信号，随机负样本校准召回边界，`sqrt` soft label 放大高分 teacher 的区分度，最后再由 Ranker 做融合重排。

@@ -221,6 +221,29 @@ teacher 样本更有效；但该结果仍低于 big ItemCF `NDCG@20=0.065921`。
 - `reports/stage9_pipeline_tuning_plan.md`
 - `reports/stage9_pipeline_tuning_report.md`
 
+## 第十到第十一轮最终收尾结果
+
+第十轮修正蒸馏采样逻辑，让 `negative_items_per_user` 真正参与随机负样本采样，并加入 teacher
+soft label 变换。随后围绕阶段九最佳继续做四组比例消融，第十一轮用最佳配置换 `seed=2027` 复跑。
+
+| 阶段 | 实验 | 最佳模型 | Recall@20 | NDCG@20 | AUC | 结论 |
+|---|---|---|---:|---:|---:|---|
+| Stage10 | `soft_replay_p29_t14_linear` | `Blend@100a0.75` | 0.012197 | 0.051595 | 0.694056 | 超过阶段九 |
+| Stage10 | `soft_p30_t10_linear` | `Blend@100a0.5` | 0.012395 | 0.052608 | 0.683012 | 达到强成功线 |
+| Stage10 | `soft_p30_t15_linear` | `Rerank@100` | 0.013347 | 0.053271 | 0.692285 | 继续提升 |
+| Stage10 | `soft_p30_t15_sqrt` | `Blend@100a0.5` | 0.014698 | 0.055883 | 0.676812 | 当前最佳神经 pipeline |
+| Stage11 | `final_replay_soft_p30_t15_sqrt_seed2027` | `Blend@100a0.5` | 0.013915 | 0.052947 | 0.669883 | 换 seed 后仍超过阶段九 |
+
+最终结论：KuaiRec big 神经 pipeline 从 Stage5 的 `NDCG@20=0.005245`，经过 ItemCF 蒸馏、hard negative
+排序和 soft label 精调，提升到 Stage10 最佳 `NDCG@20=0.055883`；换 seed 复跑仍有
+`NDCG@20=0.052947`。这已经完成本数据集的模型实验收尾，但仍低于 big ItemCF `NDCG@20=0.065921`，
+说明统计协同过滤仍是当前 TopK 上限参考。
+
+详细报告见：
+
+- `reports/stage10_soft_label_tuning_report.md`
+- `reports/stage11_final_kuairec_report.md`
+
 ## 当前状态
 
 - [x] 新建 KuaiRec 实验目录。
@@ -244,3 +267,4 @@ teacher 样本更有效；但该结果仍低于 big ItemCF `NDCG@20=0.065921`。
 - [x] 完成 KuaiRec big ItemCF 蒸馏 Two-Tower、LightGCN、序列兴趣模型和轻量文本 encoder 中等规模验证。
 - [x] 完成 KuaiRec 阶段八：2M 蒸馏放大、蒸馏 pipeline、LightGCN 调参和序列 padding 修复验证。
 - [x] 完成 KuaiRec 阶段九：蒸馏 pipeline 精调，最佳 `DistillTwoTower+DNN-Rerank@100 NDCG@20=0.048158`。
+- [x] 完成 KuaiRec 阶段十和阶段十一：soft label 蒸馏精调与最终复跑，最佳 `NDCG@20=0.055883`。
