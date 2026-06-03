@@ -41,6 +41,7 @@
 | KuaiRec big | ItemCF-Distill-TwoTower | `NDCG@20=0.033562` | 蒸馏 ItemCF 协同信号后明显提升神经 TopK |
 | KuaiRec big | LightGCN | `NDCG@20=0.008166` | 第一版图召回覆盖率高，但排序质量不足 |
 | KuaiRec big | TextCNN-TwoTower | `NDCG@20=0.007997` | 轻量文本 encoder 可运行，但单独文本增强收益有限 |
+| KuaiRec big | Stage 8 DistillTwoTower+DNN-Rerank@200 | `NDCG@20=0.044560` | 蒸馏召回接 Ranker 后成为当前最佳神经 pipeline |
 | KuaiRec MLU | 单卡 benchmark | `723,335 samples/s` | MLU 单卡训练链路跑通 |
 | KuaiRec MLU | 双卡 DDP benchmark | `908,159 samples/s` | 双卡吞吐提升约 25.6% |
 
@@ -51,18 +52,18 @@
 3. MovieLens 上，两阶段 pipeline 说明“召回候选 + Ranker 重排”能带来稳定收益。
 4. MIND 上，内容特征有效，标题/摘要哈希 embedding 已经能提升新闻推荐效果。
 5. KuaiRec small 上，hard negative 是 Ranker 的关键优化点，因为它让 Ranker 学会压低“两塔高分但真实不喜欢”的候选。
-6. KuaiRec big 上，ItemCF 明显强于早期神经召回；第七轮验证 ItemCF 蒸馏 Two-Tower 能把神经 TopK 从 `0.005245` 提升到 `0.033562`，说明蒸馏强协同信号是有效补强方向。
+6. KuaiRec big 上，ItemCF 明显强于早期神经召回；第七轮验证 ItemCF 蒸馏 Two-Tower 能把神经 TopK 从 `0.005245` 提升到 `0.033562`，阶段八进一步通过蒸馏召回 + Ranker 把 pipeline 提升到 `0.044560`。
 7. MLU 工程链路已经打通，当前项目具备单卡训练、双卡 DDP benchmark 和吞吐记录能力。
 
 ## 5. 当前限制
 
 | 限制 | 影响 | 后续方向 |
 |---|---|---|
-| KuaiRec big 神经召回仍弱于 ItemCF | Two-Tower 候选质量不足，蒸馏后仍未完全学到 ItemCF 排序信号 | 扩大 ItemCF 蒸馏样本，优化 teacher 权重和 hard negative 配比 |
+| KuaiRec big 神经召回仍弱于 ItemCF | Two-Tower 候选质量不足，蒸馏后仍未完全学到 ItemCF 排序信号 | 精调蒸馏 pipeline 的 teacher 权重、hard negative 配比和候选融合 |
 | 文本特征仍是哈希 embedding | 只能利用弱文本信号，缺少语义理解 | 后续可接入轻量文本 encoder |
 | DDP 只做吞吐 benchmark | 还没有做完整多卡 TopK 评测 | 后续如需工程深化，再做分布式评测 |
 | 当前主要是离线评测 | 未包含在线 A/B、延迟和服务化 | 简历中应明确这是离线训练评测闭环 |
 
 ## 6. 阶段性结论
 
-当前三批数据集已经足够支撑一个完整的简历项目：从入门数据集到内容推荐，再到短视频大规模推荐和 MLU 工程验证。下一步优先级不是马上切换 Tenrec，而是把现有实验写透；如果继续做模型实验，应优先扩大 KuaiRec big 的 ItemCF 蒸馏 Two-Tower。
+当前三批数据集已经足够支撑一个完整的简历项目：从入门数据集到内容推荐，再到短视频大规模推荐和 MLU 工程验证。下一步优先级不是马上切换 Tenrec，而是把现有实验写透；如果继续做模型实验，应优先精调 KuaiRec big 的蒸馏召回 + Ranker pipeline。

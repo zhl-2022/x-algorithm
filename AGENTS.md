@@ -59,6 +59,13 @@
   TextCNN 双塔均已按“预处理缓存 + 分批启动”方式跑通。当前最有效的是 ItemCF 蒸馏 Two-Tower，
   `NDCG@20=0.033562`，高于 stage5 best pipeline `0.005245`，但仍低于 big ItemCF `0.065921`。
   后续若继续训练，优先扩大蒸馏样本和优化 teacher 权重。
+- KuaiRec 阶段八已完成：2M ItemCF 蒸馏、蒸馏双塔 + DNNRanker pipeline、LightGCN 层数/轮数
+  调参、GRU 序列 padding 修复验证。单独 2M 蒸馏 `NDCG@20=0.027320`，低于 800k 蒸馏；
+  当前最佳神经 pipeline 是 `DistillTwoTower+DNN-Rerank@200 NDCG@20=0.044560`。
+  下一步不建议盲目扩到 5M，优先精调 teacher 权重、hard negative 配比和候选融合。
+- KuaiRec 阶段九计划已记录在
+  `experiments/kuairec_short_video/reports/stage9_pipeline_tuning_plan.md`。默认三组实验是
+  `distill_pipeline_800k_t40n40`、`distill_pipeline_2m_t40n120` 和 `distill_pipeline_2m_t120n40`。
 
 ## 服务器与 MLU 训练环境
 
@@ -155,6 +162,7 @@ source /torch/venv3/pytorch/bin/activate
 5. KuaiRec 阶段三：Ranker hard negative 优化，使 `TwoTower+DNN-Rerank` 的 `NDCG@20` 超过单独 Two-Tower。
 6. KuaiRec 阶段四到六：迁移 hard negative 到 `big_matrix.csv`、验证 in-batch negative、完成 MLU 双卡 benchmark。
 7. KuaiRec 阶段七：ItemCF 蒸馏 Two-Tower、LightGCN、序列兴趣模型和轻量文本 encoder 中等规模验证。
-8. 如需要继续优化 KuaiRec big 场景，优先扩大 ItemCF 蒸馏 Two-Tower，再考虑图召回和序列模型深调。
-9. 如需要继续扩展，再考虑 Tenrec 或 KuaiRand。
-10. 整理最终项目 README、实验报告、架构图、简历描述和面试问答。
+8. KuaiRec 阶段八：2M 蒸馏放大、蒸馏 pipeline、LightGCN 调参和序列 padding 修复验证。
+9. KuaiRec 阶段九：精调蒸馏召回 + Ranker pipeline，围绕 teacher/negative 配比和 `candidate_k=100/200` 做三组实验。
+10. 如需要继续扩展，再考虑 Tenrec 或 KuaiRand。
+11. 整理最终项目 README、实验报告、架构图、简历描述和面试问答。

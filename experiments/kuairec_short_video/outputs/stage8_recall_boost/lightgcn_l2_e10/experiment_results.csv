@@ -1,0 +1,2 @@
+model,scope,k,train_rows,eval_users,recall,hit_rate,precision,ndcg,coverage,auc,logloss,train_seconds,eval_seconds,device,notes
+LightGCN,big_matrix,20,800000,7174,0.00241232,0.16197379,0.01108865,0.01026061,0.20982476,0.60991038,0.69244146,7.9514,0.5153,cpu,基于用户-视频正反馈二部图训练 LightGCN 图召回。

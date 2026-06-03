@@ -16,7 +16,7 @@ import random
 import sys
 import time
 from collections import Counter, defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 import torch
@@ -29,6 +29,7 @@ from run_all_experiments import (
     DEFAULT_REPORTS_DIR,
     ExperimentMetric,
     FeatureTensors,
+    KuaiRecRanker,
     KuaiRecTwoTower,
     PreparedData,
     RawInteraction,
@@ -36,10 +37,14 @@ from run_all_experiments import (
     build_feature_tensors,
     build_prepared_data,
     choose_device,
+    concat_feature_tensors,
     dense_for_pairs,
     evaluate_topk,
+    evaluate_pipeline,
     move_batch,
     score_two_tower_matrix,
+    score_ranker_matrix,
+    select_hard_negative_rows,
     train_neural_model,
     write_metric_csv,
     write_single_report,
@@ -109,11 +114,12 @@ class SequenceInterestModel(nn.Module):
         self.item_projection = nn.Linear(embedding_dim, hidden_dim)
 
     def encode_history(self, histories: torch.Tensor, lengths: torch.Tensor) -> torch.Tensor:
-        embedded = self.item_embedding(histories + 1)
-        output, hidden = self.gru(embedded)
-        fallback = output.sum(dim=1) / lengths.clamp_min(1).unsqueeze(1)
-        state = hidden[-1]
-        return torch.where((lengths > 0).unsqueeze(1), state, fallback)
+        embedded = self.item_embedding(histories)
+        output, _ = self.gru(embedded)
+        last_positions = (lengths.clamp_min(1).long() - 1).view(-1, 1, 1)
+        last_positions = last_positions.expand(-1, 1, output.shape[2])
+        state = output.gather(1, last_positions).squeeze(1)
+        return torch.where((lengths > 0).unsqueeze(1), state, torch.zeros_like(state))
 
     def forward(self, batch: SequenceFeatureTensors) -> torch.Tensor:
         state = F.normalize(self.encode_history(batch.histories, batch.history_lengths), dim=1)
@@ -168,7 +174,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--experiment",
-        choices=["distill_twotower", "lightgcn", "sequence_model", "text_encoder"],
+        choices=["distill_twotower", "distill_pipeline", "lightgcn", "sequence_model", "text_encoder"],
         required=True,
     )
     parser.add_argument("--raw-dir", type=Path, default=DEFAULT_RAW_DIR)
@@ -197,13 +203,29 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--itemcf-neighbors", type=int, default=100)
     parser.add_argument("--teacher-items-per-user", type=int, default=40)
     parser.add_argument("--negative-items-per-user", type=int, default=40)
+    parser.add_argument("--ranker-train-rows", type=int, default=800_000)
+    parser.add_argument("--ranker-hidden-dims", default="256,128,64")
+    parser.add_argument("--ranker-hard-negatives-per-user", type=int, default=80)
+    parser.add_argument("--ranker-hard-negative-pool-rows", type=int, default=3_000_000)
+    parser.add_argument("--ranker-positive-weight", type=float, default=4.0)
+    parser.add_argument("--candidate-ks", type=parse_int_list, default=(100, 200, 500))
+    parser.add_argument("--rerank-blend-alphas", type=parse_float_list, default=(0.0, 0.25, 0.5, 0.75, 1.0))
     parser.add_argument("--sequence-length", type=int, default=20)
     parser.add_argument("--lightgcn-layers", type=int, default=2)
     parser.add_argument("--device", default="auto")
     parser.add_argument("--seed", type=int, default=2026)
+    parser.add_argument("--run-name", default=None, help="Optional output subdirectory name. Defaults to --experiment.")
     parser.add_argument("--outputs-dir", type=Path, default=DEFAULT_OUTPUTS_DIR / "upgrade_experiments")
     parser.add_argument("--reports-dir", type=Path, default=DEFAULT_REPORTS_DIR / "upgrade_experiments")
     return parser.parse_args(argv)
+
+
+def parse_int_list(value: str) -> tuple[int, ...]:
+    return tuple(int(part.strip()) for part in value.split(",") if part.strip())
+
+
+def parse_float_list(value: str) -> tuple[float, ...]:
+    return tuple(float(part.strip()) for part in value.split(",") if part.strip())
 
 
 def load_or_build_prepared_data(args: argparse.Namespace) -> PreparedData:
@@ -348,7 +370,7 @@ def build_sequence_features(data: PreparedData, rows: list[RawInteraction], max_
     for row in rows:
         user = data.user_to_index[row.user_id]
         item = data.item_to_index[row.video_id]
-        history = [hist_item for hist_item in data.train_positive_by_user.get(user, []) if hist_item != item]
+        history = [hist_item + 1 for hist_item in data.train_positive_by_user.get(user, []) if hist_item != item]
         history = history[-args.sequence_length :]
         padded = history + [0] * (args.sequence_length - len(history))
         users.append(user)
@@ -408,7 +430,7 @@ def build_eval_histories(data: PreparedData, max_len: int) -> tuple[torch.Tensor
     histories: list[list[int]] = []
     lengths: list[int] = []
     for user in data.eval_user_indices:
-        history = data.train_positive_by_user.get(user, [])[-max_len:]
+        history = [item + 1 for item in data.train_positive_by_user.get(user, [])[-max_len:]]
         histories.append(history + [0] * (max_len - len(history)))
         lengths.append(len(history))
     return torch.tensor(histories, dtype=torch.long), torch.tensor(lengths, dtype=torch.float32)
@@ -508,15 +530,35 @@ def write_upgrade_outputs(
     title: str,
     description: str,
 ) -> None:
-    output_dir = args.outputs_dir / args.experiment
-    report_dir = args.reports_dir / args.experiment
+    run_name = args.run_name or args.experiment
+    output_dir = args.outputs_dir / run_name
+    report_dir = args.reports_dir / run_name
     output_dir.mkdir(parents=True, exist_ok=True)
     report_dir.mkdir(parents=True, exist_ok=True)
     write_metric_csv(output_dir / "experiment_results.csv", [metric])
     write_single_report(report_dir / "experiment_report.md", title, [metric], description)
 
 
-def run_distill(data: PreparedData, args: argparse.Namespace, device: torch.device) -> ExperimentMetric:
+def write_upgrade_multi_outputs(
+    metrics: list[ExperimentMetric],
+    args: argparse.Namespace,
+    title: str,
+    description: str,
+) -> None:
+    run_name = args.run_name or args.experiment
+    output_dir = args.outputs_dir / run_name
+    report_dir = args.reports_dir / run_name
+    output_dir.mkdir(parents=True, exist_ok=True)
+    report_dir.mkdir(parents=True, exist_ok=True)
+    write_metric_csv(output_dir / "experiment_results.csv", metrics)
+    write_single_report(report_dir / "experiment_report.md", title, metrics, description)
+
+
+def train_distill_twotower(
+    data: PreparedData,
+    args: argparse.Namespace,
+    device: torch.device,
+) -> tuple[KuaiRecTwoTower, FeatureTensors, float]:
     train_features = build_distill_features(data, args)
     print(f"Distill train features ready: rows={len(train_features.labels):,}", flush=True)
     model = KuaiRecTwoTower(
@@ -532,10 +574,128 @@ def run_distill(data: PreparedData, args: argparse.Namespace, device: torch.devi
         args.temperature,
     )
     model, _, train_seconds = train_neural_model(model, train_features, device, args.epochs, args.batch_size, args.lr, args.weight_decay, args.seed + 10, 1.0)
+    return model, train_features, train_seconds
+
+
+def run_distill(data: PreparedData, args: argparse.Namespace, device: torch.device) -> ExperimentMetric:
+    model, train_features, train_seconds = train_distill_twotower(data, args, device)
     started = time.perf_counter()
     scores = score_two_tower_matrix(model, data, data.eval_user_indices, device, args.score_batch_users, args.score_batch_items)
     metric = evaluate_topk(scores, data, "ItemCF-Distill-TwoTower", args.matrix.replace(".csv", ""), 20, len(train_features.labels), train_seconds, time.perf_counter() - started, str(device), "用 ItemCF TopK teacher 样本和真实行为样本蒸馏训练 Two-Tower。")
     return add_auc_logloss(metric, data.test_rows[: args.auc_rows], scores, data)
+
+
+def run_distill_pipeline(data: PreparedData, args: argparse.Namespace, device: torch.device) -> list[ExperimentMetric]:
+    distill_model, distill_features, distill_train_seconds = train_distill_twotower(data, args, device)
+    started = time.perf_counter()
+    distill_scores = score_two_tower_matrix(
+        distill_model,
+        data,
+        data.eval_user_indices,
+        device,
+        args.score_batch_users,
+        args.score_batch_items,
+    )
+    distill_eval_seconds = time.perf_counter() - started
+    metrics = [
+        add_auc_logloss(
+            evaluate_topk(
+                distill_scores,
+                data,
+                "ItemCF-Distill-TwoTower",
+                args.matrix.replace(".csv", ""),
+                20,
+                len(distill_features.labels),
+                distill_train_seconds,
+                distill_eval_seconds,
+                str(device),
+                "用 ItemCF TopK teacher 样本和真实行为样本蒸馏训练 Two-Tower。",
+            ),
+            data.test_rows[: args.auc_rows],
+            distill_scores,
+            data,
+        )
+    ]
+
+    ranker_train_features = build_feature_tensors(data, data.train_rows, args.ranker_train_rows, args.seed + 101)
+    hard_negative_rows = select_hard_negative_rows(
+        data=data,
+        two_tower_model=distill_model,
+        rows=data.train_rows,
+        max_pool_rows=args.ranker_hard_negative_pool_rows,
+        negatives_per_user=args.ranker_hard_negatives_per_user,
+        seed=args.seed + 202,
+        device=device,
+        batch_size=args.batch_size,
+    )
+    if hard_negative_rows:
+        hard_negative_features = build_feature_tensors(data, hard_negative_rows, 0, args.seed + 303)
+        ranker_train_features = concat_feature_tensors(ranker_train_features, hard_negative_features)
+        print(f"Ranker hard negative rows from distill tower: {len(hard_negative_rows):,}", flush=True)
+
+    hidden_dims = tuple(int(part.strip()) for part in args.ranker_hidden_dims.split(",") if part.strip())
+    ranker_model = KuaiRecRanker(
+        num_users=len(data.index_to_user),
+        num_items=len(data.index_to_item),
+        num_categories=int(data.item_categories.max()),
+        text_buckets=args.text_buckets,
+        embedding_dim=args.embedding_dim,
+        hidden_dims=hidden_dims,
+        dense_dim=ranker_train_features.dense.shape[1],
+        dropout=args.dropout,
+    )
+    ranker_model, _, ranker_train_seconds = train_neural_model(
+        ranker_model,
+        ranker_train_features,
+        device,
+        args.epochs,
+        args.batch_size,
+        args.lr,
+        args.weight_decay,
+        args.seed + 3,
+        args.ranker_positive_weight,
+    )
+    started = time.perf_counter()
+    ranker_scores = score_ranker_matrix(ranker_model, data, data.eval_user_indices, device, args.score_batch_users)
+    ranker_eval_seconds = time.perf_counter() - started
+    ranker_metric = evaluate_topk(
+        ranker_scores,
+        data,
+        "DNNRanker",
+        args.matrix.replace(".csv", ""),
+        20,
+        len(ranker_train_features.labels),
+        ranker_train_seconds,
+        ranker_eval_seconds,
+        str(device),
+        (
+            "融合用户、视频、类别、caption 哈希文本和统计特征的 MLP 排序模型，"
+            f"并追加 {len(hard_negative_rows):,} 条蒸馏 Two-Tower 高分难负样本训练。"
+        ),
+    )
+    metrics.append(add_auc_logloss(ranker_metric, data.test_rows[: args.auc_rows], ranker_scores, data))
+
+    for candidate_k in args.candidate_ks:
+        for blend_alpha in args.rerank_blend_alphas:
+            pipeline_metric, pipeline_scores = evaluate_pipeline(
+                distill_scores,
+                ranker_scores,
+                data,
+                candidate_k,
+                blend_alpha,
+                20,
+                len(distill_features.labels),
+                distill_train_seconds + ranker_train_seconds,
+                distill_eval_seconds + ranker_eval_seconds,
+                str(device),
+                args.matrix.replace(".csv", ""),
+            )
+            pipeline_metric = replace(
+                pipeline_metric,
+                model=pipeline_metric.model.replace("TwoTower+", "DistillTwoTower+"),
+            )
+            metrics.append(add_auc_logloss(pipeline_metric, data.test_rows[: args.auc_rows], pipeline_scores, data))
+    return metrics
 
 
 def run_text_encoder(data: PreparedData, args: argparse.Namespace, device: torch.device) -> ExperimentMetric:
@@ -597,6 +757,21 @@ def main(argv: list[str]) -> int:
         metric = run_distill(data, args, device)
         title = "KuaiRec big ItemCF 蒸馏 Two-Tower 报告"
         description = "用 ItemCF teacher 的强协同 TopK 信号补强 Two-Tower 召回。"
+    elif args.experiment == "distill_pipeline":
+        metrics = run_distill_pipeline(data, args, device)
+        write_upgrade_multi_outputs(
+            metrics,
+            args,
+            "KuaiRec big 蒸馏双塔两阶段 Pipeline 报告",
+            "用 ItemCF 蒸馏 Two-Tower 作为召回底座，再接 DNNRanker hard negative 重排。",
+        )
+        for metric in metrics:
+            print(
+                f"{metric.model}: Recall@20={metric.recall:.6f} "
+                f"NDCG@20={metric.ndcg:.6f} AUC={metric.auc:.6f}",
+                flush=True,
+            )
+        return 0
     elif args.experiment == "lightgcn":
         metric = run_lightgcn(data, args, device)
         title = "KuaiRec big LightGCN 图召回报告"

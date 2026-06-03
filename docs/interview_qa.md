@@ -95,4 +95,6 @@ MLU 实验体现的是训练环境适配和工程验证能力：
 
 第七轮实验中，ItemCF 蒸馏 Two-Tower 达到 `NDCG@20=0.033562`，明显高于 stage5 best pipeline `0.005245`。这说明蒸馏方向有效，Two-Tower 确实学到了一部分 ItemCF 的协同排序信号。
 
-但它仍低于 ItemCF 的 `0.065921`，所以结论不是“蒸馏已经解决 big 问题”，而是“蒸馏是目前最值得继续放大的补强方向”。下一步应扩大蒸馏样本，优化 teacher 权重和 hard negative 配比。
+阶段八继续验证后，单独 2M 蒸馏 Two-Tower 的 `NDCG@20=0.027320`，反而低于 800k 蒸馏，说明不是样本越多越好；teacher 样本质量、软标签和正负样本比例更关键。
+
+但把蒸馏 Two-Tower 接回 DNNRanker 后，`DistillTwoTower+DNN-Rerank@200 NDCG@20=0.044560`，成为当前最佳神经 pipeline。结论是：蒸馏方向有效，但下一步应精调“蒸馏召回 + hard negative 排序”的两阶段组合，而不是直接盲目扩到 5M。

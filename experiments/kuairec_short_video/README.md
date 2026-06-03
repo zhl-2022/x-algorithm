@@ -183,6 +183,35 @@ python experiments/kuairec_short_video/scripts/run_all_experiments.py \
 - `reports/upgrade_experiments_status.md`
 - `reports/upgrade_experiments_batched/*/experiment_report.md`
 
+## 第八轮召回补强结果
+
+第八轮继续围绕 `big_matrix.csv` 做神经召回补强：放大 ItemCF 蒸馏 Two-Tower、
+接入 DNNRanker pipeline、调参 LightGCN，并修正 GRU 序列模型 padding。
+
+| 实验 | Recall@20 | NDCG@20 | AUC | 结论 |
+|---|---:|---:|---:|---|
+| ItemCF-Distill-TwoTower 2M | 0.006202 | 0.027320 | 0.608339 | 样本放大后 AUC 略升，但 TopK 低于 800k 蒸馏 |
+| LightGCN best `l1_e10` | 0.002902 | 0.011906 | 0.593868 | 调参后有提升，但仍弱于蒸馏路线 |
+| GRU-Sequence fixed | 0.000488 | 0.000914 | 0.683278 | padding 修复后 TopK 仍弱 |
+| DistillTwoTower+DNN-Rerank@200 | 0.011031 | 0.044560 | 0.681781 | 本轮最佳神经 pipeline |
+
+阶段结论：蒸馏双塔单模型放大到 2M 没有超过 800k 版本，但蒸馏双塔接 DNNRanker 后达到
+`NDCG@20=0.044560`，明显高于阶段七蒸馏双塔 `0.033562`，说明当前应继续优化
+“蒸馏召回 + hard negative 排序”pipeline，而不是盲目扩到 5M。
+
+详细报告见 `reports/stage8_recall_boost_report.md`。
+
+## 第九轮计划
+
+下一轮不切换新数据集，也不直接扩到 5M。优先围绕阶段八最佳
+`DistillTwoTower+DNN-Rerank@200 NDCG@20=0.044560` 做 pipeline 精调：
+
+- `distill_pipeline_800k_t40n40`
+- `distill_pipeline_2m_t40n120`
+- `distill_pipeline_2m_t120n40`
+
+详细计划见 `reports/stage9_pipeline_tuning_plan.md`。
+
 ## 当前状态
 
 - [x] 新建 KuaiRec 实验目录。
@@ -204,3 +233,4 @@ python experiments/kuairec_short_video/scripts/run_all_experiments.py \
 - [x] 完成 `big_matrix.csv` Two-Tower in-batch negative 实验。
 - [x] 完成 MLU 单卡/双卡 DDP 吞吐实验。
 - [x] 完成 KuaiRec big ItemCF 蒸馏 Two-Tower、LightGCN、序列兴趣模型和轻量文本 encoder 中等规模验证。
+- [x] 完成 KuaiRec 阶段八：2M 蒸馏放大、蒸馏 pipeline、LightGCN 调参和序列 padding 修复验证。

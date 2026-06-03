@@ -1,0 +1,2 @@
+model,scope,k,train_rows,eval_users,recall,hit_rate,precision,ndcg,coverage,auc,logloss,train_seconds,eval_seconds,device,notes
+ItemCF-Distill-TwoTower,big_matrix,20,2000000,7174,0.00620174,0.31460831,0.02752997,0.02732021,0.04604773,0.60833942,0.67768608,8.6475,0.3887,mlu,用 ItemCF TopK teacher 样本和真实行为样本蒸馏训练 Two-Tower。
