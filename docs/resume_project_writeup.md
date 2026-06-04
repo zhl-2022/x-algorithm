@@ -42,4 +42,22 @@
 2. 深调 LightGCN 的层数、采样策略和 BPR 训练轮数，判断图召回是否能追上 ItemCF。
 3. 修正和增强用户序列兴趣模型，加入最近观看类别、时间窗口和更强的负采样。
 4. 接入更强的轻量文本 encoder，替换当前哈希 caption embedding。
-5. 如果需要继续扩大数据规模，再迁移到 Tenrec 或 KuaiRand。
+5. 如果目标是工程化深化，继续补多卡 TopK 评测、离线服务化和推理延迟压测。
+
+## 8. 最终版简历描述
+
+**开源推荐系统训练与评测闭环项目 | X/Twitter 推荐架构学习复现**
+
+基于 X/Twitter 推荐系统多阶段架构，构建公开数据集推荐训练与评测闭环，覆盖数据清洗、样本构造、召回、排序、重排、离线评测和寒武纪 MLU 训练适配。使用 MovieLens 1M、MIND-small、KuaiRec 复现电影推荐、新闻推荐和短视频推荐场景，实现 Popularity、ItemCF、MF、Two-Tower、DNNRanker、ItemCF 蒸馏 Two-Tower 和 TwoTower+DNN-Rerank pipeline，并基于 `Recall@K`、`NDCG@K`、`AUC`、`LogLoss` 和训练吞吐进行系统评估。
+
+项目结果：MovieLens 上两阶段 pipeline 达到 `NDCG@20=0.042451`；MIND 上 ContentTwoTower 达到 `NDCG@10=0.374560`；KuaiRec big 上通过 ItemCF 蒸馏、hard negative、teacher/negative 配比和 soft label 精调，将神经 pipeline 从 `NDCG@20=0.005245` 提升到 `0.055883`，换 seed 复跑仍有 `0.052947`。在公司 MLU 服务器完成单卡/双卡 DDP benchmark，双卡吞吐 `908,159 samples/s`。
+
+## 9. 简历项目材料入口
+
+| 文件 | 用途 |
+|---|---|
+| `README.md` | 项目总入口 |
+| `docs/project_architecture.md` | 架构图和 pipeline 解释 |
+| `docs/project_summary_report.md` | 三批数据集最终结论 |
+| `docs/experiment_reading_guide.md` | 代码和实验阅读顺序 |
+| `docs/interview_qa.md` | 面试问答 |

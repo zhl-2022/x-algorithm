@@ -86,6 +86,8 @@
 | 文档 | 用途 |
 |---|---|
 | `docs/project_summary_report.md` | 汇总 MovieLens、MIND、KuaiRec 三批数据集的目标、模型、指标和结论 |
+| `docs/project_architecture.md` | 记录项目总架构图、离线推荐 pipeline、KuaiRec 优化链路和 MLU 训练架构 |
+| `docs/experiment_reading_guide.md` | 说明从哪里开始看实验、重点看哪些报告和代码 |
 | `docs/resume_project_writeup.md` | 提供简历标题、项目描述、可直接使用的简历要点和面试开场讲法 |
 | `docs/interview_qa.md` | 梳理面试中高频问题，例如 AUC 与 TopK 差异、hard negative、ItemCF 为什么强 |
 | `experiments/kuairec_short_video/reports/big_matrix_improvement_plan.md` | 设计 KuaiRec big 后续补强方案，默认优先 ItemCF 蒸馏 Two-Tower |

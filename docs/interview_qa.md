@@ -124,3 +124,21 @@ MLU 实验体现的是训练环境适配和工程验证能力：
 | Stage11 replay | 0.052947 | 换 seed 后仍超过阶段九，说明结果不是单次偶然 |
 
 可以这样回答：最终方案不是换更复杂模型，而是把训练信号做干净。ItemCF teacher 提供协同过滤排序信号，随机负样本校准召回边界，`sqrt` soft label 放大高分 teacher 的区分度，最后再由 Ranker 做融合重排。
+
+## 13. 面试时从哪里开始讲这个项目？
+
+建议不要从某个脚本细节开始讲，而是按“业务问题 -> 技术链路 -> 实验结果”展开：
+
+1. 业务问题：推荐系统要从大量内容里为每个用户选出 TopK 内容，不能只靠一个模型直接全量排序。
+2. 技术链路：参考 X/Twitter 多阶段思想，拆成数据处理、召回、排序、重排、离线评测和 MLU 训练。
+3. 数据递进：MovieLens 跑通最小闭环，MIND 加入新闻内容特征，KuaiRec 迁移到短视频 big 候选池。
+4. 关键结果：KuaiRec big 神经 pipeline 从 `NDCG@20=0.005245` 提升到 `0.055883`，复跑 `0.052947`。
+5. 工程能力：寒武纪 MLU 单卡/双卡训练链路已跑通，双卡吞吐 `908,159 samples/s`。
+
+## 14. 如果面试官问“这个项目应该从哪里看代码”，怎么回答？
+
+可以这样回答：
+
+> 我会建议先看 `README.md` 和 `docs/project_architecture.md` 建立整体结构，再从 MovieLens 的 `prepare_movielens.py`、`itemcf_baseline.py`、`two_tower_train.py` 看最小闭环。理解之后再看 MIND 的 `run_all_experiments.py`，它把内容特征接入了推荐模型。最后看 KuaiRec 的 `run_all_experiments.py` 和 `run_upgrade_experiments.py`，这里包含 hard negative、in-batch、ItemCF 蒸馏、soft label 和 MLU 训练验证，是项目最核心的实验代码。
+
+具体阅读路线记录在 `docs/experiment_reading_guide.md`。

@@ -70,3 +70,13 @@
 ## 6. 阶段性结论
 
 当前三批数据集已经足够支撑一个完整的简历项目：从入门数据集到内容推荐，再到短视频大规模推荐和 MLU 工程验证。KuaiRec 模型实验已完成收尾，下一步优先把现有实验写透；如果继续做模型实验，建议切换 Tenrec 或 KuaiRand。
+
+## 7. 推荐阅读入口
+
+| 阅读目标 | 建议文件 |
+|---|---|
+| 快速理解项目整体 | `README.md` |
+| 看架构图和 pipeline | `docs/project_architecture.md` |
+| 知道从哪里开始读实验和代码 | `docs/experiment_reading_guide.md` |
+| 准备简历描述 | `docs/resume_project_writeup.md` |
+| 准备面试追问 | `docs/interview_qa.md` |
