@@ -12,72 +12,9 @@
 
 ## 2. 总体架构
 
-```mermaid
-flowchart TD
-    subgraph Data[数据层]
-        ML[MovieLens 1M<br/>评分行为]
-        MIND[MIND-small<br/>新闻曝光与点击]
-        KR[KuaiRec<br/>短视频观看行为]
-    end
+![项目总体架构](assets/project_overview.svg)
 
-    subgraph Prep[数据处理层]
-        Clean[清洗与字段解析]
-        Label[正负反馈标签<br/>rating / click / watch_ratio]
-        Split[训练/验证/测试切分]
-        Feature[ID / 类别 / 文本哈希 / 统计特征]
-    end
-
-    subgraph Recall[召回层]
-        Pop[Popularity]
-        ItemCF[ItemCF]
-        MF[MF]
-        Tower[Two-Tower / ContentTwoTower]
-        Distill[ItemCF-Distill-TwoTower]
-    end
-
-    subgraph Rank[排序层]
-        Ranker[DNNRanker]
-        HN[hard negative 样本]
-        Soft[teacher soft label]
-    end
-
-    subgraph Pipeline[多阶段推荐]
-        Candidate[candidate_k 候选集]
-        Rerank[DNN 重排]
-        Blend[双塔分数 + Ranker 分数融合]
-    end
-
-    subgraph Eval[评测与工程]
-        Metrics[Recall@K / NDCG@K / AUC / LogLoss]
-        MLU[torch_mlu / MLU 单卡与双卡 DDP]
-        Reports[Markdown 报告 / CSV 结果 / 简历材料]
-    end
-
-    Data --> Clean --> Label --> Split --> Feature
-    Feature --> Pop
-    Feature --> ItemCF
-    Feature --> MF
-    Feature --> Tower
-    ItemCF --> Distill
-    Tower --> Candidate
-    Distill --> Candidate
-    Feature --> Ranker
-    HN --> Ranker
-    Soft --> Distill
-    Candidate --> Rerank
-    Ranker --> Rerank
-    Candidate --> Blend
-    Ranker --> Blend
-    Rerank --> Metrics
-    Blend --> Metrics
-    MF --> Metrics
-    Tower --> Metrics
-    Distill --> Metrics
-    Metrics --> Reports
-    Tower --> MLU
-    Ranker --> MLU
-    Distill --> MLU
-```
+本页架构图均使用静态 SVG 图片，避免 Office Viewer 或其他 Markdown 预览器的 Mermaid 兼容问题。
 
 ## 3. 三批数据集分工
 
@@ -89,21 +26,7 @@ flowchart TD
 
 ## 4. 离线推荐 Pipeline
 
-```mermaid
-sequenceDiagram
-    participant U as 用户历史行为
-    participant R as 召回模型
-    participant C as 候选集 candidate_k
-    participant K as DNNRanker
-    participant E as TopK 评测
-
-    U->>R: 输入用户 ID、历史行为、统计特征
-    R->>C: 召回 Top 100/200/500 个候选
-    C->>K: 过滤已看过内容后进入排序模型
-    K->>K: 根据 ID、类别、文本、统计特征预测兴趣分
-    K->>E: 输出 Top20 推荐列表
-    E->>E: 计算 Recall@20、NDCG@20、Coverage@20
-```
+![离线推荐 Pipeline](assets/recommendation_pipeline.svg)
 
 在这个项目里，召回层负责“从大量内容里找可能相关的候选”，排序层负责“在候选里把真正更可能命中的内容排到前面”。这也是为什么很多实验同时记录 `candidate_k`、`Recall@K` 和 `NDCG@K`。
 
@@ -125,34 +48,13 @@ sequenceDiagram
 
 ## 6. KuaiRec 最终优化链路
 
-```mermaid
-flowchart LR
-    A[Stage5<br/>big 神经 pipeline<br/>NDCG@20=0.005245]
-    B[Stage7<br/>ItemCF 蒸馏 Two-Tower<br/>NDCG@20=0.033562]
-    C[Stage8<br/>蒸馏召回 + DNNRanker<br/>NDCG@20=0.044560]
-    D[Stage9<br/>teacher/negative 配比精调<br/>NDCG@20=0.048158]
-    E[Stage10<br/>soft label + 采样修正<br/>NDCG@20=0.055883]
-    F[Stage11<br/>换 seed 复跑<br/>NDCG@20=0.052947]
-    G[ItemCF 参考上限<br/>NDCG@20=0.065921]
-
-    A --> B --> C --> D --> E --> F
-    G -.仍高于神经结果.-> E
-```
+![KuaiRec big 优化链路](assets/kuairec_optimization_chain.svg)
 
 这个链路说明：提升不是靠盲目加深 MLP，而是靠更贴合 TopK 任务的训练信号，包括 ItemCF teacher、hard negative、随机负样本比例和 soft label。
 
 ## 7. MLU 训练架构
 
-```mermaid
-flowchart TD
-    A[本地代码仓库] --> B[srv4 / node2<br/>/root/zhl/x-algorithm]
-    B --> C[xalgorithm-mlu Docker 容器]
-    C --> D[torch 2.9.1 + torch_mlu 1.30.2]
-    D --> E[单卡训练<br/>MLU_VISIBLE_DEVICES=2]
-    D --> F[双卡 DDP<br/>MLU_VISIBLE_DEVICES=2,3<br/>torchrun + cncl]
-    E --> G[吞吐与指标记录]
-    F --> G
-```
+![MLU 训练架构](assets/mlu_training_architecture.svg)
 
 当前已经验证：
 

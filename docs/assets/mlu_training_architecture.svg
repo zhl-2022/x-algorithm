@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1160" height="300" viewBox="0 0 1160 300">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#344054"/>
+    </marker>
+    <style>
+      .title { font: 700 24px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; fill: #111827; }
+      .box { fill: #ffffff; stroke: #98a2b3; stroke-width: 1.4; rx: 10; }
+      .mlu { fill: #eef6ff; stroke: #2e90fa; }
+      .text { font: 15px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; fill: #101828; }
+      .small { font: 13px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; fill: #475467; }
+      .line { stroke: #344054; stroke-width: 1.8; fill: none; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect x="0" y="0" width="1160" height="300" fill="#ffffff"/>
+  <text x="36" y="42" class="title">MLU 训练架构</text>
+
+  <rect x="40" y="110" width="150" height="80" class="box"/>
+  <text x="72" y="142" class="text">本地代码仓库</text>
+  <text x="70" y="168" class="small">E:/programs/x-algorithm</text>
+
+  <rect x="245" y="110" width="155" height="80" class="box"/>
+  <text x="288" y="142" class="text">srv4 / node2</text>
+  <text x="268" y="168" class="small">/root/zhl/x-algorithm</text>
+
+  <rect x="455" y="110" width="175" height="80" class="box"/>
+  <text x="495" y="142" class="text">Docker 容器</text>
+  <text x="486" y="168" class="small">xalgorithm-mlu</text>
+
+  <rect x="685" y="110" width="190" height="80" class="box"/>
+  <text x="720" y="142" class="text">训练环境</text>
+  <text x="713" y="168" class="small">torch 2.9.1 / torch_mlu 1.30.2</text>
+
+  <rect x="930" y="65" width="180" height="70" class="box mlu"/>
+  <text x="962" y="94" class="text">单卡训练</text>
+  <text x="960" y="118" class="small">MLU_VISIBLE_DEVICES=2</text>
+
+  <rect x="930" y="165" width="180" height="70" class="box mlu"/>
+  <text x="962" y="194" class="text">双卡 DDP</text>
+  <text x="945" y="218" class="small">Card 2/3 / torchrun / cncl</text>
+
+  <path d="M190 150 H245" class="line"/>
+  <path d="M400 150 H455" class="line"/>
+  <path d="M630 150 H685" class="line"/>
+  <path d="M875 150 C900 150 900 100 930 100" class="line"/>
+  <path d="M875 150 C900 150 900 200 930 200" class="line"/>
+</svg>

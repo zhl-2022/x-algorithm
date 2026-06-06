@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="620" viewBox="0 0 1320 620">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#344054"/>
+    </marker>
+    <style>
+      .title { font: 700 26px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; fill: #111827; }
+      .box { fill: #ffffff; stroke: #98a2b3; stroke-width: 1.4; rx: 10; }
+      .soft { fill: #f8fafc; }
+      .data { fill: #eef6ff; stroke: #2e90fa; }
+      .model { fill: #f0fdf4; stroke: #16a34a; }
+      .rank { fill: #fff7ed; stroke: #f97316; }
+      .eval { fill: #f5f3ff; stroke: #7c3aed; }
+      .text { font: 16px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; fill: #101828; }
+      .small { font: 13px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; fill: #475467; }
+      .line { stroke: #344054; stroke-width: 1.8; fill: none; marker-end: url(#arrow); }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="1320" height="620" fill="#ffffff"/>
+  <text x="40" y="45" class="title">推荐系统学习项目总体架构</text>
+
+  <rect x="40" y="110" width="190" height="120" class="box data"/>
+  <text x="70" y="145" class="text">公开数据集</text>
+  <text x="70" y="175" class="small">MovieLens 1M</text>
+  <text x="70" y="197" class="small">MIND-small</text>
+  <text x="70" y="219" class="small">KuaiRec</text>
+
+  <rect x="285" y="105" width="210" height="130" class="box data"/>
+  <text x="320" y="140" class="text">数据处理</text>
+  <text x="320" y="170" class="small">清洗 / 切分</text>
+  <text x="320" y="192" class="small">标签构造</text>
+  <text x="320" y="214" class="small">特征工程</text>
+
+  <rect x="560" y="65" width="245" height="92" class="box model"/>
+  <text x="595" y="100" class="text">Baseline</text>
+  <text x="595" y="130" class="small">Popularity / Category / ItemCF</text>
+
+  <rect x="560" y="205" width="245" height="110" class="box model"/>
+  <text x="595" y="240" class="text">召回模型</text>
+  <text x="595" y="270" class="small">MF / Two-Tower</text>
+  <text x="595" y="292" class="small">ContentTwoTower / DistillTwoTower</text>
+
+  <rect x="560" y="365" width="245" height="100" class="box rank"/>
+  <text x="595" y="400" class="text">排序模型</text>
+  <text x="595" y="430" class="small">DNNRanker</text>
+  <text x="595" y="452" class="small">hard negative / soft label</text>
+
+  <rect x="875" y="215" width="170" height="88" class="box soft"/>
+  <text x="910" y="250" class="text">候选集</text>
+  <text x="910" y="280" class="small">candidate_k</text>
+
+  <rect x="875" y="365" width="170" height="88" class="box soft"/>
+  <text x="910" y="400" class="text">重排与融合</text>
+  <text x="910" y="430" class="small">Rerank / Blend</text>
+
+  <rect x="1115" y="210" width="165" height="105" class="box eval"/>
+  <text x="1143" y="246" class="text">离线评测</text>
+  <text x="1143" y="276" class="small">Recall@K / NDCG@K</text>
+  <text x="1143" y="298" class="small">AUC / LogLoss</text>
+
+  <rect x="1115" y="395" width="165" height="105" class="box eval"/>
+  <text x="1143" y="431" class="text">实验产物</text>
+  <text x="1143" y="461" class="small">CSV / Markdown</text>
+  <text x="1143" y="483" class="small">简历 / 面试材料</text>
+
+  <rect x="875" y="505" width="405" height="70" class="box soft"/>
+  <text x="910" y="548" class="text">MLU 训练验证：torch_mlu / 单卡 / 双卡 DDP / 吞吐记录</text>
+
+  <path d="M230 170 H285" class="line"/>
+  <path d="M495 170 C525 170 525 111 560 111" class="line"/>
+  <path d="M495 170 C525 170 525 260 560 260" class="line"/>
+  <path d="M495 170 C525 170 525 415 560 415" class="line"/>
+  <path d="M805 260 H875" class="line"/>
+  <path d="M1045 259 H1115" class="line"/>
+  <path d="M805 415 H875" class="line"/>
+  <path d="M960 303 V365" class="line"/>
+  <path d="M1045 409 C1085 409 1085 263 1115 263" class="line"/>
+  <path d="M1197 315 V395" class="line"/>
+  <path d="M682 315 C682 540 840 540 875 540" class="line"/>
+  <path d="M682 465 C682 540 840 540 875 540" class="line"/>
+</svg>

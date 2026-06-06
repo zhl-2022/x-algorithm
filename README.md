@@ -30,20 +30,9 @@
 
 ## 总体架构
 
-```mermaid
-flowchart LR
-    A[公开数据集<br/>MovieLens / MIND / KuaiRec] --> B[数据处理<br/>清洗 / 切分 / 标签构造]
-    B --> C[Baseline<br/>Popularity / Category / ItemCF]
-    B --> D[召回模型<br/>MF / Two-Tower / ContentTwoTower / DistillTwoTower]
-    B --> E[排序模型<br/>DNNRanker / hard negative]
-    D --> F[候选集<br/>candidate_k]
-    F --> G[重排与融合<br/>Rerank / Blend]
-    E --> G
-    G --> H[离线评测<br/>Recall@K / NDCG@K / AUC / LogLoss]
-    H --> I[实验报告<br/>CSV / Markdown / 简历材料]
-    D --> J[MLU 训练验证<br/>torch_mlu / DDP / 吞吐]
-    E --> J
-```
+![项目总体架构](docs/assets/project_overview.svg)
+
+这张图是静态 SVG 图片，不依赖 Mermaid 插件或 Mermaid 渲染器。
 
 更完整的架构解释见 [`docs/project_architecture.md`](docs/project_architecture.md)。
 

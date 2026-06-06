@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1260" height="260" viewBox="0 0 1260 260">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#344054"/>
+    </marker>
+    <style>
+      .title { font: 700 24px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; fill: #111827; }
+      .box { fill: #ffffff; stroke: #98a2b3; stroke-width: 1.4; rx: 10; }
+      .best { fill: #ecfdf3; stroke: #16a34a; stroke-width: 2; }
+      .ref { fill: #fff7ed; stroke: #f97316; stroke-width: 1.6; }
+      .text { font: 15px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; fill: #101828; }
+      .small { font: 13px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; fill: #475467; }
+      .line { stroke: #344054; stroke-width: 1.8; fill: none; marker-end: url(#arrow); }
+      .dash { stroke: #f97316; stroke-width: 1.7; fill: none; stroke-dasharray: 6 5; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect x="0" y="0" width="1260" height="260" fill="#ffffff"/>
+  <text x="34" y="42" class="title">KuaiRec big 神经 Pipeline 优化链路</text>
+
+  <rect x="35" y="105" width="175" height="88" class="box"/>
+  <text x="68" y="136" class="text">Stage5</text>
+  <text x="60" y="162" class="small">早期神经 pipeline</text>
+  <text x="62" y="184" class="small">NDCG@20=0.005245</text>
+
+  <rect x="245" y="105" width="175" height="88" class="box"/>
+  <text x="278" y="136" class="text">Stage7</text>
+  <text x="262" y="162" class="small">ItemCF 蒸馏双塔</text>
+  <text x="272" y="184" class="small">NDCG@20=0.033562</text>
+
+  <rect x="455" y="105" width="175" height="88" class="box"/>
+  <text x="488" y="136" class="text">Stage8</text>
+  <text x="472" y="162" class="small">蒸馏召回 + Ranker</text>
+  <text x="482" y="184" class="small">NDCG@20=0.044560</text>
+
+  <rect x="665" y="105" width="175" height="88" class="box"/>
+  <text x="698" y="136" class="text">Stage9</text>
+  <text x="684" y="162" class="small">teacher/negative 精调</text>
+  <text x="692" y="184" class="small">NDCG@20=0.048158</text>
+
+  <rect x="875" y="105" width="175" height="88" class="box best"/>
+  <text x="906" y="136" class="text">Stage10</text>
+  <text x="899" y="162" class="small">soft label 精调</text>
+  <text x="902" y="184" class="small">NDCG@20=0.055883</text>
+
+  <rect x="1085" y="105" width="145" height="88" class="box"/>
+  <text x="1110" y="136" class="text">Stage11</text>
+  <text x="1108" y="162" class="small">换 seed 复跑</text>
+  <text x="1098" y="184" class="small">NDCG@20=0.052947</text>
+
+  <rect x="875" y="25" width="175" height="58" class="ref"/>
+  <text x="910" y="50" class="small">ItemCF 参考上限</text>
+  <text x="902" y="72" class="small">NDCG@20=0.065921</text>
+
+  <path d="M210 149 H245" class="line"/>
+  <path d="M420 149 H455" class="line"/>
+  <path d="M630 149 H665" class="line"/>
+  <path d="M840 149 H875" class="line"/>
+  <path d="M1050 149 H1085" class="line"/>
+  <path d="M962 83 V105" class="dash"/>
+</svg>
