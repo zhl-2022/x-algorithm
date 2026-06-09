@@ -4,13 +4,16 @@
 
 如果你是第一次回看这个项目，建议按下面顺序读，不要直接从上游 X 源码或 KuaiRec 最终脚本开始。
 
+如果你希望按阶段打卡学习，先使用 `docs/study_plan.md`；本文件更偏“读哪些报告和代码”。
+
 | 顺序 | 文件 | 读它的目的 |
 |---:|---|---|
 | 1 | `README.md` | 先理解这个仓库里“上游源码”和“个人实验”两层关系 |
 | 2 | `docs/project_summary_report.md` | 看三批数据集最终结论和关键指标 |
 | 3 | `docs/project_architecture.md` | 建立数据、模型、pipeline、MLU 的整体架构图 |
-| 4 | `docs/resume_project_writeup.md` | 看如何把实验转成简历项目 |
-| 5 | `docs/interview_qa.md` | 看面试中最容易被追问的问题 |
+| 4 | `docs/study_plan.md` | 按阶段完成学习清单和验收问题 |
+| 5 | `docs/resume_project_writeup.md` | 看如何把实验转成简历项目 |
+| 6 | `docs/interview_qa.md` | 看面试中最容易被追问的问题 |
 
 ## 2. 实验代码阅读顺序
 

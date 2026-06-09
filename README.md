@@ -15,6 +15,7 @@
 |---|---|
 | [`docs/project_summary_report.md`](docs/project_summary_report.md) | 三批数据集的总实验结论和关键指标 |
 | [`docs/project_architecture.md`](docs/project_architecture.md) | 项目架构图、模型链路和 MLU 训练链路 |
+| [`docs/study_plan.md`](docs/study_plan.md) | 从零开始学习本项目的阶段路线和验收清单 |
 | [`docs/experiment_reading_guide.md`](docs/experiment_reading_guide.md) | 从哪里开始看实验、重点看哪些代码 |
 | [`docs/resume_project_writeup.md`](docs/resume_project_writeup.md) | 可直接整理到简历里的项目描述 |
 | [`docs/interview_qa.md`](docs/interview_qa.md) | 面试问答：AUC/TopK、hard negative、ItemCF 蒸馏、MLU 多卡 |
@@ -42,8 +43,9 @@
 
 1. 先看 [`docs/project_summary_report.md`](docs/project_summary_report.md)，了解三批数据集得出了什么结论。
 2. 再看 [`docs/project_architecture.md`](docs/project_architecture.md)，建立数据、模型、评测和 MLU 的整体地图。
-3. 然后按 [`docs/experiment_reading_guide.md`](docs/experiment_reading_guide.md) 从 MovieLens 读到 MIND，再读 KuaiRec。
-4. 最后看 [`docs/resume_project_writeup.md`](docs/resume_project_writeup.md) 和 [`docs/interview_qa.md`](docs/interview_qa.md)，把实验转成简历和面试表达。
+3. 按 [`docs/study_plan.md`](docs/study_plan.md) 完成阶段学习清单。
+4. 然后按 [`docs/experiment_reading_guide.md`](docs/experiment_reading_guide.md) 从 MovieLens 读到 MIND，再读 KuaiRec。
+5. 最后看 [`docs/resume_project_writeup.md`](docs/resume_project_writeup.md) 和 [`docs/interview_qa.md`](docs/interview_qa.md)，把实验转成简历和面试表达。
 
 ## 关键代码入口
 
