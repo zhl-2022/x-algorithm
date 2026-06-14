@@ -8,6 +8,7 @@
 |---|---|
 | `a800_qwen_qlora_workflow.md` | 后续执行 A800 Qwen QLoRA 任务时优先遵循的项目级 workflow |
 | `troubleshooting_and_workflow.md` | 本次训练过程中遇到的难题、根因和解决方式 |
+| `beginner_finetune_learning_guide.md` | 面向小白的训练/微调完整学习路线，逐文件讲解数据、参数、日志、adapter 和推理 |
 | `local_webui_setup.md` | 在 Windows/WSL 本地打开 ms-swift 或 LLaMA-Factory WebUI 的学习指南 |
 | `wsl_local_finetune_setup.md` | 本地 WSL 已安装微调 WebUI 环境的路径、启动命令和排错记录 |
 | `local_snapshot_learning_guide.md` | 如何阅读本地同步的远端训练轻量快照 |
@@ -59,6 +60,7 @@ docs/a800_qwen_qlora_lab/a800_qwen_qlora_workflow.md
 如果要本地打开 WebUI 学习，读：
 
 ```text
+docs/a800_qwen_qlora_lab/beginner_finetune_learning_guide.md
 docs/a800_qwen_qlora_lab/local_webui_setup.md
 docs/a800_qwen_qlora_lab/wsl_local_finetune_setup.md
 ```
