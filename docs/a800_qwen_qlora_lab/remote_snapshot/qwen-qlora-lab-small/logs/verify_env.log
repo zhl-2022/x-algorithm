@@ -1,0 +1,52 @@
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 12.4.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+python/torch check
+torch 2.6.0+cu124
+cuda_available True
+device NVIDIA A800 80GB PCIe
+Traceback (most recent call last):
+  File "/opt/conda/bin/swift", line 6, in <module>
+    sys.exit(cli_main())
+             ^^^^^^^^^^
+  File "/opt/conda/lib/python3.11/site-packages/swift/cli/main.py", line 87, in cli_main
+    file_path = importlib.util.find_spec(route_mapping[method_name]).origin
+                                         ~~~~~~~~~~~~~^^^^^^^^^^^^^
+KeyError: '--help'
+run sh: `/opt/conda/bin/python /opt/conda/lib/python3.11/site-packages/swift/cli/sft.py --help`
+usage: sft.py [-h] [--tuner_backend TUNER_BACKEND]
+
+options:
+  -h, --help            show this help message and exit
+  --tuner_backend TUNER_BACKEND
+wrote /workspace/qwen-qlora-lab/data/text_sft.jsonl rows=180
+wrote /workspace/qwen-qlora-lab/data/mm_sft.jsonl rows=6
+data:
+total 88K
+drwxrwxrwx 2 root root   48 Jun 13 21:04 .
+drwxrwxrwx 9 root root  119 Jun 13 21:17 ..
+-rw-r--r-- 1 root root 2.2K Jun 13 21:21 mm_sft.jsonl
+-rw-r--r-- 1 root root  81K Jun 13 21:21 text_sft.jsonl
+
+images:
+total 72K
+drwxrwxrwx 2 root root  133 Jun 13 21:04 .
+drwxrwxrwx 9 root root  119 Jun 13 21:17 ..
+-rw-r--r-- 1 root root 9.6K Jun 13 21:21 01_pipeline.png
+-rw-r--r-- 1 root root  11K Jun 13 21:21 02_gpu.png
+-rw-r--r-- 1 root root 9.7K Jun 13 21:21 03_qlora.png
+-rw-r--r-- 1 root root 9.6K Jun 13 21:21 04_metrics.png
+-rw-r--r-- 1 root root  11K Jun 13 21:21 05_download.png
+-rw-r--r-- 1 root root 9.6K Jun 13 21:21 06_safety.png

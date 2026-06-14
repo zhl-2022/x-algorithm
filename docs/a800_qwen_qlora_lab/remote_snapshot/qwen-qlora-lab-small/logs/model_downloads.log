@@ -1,0 +1,10 @@
+[2026-06-13 21:30:05] SKIP existing model: Qwen/Qwen3-1.7B -> /workspace/qwen-qlora-lab/models/Qwen3-1.7B
+3.8G	/workspace/qwen-qlora-lab/models/Qwen3-1.7B
+[2026-06-13 21:30:05] SKIP existing model: Qwen/Qwen3.5-0.8B -> /workspace/qwen-qlora-lab/models/Qwen3.5-0.8B
+1.7G	/workspace/qwen-qlora-lab/models/Qwen3.5-0.8B
+[2026-06-13 21:30:05] SKIP existing model: Qwen/Qwen3.5-2B -> /workspace/qwen-qlora-lab/models/Qwen3.5-2B
+4.3G	/workspace/qwen-qlora-lab/models/Qwen3.5-2B
+[2026-06-13 21:30:05] Final model directory sizes:
+3.8G	/workspace/qwen-qlora-lab/models/Qwen3-1.7B
+1.7G	/workspace/qwen-qlora-lab/models/Qwen3.5-0.8B
+4.3G	/workspace/qwen-qlora-lab/models/Qwen3.5-2B

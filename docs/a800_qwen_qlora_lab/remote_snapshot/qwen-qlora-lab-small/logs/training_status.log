@@ -1,0 +1,20 @@
+[2026-06-13 21:09:31] Initial free memory MiB: 23175
+[2026-06-13 21:09:31] START round1_qwen3_17b_text model=models/Qwen3-1.7B dataset=data/text_sft.jsonl base_used_mib=57981 max_length=1024
+[2026-06-13 21:09:50] END round1_qwen3_17b_text rc=1 max_used_mib=57981 train_delta_mib=0 latest_ckpt=
+[2026-06-13 21:09:50] FAILED round1_qwen3_17b_text; see logs/round1_qwen3_17b_text.train.log
+[2026-06-13 21:12:26] Initial free memory MiB: 23175
+[2026-06-13 21:12:26] START round1_qwen3_17b_text model=models/Qwen3-1.7B dataset=data/text_sft.jsonl base_used_mib=57981 max_length=1024
+[2026-06-13 21:14:12] END round1_qwen3_17b_text rc=0 max_used_mib=62387 train_delta_mib=4406 latest_ckpt=outputs/qwen3_17b_text/v1-20260613-211241/checkpoint-20
+[2026-06-13 21:14:12] START round2_qwen35_08b_text model=models/Qwen3.5-0.8B dataset=data/text_sft.jsonl base_used_mib=57981 max_length=1024
+[2026-06-13 21:14:31] END round2_qwen35_08b_text rc=1 max_used_mib=57981 train_delta_mib=0 latest_ckpt=
+[2026-06-13 21:14:31] FAILED round2_qwen35_08b_text; see logs/round2_qwen35_08b_text.train.log
+[2026-06-13 21:21:42] Initial free memory MiB: 23175
+[2026-06-13 21:21:42] SKIP round1_qwen3_17b_text existing_ckpt=outputs/qwen3_17b_text/v1-20260613-211241/checkpoint-20
+[2026-06-13 21:21:42] START round2_qwen35_08b_text model=models/Qwen3.5-0.8B dataset=data/text_sft.jsonl base_used_mib=57981 max_length=1024
+[2026-06-13 21:26:42] END round2_qwen35_08b_text rc=0 max_used_mib=60715 train_delta_mib=2734 latest_ckpt=outputs/qwen35_08b_text/v1-20260613-212200/checkpoint-20
+[2026-06-13 21:30:05] Initial free memory MiB: 23175
+[2026-06-13 21:30:05] SKIP round1_qwen3_17b_text existing_ckpt=outputs/qwen3_17b_text/v1-20260613-211241/checkpoint-20
+[2026-06-13 21:30:05] SKIP round2_qwen35_08b_text existing_ckpt=outputs/qwen35_08b_text/v1-20260613-212200/checkpoint-20
+[2026-06-13 21:30:05] START round3_qwen35_mm model=models/Qwen3.5-2B dataset=data/mm_sft.jsonl base_used_mib=57981 max_length=1024
+[2026-06-13 21:35:14] END round3_qwen35_mm rc=0 max_used_mib=64401 train_delta_mib=6420 latest_ckpt=outputs/qwen35_2b_mm/v0-20260613-213024/checkpoint-20
+[2026-06-13 21:35:14] All training rounds finished.

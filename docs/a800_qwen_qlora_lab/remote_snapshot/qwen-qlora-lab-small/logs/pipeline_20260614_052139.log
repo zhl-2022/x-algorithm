@@ -1,0 +1,32 @@
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 12.4.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+[2026-06-13 21:21:39] Pipeline started inside container
+wrote /workspace/qwen-qlora-lab/data/text_sft.jsonl rows=180
+wrote /workspace/qwen-qlora-lab/data/mm_sft.jsonl rows=6
+[2026-06-13 21:21:41] SKIP existing model: Qwen/Qwen3-1.7B -> /workspace/qwen-qlora-lab/models/Qwen3-1.7B
+3.8G	/workspace/qwen-qlora-lab/models/Qwen3-1.7B
+[2026-06-13 21:21:41] SKIP existing model: Qwen/Qwen3.5-0.8B -> /workspace/qwen-qlora-lab/models/Qwen3.5-0.8B
+1.7G	/workspace/qwen-qlora-lab/models/Qwen3.5-0.8B
+[2026-06-13 21:21:41] SKIP existing model: Qwen/Qwen3.5-2B -> /workspace/qwen-qlora-lab/models/Qwen3.5-2B
+4.3G	/workspace/qwen-qlora-lab/models/Qwen3.5-2B
+[2026-06-13 21:21:41] Final model directory sizes:
+3.8G	/workspace/qwen-qlora-lab/models/Qwen3-1.7B
+1.7G	/workspace/qwen-qlora-lab/models/Qwen3.5-0.8B
+4.3G	/workspace/qwen-qlora-lab/models/Qwen3.5-2B
+[2026-06-13 21:21:42] Initial free memory MiB: 23175
+[2026-06-13 21:21:42] SKIP round1_qwen3_17b_text existing_ckpt=outputs/qwen3_17b_text/v1-20260613-211241/checkpoint-20
+[2026-06-13 21:21:42] START round2_qwen35_08b_text model=models/Qwen3.5-0.8B dataset=data/text_sft.jsonl base_used_mib=57981 max_length=1024
+[2026-06-13 21:26:42] END round2_qwen35_08b_text rc=0 max_used_mib=60715 train_delta_mib=2734 latest_ckpt=outputs/qwen35_08b_text/v1-20260613-212200/checkpoint-20

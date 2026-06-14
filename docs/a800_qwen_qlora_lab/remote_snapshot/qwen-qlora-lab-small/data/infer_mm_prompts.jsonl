@@ -1,0 +1,2 @@
+{"messages": [{"role": "user", "content": "<image> 请描述这张推荐系统流程图，并指出训练闭环包含哪些环节。"}], "images": ["/workspace/qwen-qlora-lab/images/01_pipeline.png"]}
+{"messages": [{"role": "user", "content": "<image> 请根据图中的指标表，说明离线评测应该关注什么。"}], "images": ["/workspace/qwen-qlora-lab/images/04_metrics.png"]}

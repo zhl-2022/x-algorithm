@@ -135,6 +135,28 @@ source /torch/venv3/pytorch/bin/activate
 6. `srv3` 当前存在 SSH host key changed 警告，不自动清理 `known_hosts`，除非人工确认后再使用。
 7. 容器方案细节记录在 `docs/mlu_training_container.md`。
 
+## A800 Qwen QLoRA 学习环境
+
+当任务涉及 A800、Qwen、Qwen3、Qwen3.5、QLoRA、LoRA、SFT、ms-swift、ModelScope
+或多模态微调时，优先阅读并遵循：
+
+1. `docs/a800_qwen_qlora_lab/a800_qwen_qlora_workflow.md`
+2. `docs/a800_qwen_qlora_lab/troubleshooting_and_workflow.md`
+3. `docs/a800_qwen_qlora_lab/local_snapshot_learning_guide.md`
+4. `docs/a800_qwen_qlora_lab/local_webui_setup.md`
+
+当前 A800 实验目录是 `/root/zhl/qwen-qlora-lab`，本地轻量快照在
+`docs/a800_qwen_qlora_lab/remote_snapshot/qwen-qlora-lab-small/`。
+
+A800 任务必须遵循以下额外约束：
+
+1. 训练前先查 `nvidia-smi` 和 `df -h /root`，并记录现有 GPU 进程。
+2. 不停止 vLLM、MinerU、Milvus 等已有业务服务；只允许停止自己本轮启动且确认卡住的实验容器。
+3. 复杂远端命令优先用绝对路径或远端脚本，避免 PowerShell 双层 SSH 中未转义的 `$()`、`$!` 和远端变量。
+4. 模型下载优先 ModelScope，下载后必须检查 `config.json`、tokenizer 文件和 safetensors 权重。
+5. 自动化推理验证使用 `swift infer --val_dataset ... --result_path ...`，不要用交互式 `swift infer`。
+6. 不提交 `/root/zhl/qwen-qlora-lab/models/`、`adapter_model.safetensors`、`*.pt`、`*.bin` 或 Docker 镜像层。
+
 ## 协作规则
 
 1. 文档默认使用中文，保留必要英文术语，例如 `Recall@20`、`Two-Tower`、`ItemCF`。
