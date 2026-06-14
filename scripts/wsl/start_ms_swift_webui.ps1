@@ -5,10 +5,47 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+function Test-WslPortInUse {
+    param([int]$CandidatePort)
+
+    $checkCommand = "ss -ltn | awk '{print `$4}' | grep -Eq '(^|:)$($CandidatePort)$'"
+    wsl -- bash -lc $checkCommand | Out-Null
+    return $LASTEXITCODE -eq 0
+}
+
+function Resolve-WslPort {
+    param(
+        [int]$PreferredPort,
+        [int]$StartPort,
+        [int]$EndPort
+    )
+
+    if ($PreferredPort -gt 0 -and -not (Test-WslPortInUse -CandidatePort $PreferredPort)) {
+        return $PreferredPort
+    }
+
+    if ($PreferredPort -gt 0) {
+        Write-Warning "WSL port $PreferredPort is already in use; searching $StartPort-$EndPort."
+    }
+
+    for ($candidate = $StartPort; $candidate -le $EndPort; $candidate++) {
+        if (-not (Test-WslPortInUse -CandidatePort $candidate)) {
+            return $candidate
+        }
+    }
+
+    throw "No free WSL port found in range $StartPort-$EndPort."
+}
+
+$Port = Resolve-WslPort -PreferredPort $Port -StartPort 7860 -EndPort 7899
+
 $bashCommand = @"
 set -e
 cd /home/zhl/finetune-webui
 source /home/zhl/finetune-webui/swift-env/bin/activate
+export NO_PROXY="127.0.0.1,localhost,::1,`$NO_PROXY"
+export no_proxy="127.0.0.1,localhost,::1,`$no_proxy"
+export BROWSER=/bin/true
 echo "ms-swift WebUI: http://${HostName}:$Port"
 swift web-ui --lang zh --server_name $HostName --server_port $Port
 "@

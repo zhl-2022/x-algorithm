@@ -65,6 +65,8 @@ http://127.0.0.1:7860
 powershell -NoProfile -File scripts\wsl\start_ms_swift_webui.ps1 -Port 7870
 ```
 
+如果默认 `7860` 已被占用，脚本会自动在 `7860-7899` 里寻找下一个 WSL 空闲端口，并在终端输出实际 URL。
+
 等价的 WSL 手动命令：
 
 ```bash
@@ -92,6 +94,8 @@ http://127.0.0.1:7861
 ```powershell
 powershell -NoProfile -File scripts\wsl\start_llamafactory_webui.ps1 -Port 7871
 ```
+
+如果默认 `7861` 已被占用，脚本会自动在 `7861-7899` 里寻找下一个 WSL 空闲端口，并在终端输出实际 URL。
 
 等价的 WSL 手动命令：
 
@@ -151,6 +155,75 @@ cd /mnt/e/programs/x-algorithm
 | Gradio 与 Hugging Face Hub 不兼容 | `cannot import name 'HfFolder'` | 升级为 `gradio 5.50.0` |
 | LLaMA-Factory WebUI 导入 CUDA 版 torchaudio | 缺少 `libcudart.so.13` | 替换为 `torchaudio 2.11.0+cpu` |
 | 复制 venv 后激活路径错误 | `activate` 仍指向旧 `swift-env` | 修正 `llamafactory-env/bin` 中的 venv 路径 |
+| WebUI 默认端口被占用 | `Cannot find empty port in range: 7860-7860` | 关闭占用进程，或使用脚本自动切到空闲端口 |
+| Gradio startup-events 返回 502 | `http://127.0.0.1:7860/gradio_api/startup-events failed (code 502)` | 在启动脚本中为 `127.0.0.1`、`localhost`、`::1` 显式设置 `NO_PROXY/no_proxy` |
+| WSL 内自动打开浏览器失败 | `gio: http://127.0.0.1:7860/: Operation not supported` | 在启动脚本中设置 `BROWSER=/bin/true`，改用 Windows 浏览器打开 URL |
+
+### 端口占用排查
+
+如果看到类似错误：
+
+```text
+OSError: Cannot find empty port in range: 7860-7860
+```
+
+说明 WSL 里已经有进程监听这个端口。查看方式：
+
+```powershell
+wsl -- ss -ltnp
+```
+
+只看常用 WebUI 端口：
+
+```powershell
+wsl -- bash -lc "ss -ltnp | grep -E ':(7860|7861|7862|7870)\b' || true"
+```
+
+如果确认是旧的测试进程，可以在 WSL 里按 PID 停掉：
+
+```bash
+kill <PID>
+```
+
+也可以直接启动脚本并让它自动选择空闲端口：
+
+```powershell
+powershell -NoProfile -File scripts\wsl\start_ms_swift_webui.ps1
+```
+
+### Gradio 502 排查
+
+如果 WebUI 已经打印：
+
+```text
+* Running on local URL:  http://127.0.0.1:7860
+```
+
+随后又报：
+
+```text
+Couldn't start the app because 'http://127.0.0.1:7860/gradio_api/startup-events' failed (code 502)
+```
+
+通常是 WSL 里的代理变量把 `127.0.0.1` 请求转发到了代理端口。检查方式：
+
+```powershell
+wsl -- bash -lc "env | grep -iE 'proxy|no_proxy'"
+```
+
+启动脚本已经显式设置：
+
+```bash
+export NO_PROXY="127.0.0.1,localhost,::1,$NO_PROXY"
+export no_proxy="127.0.0.1,localhost,::1,$no_proxy"
+export BROWSER=/bin/true
+```
+
+因此直接重新运行脚本即可：
+
+```powershell
+powershell -NoProfile -File scripts\wsl\start_ms_swift_webui.ps1
+```
 
 ## 以后如果要改成本地 GPU 训练
 
