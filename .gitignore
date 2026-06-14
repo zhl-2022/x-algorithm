@@ -7,3 +7,4 @@ experiments/*/logs/
 *.pth
 *.ckpt
 *.safetensors
+llamaboard_cache/

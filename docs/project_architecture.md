@@ -18,11 +18,11 @@
 
 ## 3. 三批数据集分工
 
-| 数据集 | 业务场景 | 本项目中承担的学习目标 |
-|---|---|---|
-| MovieLens 1M | 用户给电影评分 | 用最简单的数据跑通数据处理、正反馈、TopK 评测、召回和排序 |
-| MIND-small | 用户浏览新闻曝光列表并点击 | 学习内容推荐，加入标题、摘要、类别、曝光候选和点击标签 |
-| KuaiRec | 用户观看短视频 | 学习短视频信息流推荐，加入观看时长、完播率、类别、caption、big 候选池和 MLU 工程 |
+| 数据集       | 业务场景                   | 本项目中承担的学习目标                                                           |
+| ------------ | -------------------------- | -------------------------------------------------------------------------------- |
+| MovieLens 1M | 用户给电影评分             | 用最简单的数据跑通数据处理、正反馈、TopK 评测、召回和排序                        |
+| MIND-small   | 用户浏览新闻曝光列表并点击 | 学习内容推荐，加入标题、摘要、类别、曝光候选和点击标签                           |
+| KuaiRec      | 用户观看短视频             | 学习短视频信息流推荐，加入观看时长、完播率、类别、caption、big 候选池和 MLU 工程 |
 
 ## 4. 离线推荐 Pipeline
 
@@ -32,17 +32,17 @@
 
 ## 5. 当前模型结构
 
-| 模型 | 结构 | 作用 |
-|---|---|---|
-| Popularity | 按全局热度排序 | 最低 baseline，判断数据是否有长尾和热门偏置 |
-| Category | 按用户偏好类别召回 | 内容类别 baseline |
-| ItemCF | 物品共现相似度 `co_count(i,j) / sqrt(count(i) * count(j))` | 传统协同过滤，KuaiRec big 上仍很强 |
-| MF | 用户 embedding + 物品 embedding 点积 + bias | 学习基础协同信号 |
-| Two-Tower | 用户塔 MLP + 内容塔 MLP + 点积 | 工业召回常用结构 |
-| ContentTwoTower | Two-Tower + 标题/摘要哈希文本 embedding | MIND 新闻内容推荐 |
-| DNNRanker | ID embedding、类别、文本、统计特征拼接后进入 MLP | 候选内精排 |
-| ItemCF-Distill-TwoTower | 用 ItemCF TopK 作为 teacher 训练 Two-Tower | 把传统协同过滤信号迁移到神经召回 |
-| TwoTower+DNN-Rerank | 先召回，再 Ranker 重排 | 模拟真实推荐系统多阶段 pipeline |
+| 模型                    | 结构                                                         | 作用                                        |
+| ----------------------- | ------------------------------------------------------------ | ------------------------------------------- |
+| Popularity              | 按全局热度排序                                               | 最低 baseline，判断数据是否有长尾和热门偏置 |
+| Category                | 按用户偏好类别召回                                           | 内容类别 baseline                           |
+| ItemCF                  | 物品共现相似度 `co_count(i,j) / sqrt(count(i) * count(j))` | 传统协同过滤，KuaiRec big 上仍很强          |
+| MF                      | 用户 embedding + 物品 embedding 点积 + bias                  | 学习基础协同信号                            |
+| Two-Tower               | 用户塔 MLP + 内容塔 MLP + 点积                               | 工业召回常用结构                            |
+| ContentTwoTower         | Two-Tower + 标题/摘要哈希文本 embedding                      | MIND 新闻内容推荐                           |
+| DNNRanker               | ID embedding、类别、文本、统计特征拼接后进入 MLP             | 候选内精排                                  |
+| ItemCF-Distill-TwoTower | 用 ItemCF TopK 作为 teacher 训练 Two-Tower                   | 把传统协同过滤信号迁移到神经召回            |
+| TwoTower+DNN-Rerank     | 先召回，再 Ranker 重排                                       | 模拟真实推荐系统多阶段 pipeline             |
 
 当前 Two-Tower 不是 Transformer，也不是 Grok/LLM。它是轻量推荐表征模型：用户塔和内容塔分别输出向量，最后用点积算相似度。
 
@@ -58,21 +58,21 @@
 
 当前已经验证：
 
-| 配置 | 结果 |
-|---|---:|
+| 配置               |                  结果 |
+| ------------------ | --------------------: |
 | 单卡 MLU benchmark | `723,335 samples/s` |
 | 双卡 DDP benchmark | `908,159 samples/s` |
-| 双卡提升 | 约 `25.6%` |
+| 双卡提升           |          约 `25.6%` |
 
 ## 8. 最终产物关系
 
-| 产物 | 路径 | 用途 |
-|---|---|---|
-| 总实验报告 | `docs/project_summary_report.md` | 汇总三批数据集结果 |
-| 总路线 | `docs/project_roadmap.md` | 记录项目阶段、当前状态和后续方向 |
-| 阅读指南 | `docs/experiment_reading_guide.md` | 告诉自己和面试官从哪里看实验 |
-| 简历写法 | `docs/resume_project_writeup.md` | 转成简历 bullet |
-| 面试问答 | `docs/interview_qa.md` | 准备项目追问 |
-| MovieLens 实验 | `experiments/movielens_recall/` | 入门闭环 |
-| MIND 实验 | `experiments/mind_news/` | 内容推荐 |
-| KuaiRec 实验 | `experiments/kuairec_short_video/` | 短视频和 MLU 工程 |
+| 产物           | 路径                                 | 用途                             |
+| -------------- | ------------------------------------ | -------------------------------- |
+| 总实验报告     | `docs/project_summary_report.md`   | 汇总三批数据集结果               |
+| 总路线         | `docs/project_roadmap.md`          | 记录项目阶段、当前状态和后续方向 |
+| 阅读指南       | `docs/experiment_reading_guide.md` | 告诉自己和面试官从哪里看实验     |
+| 简历写法       | `docs/resume_project_writeup.md`   | 转成简历 bullet                  |
+| 面试问答       | `docs/interview_qa.md`             | 准备项目追问                     |
+| MovieLens 实验 | `experiments/movielens_recall/`    | 入门闭环                         |
+| MIND 实验      | `experiments/mind_news/`           | 内容推荐                         |
+| KuaiRec 实验   | `experiments/kuairec_short_video/` | 短视频和 MLU 工程                |
