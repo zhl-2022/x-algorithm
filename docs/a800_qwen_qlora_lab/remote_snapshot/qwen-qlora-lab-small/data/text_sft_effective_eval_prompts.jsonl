@@ -1,0 +1,6 @@
+{"messages": [{"role": "user", "content": "请用简洁中文解释：A800 共享训练。"}]}
+{"messages": [{"role": "user", "content": "请用简洁中文解释：QLoRA 显存优化。"}]}
+{"messages": [{"role": "user", "content": "请用简洁中文解释：LoRA 参数含义。"}]}
+{"messages": [{"role": "user", "content": "请用简洁中文解释：推荐系统召回。"}]}
+{"messages": [{"role": "user", "content": "真实项目里使用 adapter 推理 时要注意什么？"}]}
+{"messages": [{"role": "user", "content": "请解释 max_length 为什么重要。"}]}

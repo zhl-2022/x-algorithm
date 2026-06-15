@@ -1,0 +1,9 @@
+wrote data/text_sft_effective_unique.jsonl rows=96 unique_prompts=96
+wrote data/text_sft_effective_eval_prompts.jsonl rows=6
+[2026-06-15 10:20:18] Run base inference for comparison
+[2026-06-15 10:21:34] Base inference rc=0 result=logs/qwen3_17b_effective.base.result.jsonl
+[2026-06-15 10:21:34] Start effective QLoRA training base_used_mib=54745
+[2026-06-15 10:25:47] Training rc=0 max_used_mib=59505 train_delta_mib=4760 latest_ckpt=outputs/qwen3_17b_text_effective/v0-20260615-102152/checkpoint-120
+[2026-06-15 10:25:47] Run effective LoRA inference
+[2026-06-15 10:26:49] LoRA inference rc=0 result=logs/qwen3_17b_effective.lora.result.jsonl
+[2026-06-15 10:26:51] Effective training workflow finished

@@ -37,28 +37,28 @@ docs/a800_qwen_qlora_lab/remote_snapshot/qwen-qlora-lab-small/
 
 在这次项目中，完整闭环是：
 
-| 阶段 | 当前文件 | 你要理解什么 |
-|---|---|---|
-| 环境 | `docker/Dockerfile` | 训练需要哪些 Python 包、为什么要做兼容处理 |
-| 数据 | `scripts/generate_data.py`、`data/*.jsonl` | 文本 SFT 和多模态 SFT 样本长什么样 |
-| 模型 | `scripts/download_models.sh`、`logs/model_downloads.log` | 模型怎么下载、怎么校验 |
-| 训练 | `scripts/train_rounds_inside.sh` | 一次 `swift sft` 训练命令包含哪些关键参数 |
-| 结果 | `outputs/*/args.json`、`outputs/*/logging.jsonl` | 实际训练参数和每步训练状态 |
-| adapter | `outputs/*/checkpoint-*/adapter_config.json` | LoRA 训练了哪些模块、rank/alpha 是什么 |
-| 推理 | `scripts/infer_rounds_inside.sh`、`logs/*.infer.md` | 如何用 adapter 批量验证效果 |
-| 运维 | `logs/training_status.log`、`logs/*.nvidia-smi.txt` | 如何确认没有影响共享 GPU 服务 |
+| 阶段    | 当前文件                                                     | 你要理解什么                                |
+| ------- | ------------------------------------------------------------ | ------------------------------------------- |
+| 环境    | `docker/Dockerfile`                                        | 训练需要哪些 Python 包、为什么要做兼容处理  |
+| 数据    | `scripts/generate_data.py`、`data/*.jsonl`               | 文本 SFT 和多模态 SFT 样本长什么样          |
+| 模型    | `scripts/download_models.sh`、`logs/model_downloads.log` | 模型怎么下载、怎么校验                      |
+| 训练    | `scripts/train_rounds_inside.sh`                           | 一次 `swift sft` 训练命令包含哪些关键参数 |
+| 结果    | `outputs/*/args.json`、`outputs/*/logging.jsonl`         | 实际训练参数和每步训练状态                  |
+| adapter | `outputs/*/checkpoint-*/adapter_config.json`               | LoRA 训练了哪些模块、rank/alpha 是什么      |
+| 推理    | `scripts/infer_rounds_inside.sh`、`logs/*.infer.md`      | 如何用 adapter 批量验证效果                 |
+| 运维    | `logs/training_status.log`、`logs/*.nvidia-smi.txt`      | 如何确认没有影响共享 GPU 服务               |
 
 ## 你不需要一开始掌握什么
 
 你不需要一开始理解所有高级训练概念。
 
-| 暂时不用深挖 | 原因 |
-|---|---|
-| 预训练细节 | 本项目做的是 SFT/QLoRA，不是从零预训练 |
-| 分布式训练、ZeRO、FSDP | 本次只用 A800 单卡保守训练 |
-| 每个 WebUI 字段 | 很多字段是高级功能或默认值，先掌握核心字段 |
-| `adapter_model.safetensors` 二进制内容 | 它是权重文件，不能用肉眼学习 |
-| 大规模评测平台 | 当前目标是学习闭环，不是生产级评测平台 |
+| 暂时不用深挖                             | 原因                                       |
+| ---------------------------------------- | ------------------------------------------ |
+| 预训练细节                               | 本项目做的是 SFT/QLoRA，不是从零预训练     |
+| 分布式训练、ZeRO、FSDP                   | 本次只用 A800 单卡保守训练                 |
+| 每个 WebUI 字段                          | 很多字段是高级功能或默认值，先掌握核心字段 |
+| `adapter_model.safetensors` 二进制内容 | 它是权重文件，不能用肉眼学习               |
+| 大规模评测平台                           | 当前目标是学习闭环，不是生产级评测平台     |
 
 你要先掌握的是：数据格式、训练命令、LoRA 参数、日志判断、推理验证。
 
@@ -72,20 +72,20 @@ docs/a800_qwen_qlora_lab/remote_snapshot/qwen-qlora-lab-small/
 
 你会看到这些子目录：
 
-| 目录 | 含义 | 怎么看 |
-|---|---|---|
-| `data/` | 训练和推理用的 JSONL 数据 | 先看 `text_sft.jsonl` 和 `mm_sft.jsonl` |
-| `images/` | 多模态训练用的合成图片 | 打开 `01_pipeline.png` 等图片 |
-| `scripts/` | 数据生成、下载、训练、推理脚本 | 重点看 `train_rounds_inside.sh` |
-| `docker/` | 远端训练环境镜像 | 看它安装了哪些框架和依赖 |
-| `logs/` | 训练、下载、推理、显存日志 | 看成功/失败原因和显存占用 |
-| `outputs/` | 训练输出目录 | 看 `args.json`、`logging.jsonl`、checkpoint 元数据 |
+| 目录         | 含义                           | 怎么看                                                 |
+| ------------ | ------------------------------ | ------------------------------------------------------ |
+| `data/`    | 训练和推理用的 JSONL 数据      | 先看 `text_sft.jsonl` 和 `mm_sft.jsonl`            |
+| `images/`  | 多模态训练用的合成图片         | 打开 `01_pipeline.png` 等图片                        |
+| `scripts/` | 数据生成、下载、训练、推理脚本 | 重点看 `train_rounds_inside.sh`                      |
+| `docker/`  | 远端训练环境镜像               | 看它安装了哪些框架和依赖                               |
+| `logs/`    | 训练、下载、推理、显存日志     | 看成功/失败原因和显存占用                              |
+| `outputs/` | 训练输出目录                   | 看 `args.json`、`logging.jsonl`、checkpoint 元数据 |
 
 练习任务：
 
-- [ ] 在 VS Code 里展开 `remote_snapshot/qwen-qlora-lab-small/`。
-- [ ] 找到 `data/`、`scripts/`、`logs/`、`outputs/`。
-- [ ] 用一句话解释每个目录的作用。
+- [X] 在 VS Code 里展开 `remote_snapshot/qwen-qlora-lab-small/`。
+- [X] 找到 `data/`、`scripts/`、`logs/`、`outputs/`。
+- [X] 用一句话解释每个目录的作用。
 
 面试表达：
 
@@ -126,11 +126,11 @@ docs/a800_qwen_qlora_lab/remote_snapshot/qwen-qlora-lab-small/data/text_sft.json
 
 `messages` 是聊天模型最常见的监督微调格式。它表示一次对话。
 
-| 字段 | 含义 | 当前例子 |
-|---|---|---|
-| `system` | 给模型设定身份、风格和边界 | 中文技术助手 |
-| `user` | 用户问题 | 解释推荐系统召回 |
-| `assistant` | 期望模型学会的回答 | 召回阶段的解释 |
+| 字段          | 含义                       | 当前例子         |
+| ------------- | -------------------------- | ---------------- |
+| `system`    | 给模型设定身份、风格和边界 | 中文技术助手     |
+| `user`      | 用户问题                   | 解释推荐系统召回 |
+| `assistant` | 期望模型学会的回答         | 召回阶段的解释   |
 
 训练时，模型会看到 `system + user`，然后学习生成 `assistant` 的内容。
 
@@ -153,19 +153,19 @@ docs/a800_qwen_qlora_lab/remote_snapshot/qwen-qlora-lab-small/data/text_sft.json
 
 ### 好数据和坏数据的区别
 
-| 类型 | 表现 |
-|---|---|
-| 好数据 | 问题明确、回答准确、风格稳定、和目标任务一致 |
+| 类型   | 表现                                               |
+| ------ | -------------------------------------------------- |
+| 好数据 | 问题明确、回答准确、风格稳定、和目标任务一致       |
 | 坏数据 | 回答含糊、事实错误、格式混乱、同一问题答案互相矛盾 |
 
 在真实项目里，数据质量通常比调参更重要。微调不是把模型变聪明，而是把你的数据分布、任务格式和回答偏好灌进模型。
 
 练习任务：
 
-- [ ] 打开 `text_sft.jsonl`。
-- [ ] 复制一条样本，标出 `system`、`user`、`assistant`。
-- [ ] 自己写 3 条推荐系统相关样本，保持同样格式。
-- [ ] 判断这批数据适合让模型学什么，不适合让模型学什么。
+- [X] 打开 `text_sft.jsonl`。
+- [X] 复制一条样本，标出 `system`、`user`、`assistant`。
+- [X] 自己写 3 条推荐系统相关样本，保持同样格式。
+- [X] 判断这批数据适合让模型学什么，不适合让模型学什么。
 
 面试表达：
 
@@ -207,11 +207,11 @@ docs/a800_qwen_qlora_lab/remote_snapshot/qwen-qlora-lab-small/data/mm_sft.jsonl
 
 ### 多模态样本比文本多了什么
 
-| 字段 | 作用 |
-|---|---|
-| `messages` | 仍然表示对话 |
-| `<image>` | 告诉模板这里插入图片 |
-| `images` | 给出图片路径 |
+| 字段         | 作用                 |
+| ------------ | -------------------- |
+| `messages` | 仍然表示对话         |
+| `<image>`  | 告诉模板这里插入图片 |
+| `images`   | 给出图片路径         |
 
 这类数据用于训练或微调能读图的模型。文本模型只看文字，多模态模型还要把图片编码成视觉特征。
 
@@ -231,21 +231,21 @@ docs/a800_qwen_qlora_lab/remote_snapshot/qwen-qlora-lab-small/scripts/generate_d
 
 当前图片包括：
 
-| 图片 | 含义 |
-|---|---|
-| `01_pipeline.png` | 推荐系统离线 pipeline |
-| `02_gpu.png` | A800 共享 GPU 使用策略 |
-| `03_qlora.png` | QLoRA 训练闭环 |
-| `04_metrics.png` | 推荐系统指标 |
-| `05_download.png` | 模型下载回退策略 |
-| `06_safety.png` | 低风险训练原则 |
+| 图片                | 含义                   |
+| ------------------- | ---------------------- |
+| `01_pipeline.png` | 推荐系统离线 pipeline  |
+| `02_gpu.png`      | A800 共享 GPU 使用策略 |
+| `03_qlora.png`    | QLoRA 训练闭环         |
+| `04_metrics.png`  | 推荐系统指标           |
+| `05_download.png` | 模型下载回退策略       |
+| `06_safety.png`   | 低风险训练原则         |
 
 练习任务：
 
-- [ ] 打开 `mm_sft.jsonl`。
-- [ ] 打开 `images/01_pipeline.png`。
-- [ ] 检查 JSONL 里的图片路径和图片文件是否对应。
-- [ ] 自己解释 `<image>` 的作用。
+- [X] 打开 `mm_sft.jsonl`。
+- [X] 打开 `images/01_pipeline.png`。
+- [X] 检查 JSONL 里的图片路径和图片文件是否对应。
+- [X] 自己解释 `<image>` 的作用。
 
 面试表达：
 
@@ -270,10 +270,10 @@ docs/a800_qwen_qlora_lab/remote_snapshot/qwen-qlora-lab-small/scripts/generate_d
 
 因为它能回答三个基础问题：
 
-| 问题 | 对应代码 |
-|---|---|
-| 训练数据有多少条 | `for i in range(180)` |
-| 每条样本是什么格式 | `rows.append({"messages": [...]})` |
+| 问题               | 对应代码                                              |
+| ------------------ | ----------------------------------------------------- |
+| 训练数据有多少条   | `for i in range(180)`                               |
+| 每条样本是什么格式 | `rows.append({"messages": [...]})`                  |
 | 多模态图片怎么来的 | `Image.new`、`ImageDraw.Draw`、`img.save(path)` |
 
 ### 当前数据规模意味着什么
@@ -288,9 +288,9 @@ docs/a800_qwen_qlora_lab/remote_snapshot/qwen-qlora-lab-small/scripts/generate_d
 
 练习任务：
 
-- [ ] 找到 `text_topics`，看这批文本样本覆盖哪些主题。
-- [ ] 找到 `mm_specs`，看每张图对应什么回答。
-- [ ] 修改一条样本主题，思考训练结果会被怎样影响。
+- [X] 找到 `text_topics`，看这批文本样本覆盖哪些主题。
+- [X] 找到 `mm_specs`，看每张图对应什么回答。
+- [X] 修改一条样本主题，思考训练结果会被怎样影响。
 
 ## 第五课：看懂环境 Dockerfile
 
@@ -316,15 +316,15 @@ RUN python -m pip install -U \
 
 这表示主训练框架是 `ms-swift`，同时安装了：
 
-| 包 | 用途 |
-|---|---|
-| `ms-swift` | 训练、推理、导出主框架 |
-| `transformers` | 模型结构和 tokenizer |
-| `accelerate` | 训练加速和设备管理 |
-| `peft` | LoRA/QLoRA adapter |
-| `bitsandbytes` | 4bit/8bit 量化 |
-| `qwen-vl-utils` | Qwen 多模态处理工具 |
-| `modelscope` | 国内模型下载 |
+| 包                | 用途                   |
+| ----------------- | ---------------------- |
+| `ms-swift`      | 训练、推理、导出主框架 |
+| `transformers`  | 模型结构和 tokenizer   |
+| `accelerate`    | 训练加速和设备管理     |
+| `peft`          | LoRA/QLoRA adapter     |
+| `bitsandbytes`  | 4bit/8bit 量化         |
+| `qwen-vl-utils` | Qwen 多模态处理工具    |
+| `modelscope`    | 国内模型下载           |
 
 ### 为什么有兼容 shim
 
@@ -339,10 +339,10 @@ if not hasattr(torch, "float8_e8m0fnu"):
 
 练习任务：
 
-- [ ] 找到 `ms-swift==4.3.0`。
-- [ ] 找到 `bitsandbytes`。
-- [ ] 找到 `modelscope`。
-- [ ] 用一句话说明 Dockerfile 为什么重要。
+- [X] 找到 `ms-swift==4.3.0`。
+- [X] 找到 `bitsandbytes`。
+- [X] 找到 `modelscope`。
+- [X] 用一句话说明 Dockerfile 为什么重要。
 
 面试表达：
 
@@ -368,11 +368,11 @@ docs/a800_qwen_qlora_lab/remote_snapshot/qwen-qlora-lab-small/logs/model_downloa
 
 当前下载结果：
 
-| 模型 | 目录大小 |
-|---|---:|
-| `Qwen3-1.7B` | `3.8G` |
+| 模型             | 目录大小 |
+| ---------------- | -------: |
+| `Qwen3-1.7B`   | `3.8G` |
 | `Qwen3.5-0.8B` | `1.7G` |
-| `Qwen3.5-2B` | `4.3G` |
+| `Qwen3.5-2B`   | `4.3G` |
 
 ### 为什么下载后要校验
 
@@ -393,9 +393,9 @@ config.json
 
 练习任务：
 
-- [ ] 打开 `download_models.sh`。
-- [ ] 找到 `verify_model_dir` 函数。
-- [ ] 打开 `model_downloads.log`，确认三个模型大小。
+- [X] 打开 `download_models.sh`。
+- [X] 找到 `verify_model_dir` 函数。
+- [X] 打开 `model_downloads.log`，确认三个模型大小。
 
 面试表达：
 
@@ -425,11 +425,11 @@ docs/a800_qwen_qlora_lab/remote_snapshot/qwen-qlora-lab-small/scripts/train_roun
 
 三轮训练是：
 
-| 轮次 | 模型 | 数据 | 输出目录 |
-|---|---|---|---|
-| Round 1 | `models/Qwen3-1.7B` | `data/text_sft.jsonl` | `outputs/qwen3_17b_text` |
+| 轮次    | 模型                    | 数据                    | 输出目录                    |
+| ------- | ----------------------- | ----------------------- | --------------------------- |
+| Round 1 | `models/Qwen3-1.7B`   | `data/text_sft.jsonl` | `outputs/qwen3_17b_text`  |
 | Round 2 | `models/Qwen3.5-0.8B` | `data/text_sft.jsonl` | `outputs/qwen35_08b_text` |
-| Round 3 | `models/Qwen3.5-2B` | `data/mm_sft.jsonl` | `outputs/qwen35_2b_mm` |
+| Round 3 | `models/Qwen3.5-2B`   | `data/mm_sft.jsonl`   | `outputs/qwen35_2b_mm`    |
 
 ### 显存保护逻辑
 
@@ -461,10 +461,10 @@ delta=$((max_used - base_used))
 
 练习任务：
 
-- [ ] 找到 `free_mib` 函数。
-- [ ] 找到 `used_mib` 函数。
-- [ ] 找到 `logs/force_max_length_512` 的逻辑。
-- [ ] 解释为什么共享 GPU 上要先检查显存。
+- [X] 找到 `free_mib` 函数。
+- [X] 找到 `used_mib` 函数。
+- [X] 找到 `logs/force_max_length_512` 的逻辑。
+- [X] 解释为什么共享 GPU 上要先检查显存。
 
 面试表达：
 
@@ -500,24 +500,24 @@ CUDA_VISIBLE_DEVICES=0 swift sft \
 
 ### 参数分类理解
 
-| 分类 | 参数 | 当前值 | 小白解释 |
-|---|---|---|---|
-| 设备 | `CUDA_VISIBLE_DEVICES` | `0` | 只用第 0 张可见 GPU |
-| 框架 | `swift sft` | SFT 训练 | 做监督微调 |
-| 模型 | `--model` | 模型目录 | 选择要微调的基座模型 |
-| 数据 | `--dataset` | JSONL 文件 | 选择训练样本 |
-| 量化 | `--quant_bits` | `4` | 用 4bit 加载基座模型，降低显存 |
-| 精度 | `--torch_dtype` | `bfloat16` | 训练计算用 bf16 |
-| 步数 | `--max_steps` | `20` | 只训练 20 步，学习实验用 |
-| batch | `--per_device_train_batch_size` | `1` | 单步每卡只放 1 条样本 |
-| 梯度累积 | `--gradient_accumulation_steps` | `8` | 累积 8 次再更新，相当于有效 batch 变大 |
-| 学习率 | `--learning_rate` | `1e-4` | 控制每次参数更新幅度 |
-| LoRA 容量 | `--lora_rank` | `8` | adapter 低秩矩阵大小 |
-| LoRA 缩放 | `--lora_alpha` | `32` | adapter 更新强度 |
-| LoRA 插入层 | `--target_modules` | `all-linear` | 对线性层插入 LoRA |
-| 序列长度 | `--max_length` | `1024` | 输入输出总 token 上限 |
-| 保存 | `--save_steps` | `10` | 每 10 步保存一次 |
-| 输出 | `--output_dir` | `outputs/...` | 保存训练产物 |
+| 分类        | 参数                              | 当前值          | 小白解释                               |
+| ----------- | --------------------------------- | --------------- | -------------------------------------- |
+| 设备        | `CUDA_VISIBLE_DEVICES`          | `0`           | 只用第 0 张可见 GPU                    |
+| 框架        | `swift sft`                     | SFT 训练        | 做监督微调                             |
+| 模型        | `--model`                       | 模型目录        | 选择要微调的基座模型                   |
+| 数据        | `--dataset`                     | JSONL 文件      | 选择训练样本                           |
+| 量化        | `--quant_bits`                  | `4`           | 用 4bit 加载基座模型，降低显存         |
+| 精度        | `--torch_dtype`                 | `bfloat16`    | 训练计算用 bf16                        |
+| 步数        | `--max_steps`                   | `20`          | 只训练 20 步，学习实验用               |
+| batch       | `--per_device_train_batch_size` | `1`           | 单步每卡只放 1 条样本                  |
+| 梯度累积    | `--gradient_accumulation_steps` | `8`           | 累积 8 次再更新，相当于有效 batch 变大 |
+| 学习率      | `--learning_rate`               | `1e-4`        | 控制每次参数更新幅度                   |
+| LoRA 容量   | `--lora_rank`                   | `8`           | adapter 低秩矩阵大小                   |
+| LoRA 缩放   | `--lora_alpha`                  | `32`          | adapter 更新强度                       |
+| LoRA 插入层 | `--target_modules`              | `all-linear`  | 对线性层插入 LoRA                      |
+| 序列长度    | `--max_length`                  | `1024`        | 输入输出总 token 上限                  |
+| 保存        | `--save_steps`                  | `10`          | 每 10 步保存一次                       |
+| 输出        | `--output_dir`                  | `outputs/...` | 保存训练产物                           |
 
 ### 有效 batch size 怎么算
 
@@ -539,19 +539,19 @@ $$
 
 ### 你调参时先动哪些
 
-| 目标 | 优先调整 |
-|---|---|
-| 显存不够 | 降 `max_length`，保持 batch size 为 1 |
-| 训练太慢 | 降模型大小或 `max_length` |
-| 过拟合 | 减少 epoch/steps，增加验证集，清洗重复数据 |
-| 效果不明显 | 增加高质量数据，适当增加 steps |
-| 输出风格不稳定 | 提高数据一致性，检查模板和 system prompt |
+| 目标           | 优先调整                                   |
+| -------------- | ------------------------------------------ |
+| 显存不够       | 降 `max_length`，保持 batch size 为 1    |
+| 训练太慢       | 降模型大小或 `max_length`                |
+| 过拟合         | 减少 epoch/steps，增加验证集，清洗重复数据 |
+| 效果不明显     | 增加高质量数据，适当增加 steps             |
+| 输出风格不稳定 | 提高数据一致性，检查模板和 system prompt   |
 
 练习任务：
 
-- [ ] 在 WebUI 里找到 `model`、`dataset`、`max_length`、`learning_rate`。
-- [ ] 在 WebUI 里找到 `lora_rank`、`lora_alpha`、`target_modules`。
-- [ ] 用自己的话解释有效 batch size。
+- [X] 在 WebUI 里找到 `model`、`dataset`、`max_length`、`learning_rate`。
+- [X] 在 WebUI 里找到 `lora_rank`、`lora_alpha`、`target_modules`。
+- [X] 用自己的话解释有效 batch size。
 
 面试表达：
 
@@ -586,12 +586,12 @@ LoRA adapter 用较高精度训练
 
 本项目里对应参数：
 
-| 概念 | 参数 |
-|---|---|
-| 使用 QLoRA | `--quant_bits 4` |
-| 使用 LoRA | `--tuner_backend peft`、`--lora_rank`、`--lora_alpha` |
-| 插入哪些层 | `--target_modules all-linear` |
-| adapter 输出 | `outputs/*/checkpoint-*` |
+| 概念         | 参数                                                        |
+| ------------ | ----------------------------------------------------------- |
+| 使用 QLoRA   | `--quant_bits 4`                                          |
+| 使用 LoRA    | `--tuner_backend peft`、`--lora_rank`、`--lora_alpha` |
+| 插入哪些层   | `--target_modules all-linear`                             |
+| adapter 输出 | `outputs/*/checkpoint-*`                                  |
 
 ## 第十课：看懂 `adapter_config.json`
 
@@ -603,16 +603,16 @@ docs/a800_qwen_qlora_lab/remote_snapshot/qwen-qlora-lab-small/outputs/qwen3_17b_
 
 重点字段：
 
-| 字段 | 当前值 | 含义 |
-|---|---|---|
+| 字段                        | 当前值                                          | 含义                     |
+| --------------------------- | ----------------------------------------------- | ------------------------ |
 | `base_model_name_or_path` | `/workspace/qwen-qlora-lab/models/Qwen3-1.7B` | adapter 对应哪个基座模型 |
-| `peft_type` | `LORA` | 这是 LoRA adapter |
-| `task_type` | `CAUSAL_LM` | 因果语言模型任务 |
-| `r` | `8` | LoRA rank |
-| `lora_alpha` | `32` | LoRA 缩放系数 |
-| `lora_dropout` | `0.05` | adapter dropout |
-| `target_modules` | `q_proj`、`v_proj`、`gate_proj` 等 | 实际插入 LoRA 的模块 |
-| `inference_mode` | `true` | 当前 checkpoint 用于推理 |
+| `peft_type`               | `LORA`                                        | 这是 LoRA adapter        |
+| `task_type`               | `CAUSAL_LM`                                   | 因果语言模型任务         |
+| `r`                       | `8`                                           | LoRA rank                |
+| `lora_alpha`              | `32`                                          | LoRA 缩放系数            |
+| `lora_dropout`            | `0.05`                                        | adapter dropout          |
+| `target_modules`          | `q_proj`、`v_proj`、`gate_proj` 等        | 实际插入 LoRA 的模块     |
+| `inference_mode`          | `true`                                        | 当前 checkpoint 用于推理 |
 
 ### 为什么训练命令里是 `all-linear`，这里变成具体模块
 
@@ -636,10 +636,10 @@ docs/a800_qwen_qlora_lab/remote_snapshot/qwen-qlora-lab-small/outputs/qwen3_17b_
 
 练习任务：
 
-- [ ] 打开 `adapter_config.json`。
-- [ ] 找到 `r` 和 `lora_alpha`。
-- [ ] 找到 `target_modules`。
-- [ ] 解释为什么 adapter 必须知道 `base_model_name_or_path`。
+- [X] 打开 `adapter_config.json`。
+- [X] 找到 `r` 和 `lora_alpha`。
+- [X] 找到 `target_modules`。
+- [X] 解释为什么 adapter 必须知道 `base_model_name_or_path`。
 
 面试表达：
 
@@ -657,33 +657,33 @@ docs/a800_qwen_qlora_lab/remote_snapshot/qwen-qlora-lab-small/outputs/qwen3_17b_
 
 重点文件：
 
-| 文件 | 作用 |
-|---|---|
-| `args.json` | 本次训练的完整参数快照 |
-| `logging.jsonl` | 每一步训练指标 |
+| 文件               | 作用                      |
+| ------------------ | ------------------------- |
+| `args.json`      | 本次训练的完整参数快照    |
+| `logging.jsonl`  | 每一步训练指标            |
 | `checkpoint-10/` | 第 10 步保存的 checkpoint |
 | `checkpoint-20/` | 第 20 步保存的 checkpoint |
-| `images/` | 训练曲线图 |
+| `images/`        | 训练曲线图                |
 
 ### `args.json` 怎么看
 
 `args.json` 很长，不要从头背到尾。先找这些字段：
 
-| 字段 | 当前例子 | 你要理解什么 |
-|---|---|---|
-| `model` | `models/Qwen3-1.7B` | 用了哪个基座模型 |
-| `model_type` | `qwen3` | 框架识别的模型类型 |
-| `template` | `qwen3` | 使用哪个 prompt 模板 |
-| `dataset` | `data/text_sft.jsonl` | 训练数据 |
-| `quant_bits` | `4` | 是否 QLoRA |
-| `max_length` | `1024` | 序列长度上限 |
-| `per_device_train_batch_size` | `1` | 单卡 batch |
-| `gradient_accumulation_steps` | `8` | 梯度累积 |
-| `learning_rate` | `0.0001` | 学习率 |
-| `lora_rank` | `8` | LoRA rank |
-| `lora_alpha` | `32` | LoRA alpha |
-| `target_modules` | `all-linear` | LoRA 目标模块 |
-| `swift_version` | `4.3.0` | 框架版本 |
+| 字段                            | 当前例子                | 你要理解什么         |
+| ------------------------------- | ----------------------- | -------------------- |
+| `model`                       | `models/Qwen3-1.7B`   | 用了哪个基座模型     |
+| `model_type`                  | `qwen3`               | 框架识别的模型类型   |
+| `template`                    | `qwen3`               | 使用哪个 prompt 模板 |
+| `dataset`                     | `data/text_sft.jsonl` | 训练数据             |
+| `quant_bits`                  | `4`                   | 是否 QLoRA           |
+| `max_length`                  | `1024`                | 序列长度上限         |
+| `per_device_train_batch_size` | `1`                   | 单卡 batch           |
+| `gradient_accumulation_steps` | `8`                   | 梯度累积             |
+| `learning_rate`               | `0.0001`              | 学习率               |
+| `lora_rank`                   | `8`                   | LoRA rank            |
+| `lora_alpha`                  | `32`                  | LoRA alpha           |
+| `target_modules`              | `all-linear`          | LoRA 目标模块        |
+| `swift_version`               | `4.3.0`               | 框架版本             |
 
 ### 为什么 `args.json` 很重要
 
@@ -691,12 +691,12 @@ docs/a800_qwen_qlora_lab/remote_snapshot/qwen-qlora-lab-small/outputs/qwen3_17b_
 
 练习任务：
 
-- [ ] 打开 `args.json`。
-- [ ] 搜索 `model`。
-- [ ] 搜索 `dataset`。
-- [ ] 搜索 `quant_bits`。
-- [ ] 搜索 `lora_rank`。
-- [ ] 搜索 `target_modules`。
+- [X] 打开 `args.json`。
+- [X] 搜索 `model`。
+- [X] 搜索 `dataset`。
+- [X] 搜索 `quant_bits`。
+- [X] 搜索 `lora_rank`。
+- [X] 搜索 `target_modules`。
 
 ## 第十二课：看懂训练日志指标
 
@@ -715,16 +715,16 @@ docs/a800_qwen_qlora_lab/remote_snapshot/qwen-qlora-lab-small/outputs/qwen3_17b_
 
 ### 指标怎么理解
 
-| 指标 | 含义 | 怎么判断 |
-|---|---|---|
-| `loss` | 模型预测和目标答案的差距 | 通常希望整体下降，但不能只看 loss |
-| `grad_norm` | 梯度范数 | 过大可能不稳定，异常 NaN 需要警惕 |
-| `learning_rate` | 当前学习率 | 本次用 cosine 调度，逐步下降 |
-| `token_acc` | token 级预测准确率 | 可辅助观察训练是否学到东西 |
-| `epoch` | 训练数据遍历进度 | 小实验未必完整跑完 1 epoch |
-| `global_step/max_steps` | 当前训练步数 | 本次最多 20 步 |
-| `memory(GiB)` | 框架记录的显存 | 只作参考，结合 `nvidia-smi` |
-| `train_speed(s/it)` | 每步耗时 | 用来比较训练速度 |
+| 指标                      | 含义                     | 怎么判断                          |
+| ------------------------- | ------------------------ | --------------------------------- |
+| `loss`                  | 模型预测和目标答案的差距 | 通常希望整体下降，但不能只看 loss |
+| `grad_norm`             | 梯度范数                 | 过大可能不稳定，异常 NaN 需要警惕 |
+| `learning_rate`         | 当前学习率               | 本次用 cosine 调度，逐步下降      |
+| `token_acc`             | token 级预测准确率       | 可辅助观察训练是否学到东西        |
+| `epoch`                 | 训练数据遍历进度         | 小实验未必完整跑完 1 epoch        |
+| `global_step/max_steps` | 当前训练步数             | 本次最多 20 步                    |
+| `memory(GiB)`           | 框架记录的显存           | 只作参考，结合 `nvidia-smi`     |
+| `train_speed(s/it)`     | 每步耗时                 | 用来比较训练速度                  |
 
 ### 当前 Round 1 日志说明什么
 
@@ -767,24 +767,24 @@ docs/a800_qwen_qlora_lab/remote_snapshot/qwen-qlora-lab-small/logs/training_stat
 
 ### 关键字段
 
-| 字段 | 含义 |
-|---|---|
-| `START` | 某轮训练开始 |
-| `END` | 某轮训练结束 |
-| `rc=0` | exit code 为 0，表示成功 |
-| `rc=1` | exit code 非 0，表示失败 |
-| `base_used_mib` | 训练前 GPU 已用显存 |
-| `max_used_mib` | 训练期间最高已用显存 |
-| `train_delta_mib` | 本轮新增显存峰值 |
-| `latest_ckpt` | 最新 checkpoint 路径 |
+| 字段                | 含义                     |
+| ------------------- | ------------------------ |
+| `START`           | 某轮训练开始             |
+| `END`             | 某轮训练结束             |
+| `rc=0`            | exit code 为 0，表示成功 |
+| `rc=1`            | exit code 非 0，表示失败 |
+| `base_used_mib`   | 训练前 GPU 已用显存      |
+| `max_used_mib`    | 训练期间最高已用显存     |
+| `train_delta_mib` | 本轮新增显存峰值         |
+| `latest_ckpt`     | 最新 checkpoint 路径     |
 
 ### 当前三轮结果
 
-| 轮次 | 结果 | 显存增量 | checkpoint |
-|---|---|---:|---|
-| Round 1 | 成功 | `4406 MiB` | `outputs/qwen3_17b_text/.../checkpoint-20` |
+| 轮次    | 结果 |     显存增量 | checkpoint                                    |
+| ------- | ---- | -----------: | --------------------------------------------- |
+| Round 1 | 成功 | `4406 MiB` | `outputs/qwen3_17b_text/.../checkpoint-20`  |
 | Round 2 | 成功 | `2734 MiB` | `outputs/qwen35_08b_text/.../checkpoint-20` |
-| Round 3 | 成功 | `6420 MiB` | `outputs/qwen35_2b_mm/.../checkpoint-20` |
+| Round 3 | 成功 | `6420 MiB` | `outputs/qwen35_2b_mm/.../checkpoint-20`    |
 
 注意：日志里也保留了失败记录，例如 Round 1 和 Round 2 曾经 `rc=1`。这很正常，真实工程不是一次成功，重要的是能定位、修复、复跑，并保留记录。
 
@@ -806,12 +806,12 @@ docs/a800_qwen_qlora_lab/remote_snapshot/qwen-qlora-lab-small/logs/round1_qwen3_
 
 这个文件是完整 stdout/stderr，信息很多。小白不用全部看，先看四类信息：
 
-| 信息 | 怎么找 |
-|---|---|
-| 训练进度 | 搜索 `Train:` |
-| 每步指标 | 搜索 `'loss'` |
-| 保存 checkpoint | 搜索 `Saving model checkpoint` |
-| 最终结果 | 搜索 `train_runtime`、`last_model_checkpoint` |
+| 信息            | 怎么找                                            |
+| --------------- | ------------------------------------------------- |
+| 训练进度        | 搜索 `Train:`                                   |
+| 每步指标        | 搜索 `'loss'`                                   |
+| 保存 checkpoint | 搜索 `Saving model checkpoint`                  |
+| 最终结果        | 搜索 `train_runtime`、`last_model_checkpoint` |
 
 当前 Round 1 最终摘要：
 
@@ -858,14 +858,14 @@ swift infer \
 
 ### 推理参数解释
 
-| 参数 | 含义 |
-|---|---|
-| `--adapters` | 加载哪个 LoRA checkpoint |
-| `--val_dataset` | 用哪个 JSONL 做验证输入 |
-| `--result_path` | 把输出保存到哪里 |
-| `--stream false` | 非流式输出，适合批量验证 |
-| `--max_new_tokens 256` | 最多生成 256 个新 token |
-| `--max_batch_size 1` | 每次推理 1 条，保守省显存 |
+| 参数                     | 含义                      |
+| ------------------------ | ------------------------- |
+| `--adapters`           | 加载哪个 LoRA checkpoint  |
+| `--val_dataset`        | 用哪个 JSONL 做验证输入   |
+| `--result_path`        | 把输出保存到哪里          |
+| `--stream false`       | 非流式输出，适合批量验证  |
+| `--max_new_tokens 256` | 最多生成 256 个新 token   |
+| `--max_batch_size 1`   | 每次推理 1 条，保守省显存 |
 
 ### 看推理结果
 
@@ -890,11 +890,11 @@ result_preview:
 
 先看三个层次：
 
-| 层次 | 判断问题 |
-|---|---|
-| 格式 | 是否能正常输出中文，是否跑完 3 条 |
-| 相关性 | 回答是否围绕问题 |
-| 稳定性 | 是否啰嗦、幻觉、遗漏重点 |
+| 层次   | 判断问题                          |
+| ------ | --------------------------------- |
+| 格式   | 是否能正常输出中文，是否跑完 3 条 |
+| 相关性 | 回答是否围绕问题                  |
+| 稳定性 | 是否啰嗦、幻觉、遗漏重点          |
 
 真实项目还要做更严格评测：
 
@@ -924,57 +924,57 @@ result_preview:
 
 ### 顶部标签页
 
-| WebUI 标签 | 含义 | 当前是否重点 |
-|---|---|---|
-| `LLM预训练/微调` | SFT、LoRA、QLoRA 等训练入口 | 重点 |
-| `LLM人类对齐` | DPO、偏好对齐等 | 暂时了解 |
-| `LLM GRPO` | 强化学习/GRPO 相关 | 暂时不学 |
-| `LLM推理` | 加载模型或 adapter 做推理 | 第二重点 |
-| `LLM导出` | 合并/导出模型 | 后续学习 |
-| `LLM评测` | 自动评测 | 后续学习 |
-| `LLM采样` | 生成/采样数据 | 后续学习 |
+| WebUI 标签         | 含义                        | 当前是否重点 |
+| ------------------ | --------------------------- | ------------ |
+| `LLM预训练/微调` | SFT、LoRA、QLoRA 等训练入口 | 重点         |
+| `LLM人类对齐`    | DPO、偏好对齐等             | 暂时了解     |
+| `LLM GRPO`       | 强化学习/GRPO 相关          | 暂时不学     |
+| `LLM推理`        | 加载模型或 adapter 做推理   | 第二重点     |
+| `LLM导出`        | 合并/导出模型               | 后续学习     |
+| `LLM评测`        | 自动评测                    | 后续学习     |
+| `LLM采样`        | 生成/采样数据               | 后续学习     |
 
 ### 模型设置
 
-| WebUI 字段 | 命令参数 | 当前例子 | 解释 |
-|---|---|---|---|
-| 模型 id 或路径 | `--model` | `models/Qwen3-1.7B` | 基座模型目录 |
-| 模型类型 | `--model_type` | `qwen3` | 框架识别模型结构 |
-| Prompt 模板类型 | `--template` | `qwen3` | 把 messages 转成模型实际输入 |
-| System 字段 | `--system` 或数据里的 system | 当前在数据里 | 指定助手身份 |
+| WebUI 字段      | 命令参数                       | 当前例子              | 解释                         |
+| --------------- | ------------------------------ | --------------------- | ---------------------------- |
+| 模型 id 或路径  | `--model`                    | `models/Qwen3-1.7B` | 基座模型目录                 |
+| 模型类型        | `--model_type`               | `qwen3`             | 框架识别模型结构             |
+| Prompt 模板类型 | `--template`                 | `qwen3`             | 把 messages 转成模型实际输入 |
+| System 字段     | `--system` 或数据里的 system | 当前在数据里          | 指定助手身份                 |
 
 模板很重要。模型和模板不匹配，轻则回答奇怪，重则训练数据拼接错误。
 
 ### 数据集设置
 
-| WebUI 字段 | 命令参数 | 当前例子 | 解释 |
-|---|---|---|---|
-| 数据集名称 | `--dataset` | `data/text_sft.jsonl` | 训练样本 |
-| 验证集拆分比例 | `--split_dataset_ratio` | `0.0` | 小实验不拆验证集 |
-| 句子最大长度 | `--max_length` | `1024` | 输入输出 token 上限 |
-| 无填充批处理 | `--padding_free` | `false` | 高级优化，先不碰 |
+| WebUI 字段     | 命令参数                  | 当前例子                | 解释                |
+| -------------- | ------------------------- | ----------------------- | ------------------- |
+| 数据集名称     | `--dataset`             | `data/text_sft.jsonl` | 训练样本            |
+| 验证集拆分比例 | `--split_dataset_ratio` | `0.0`                 | 小实验不拆验证集    |
+| 句子最大长度   | `--max_length`          | `1024`                | 输入输出 token 上限 |
+| 无填充批处理   | `--padding_free`        | `false`               | 高级优化，先不碰    |
 
 ### 训练参数设置
 
-| WebUI 字段 | 命令参数 | 当前例子 | 解释 |
-|---|---|---|---|
-| 训练 Stage | 隐含 SFT | `sft` | 监督微调 |
-| 训练方式 | `--tuner_type` | `lora` | 用 LoRA 微调 |
-| 随机数种子 | `--seed` | `42` | 保持可复现 |
-| 训练精度 | `--torch_dtype` | `bfloat16` | A800 上常用 |
-| batch size | `--per_device_train_batch_size` | `1` | 省显存 |
-| 梯度累积 | `--gradient_accumulation_steps` | `8` | 有效 batch |
-| 学习率 | `--learning_rate` | `1e-4` | 更新幅度 |
-| 最大步数 | `--max_steps` | `20` | 学习实验短跑 |
-| 保存步数 | `--save_steps` | `10` | 保存 checkpoint |
+| WebUI 字段 | 命令参数                          | 当前例子     | 解释            |
+| ---------- | --------------------------------- | ------------ | --------------- |
+| 训练 Stage | 隐含 SFT                          | `sft`      | 监督微调        |
+| 训练方式   | `--tuner_type`                  | `lora`     | 用 LoRA 微调    |
+| 随机数种子 | `--seed`                        | `42`       | 保持可复现      |
+| 训练精度   | `--torch_dtype`                 | `bfloat16` | A800 上常用     |
+| batch size | `--per_device_train_batch_size` | `1`        | 省显存          |
+| 梯度累积   | `--gradient_accumulation_steps` | `8`        | 有效 batch      |
+| 学习率     | `--learning_rate`               | `1e-4`     | 更新幅度        |
+| 最大步数   | `--max_steps`                   | `20`       | 学习实验短跑    |
+| 保存步数   | `--save_steps`                  | `10`       | 保存 checkpoint |
 
 ### LoRA/QLoRA 设置
 
-| WebUI 字段 | 命令参数 | 当前例子 | 解释 |
-|---|---|---|---|
-| 量化 bit | `--quant_bits` | `4` | QLoRA 关键 |
-| LoRA rank | `--lora_rank` | `8` | adapter 容量 |
-| LoRA alpha | `--lora_alpha` | `32` | adapter 缩放 |
+| WebUI 字段     | 命令参数             | 当前例子       | 解释          |
+| -------------- | -------------------- | -------------- | ------------- |
+| 量化 bit       | `--quant_bits`     | `4`          | QLoRA 关键    |
+| LoRA rank      | `--lora_rank`      | `8`          | adapter 容量  |
+| LoRA alpha     | `--lora_alpha`     | `32`         | adapter 缩放  |
 | Target modules | `--target_modules` | `all-linear` | 哪些层加 LoRA |
 
 ### WebUI 学习方式
@@ -1076,13 +1076,13 @@ result_preview:
 
 真实项目不只跑通训练，还要补：
 
-| 模块 | 要补什么 |
-|---|---|
-| 数据 | 数据来源、清洗规则、去重、质量抽检 |
-| 评测 | 固定评测集、人工标准答案、自动评分 |
-| 对比 | base 模型 vs prompt vs RAG vs 微调 |
-| 安全 | 敏感数据、越权输出、幻觉、拒答 |
-| 部署 | adapter 加载、导出、服务接口、回滚 |
+| 模块 | 要补什么                               |
+| ---- | -------------------------------------- |
+| 数据 | 数据来源、清洗规则、去重、质量抽检     |
+| 评测 | 固定评测集、人工标准答案、自动评分     |
+| 对比 | base 模型 vs prompt vs RAG vs 微调     |
+| 安全 | 敏感数据、越权输出、幻觉、拒答         |
+| 部署 | adapter 加载、导出、服务接口、回滚     |
 | 成本 | 训练显存、训练时长、推理延迟、存储大小 |
 
 ## 第十八课：面试怎么讲
@@ -1107,15 +1107,15 @@ result_preview:
 
 ### 面试官可能追问
 
-| 问题 | 回答要点 |
-|---|---|
-| 为什么用 QLoRA | 4bit 加载基座模型，显存低，只训练 adapter |
-| LoRA rank 是什么 | 低秩矩阵容量，越大表达能力越强但参数更多 |
-| 为什么不只看 loss | loss 只说明训练集拟合，真实效果要看验证集和业务任务 |
-| 为什么要记录显存 | 共享 GPU 环境要避免影响已有服务 |
-| adapter 能单独用吗 | 不能，必须和对应基座模型一起加载 |
-| 数据少有什么问题 | 容易过拟合，只能验证流程，不代表生产效果 |
-| 模板为什么重要 | messages 需要被模板转成模型认识的 prompt 格式 |
+| 问题                           | 回答要点                                                                         |
+| ------------------------------ | -------------------------------------------------------------------------------- |
+| 为什么用 QLoRA                 | 4bit 加载基座模型，显存低，只训练 adapter                                        |
+| LoRA rank 是什么               | 低秩矩阵容量，越大表达能力越强但参数更多                                         |
+| 为什么不只看 loss              | loss 只说明训练集拟合，真实效果要看验证集和业务任务                              |
+| 为什么要记录显存               | 共享 GPU 环境要避免影响已有服务                                                  |
+| adapter 能单独用吗             | 不能，必须和对应基座模型一起加载                                                 |
+| 数据少有什么问题               | 容易过拟合，只能验证流程，不代表生产效果                                         |
+| 模板为什么重要                 | messages 需要被模板转成模型认识的 prompt 格式                                    |
 | ms-swift 和 LLaMA-Factory 区别 | ms-swift 更贴 Qwen/ModelScope/多模态工程，LLaMA-Factory WebUI 更适合入门理解流程 |
 
 ## 第十九课：你应该掌握到什么程度
