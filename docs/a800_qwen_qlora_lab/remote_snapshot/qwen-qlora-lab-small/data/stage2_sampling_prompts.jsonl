@@ -1,0 +1,3 @@
+{"id": "sampling_a800_plan", "prompt": "请给我一份明天学习 QLoRA 推理、评测、导出的清单。"}
+{"id": "sampling_interview_answer", "prompt": "请生成一段面试回答：我如何在 A800 上完成 Qwen3 QLoRA 微调和推理对比。"}
+{"id": "sampling_short_explain", "prompt": "请用小白能懂的话解释：为什么同一个模型每次回答可能不一样？"}

@@ -1,0 +1,825 @@
+DPO dataset: data/stage3_dpo_stage2_corrections.jsonl
+Base model: models/Qwen3-1.7B
+Start adapter: outputs/stage3_qwen3_17b_dpo/v0-20260616-031625/checkpoint-30
+Max steps: 40
+run sh: `/opt/conda/bin/python /opt/conda/lib/python3.11/site-packages/swift/cli/rlhf.py --rlhf_type dpo --tuner_backend peft --tuner_type lora --model models/Qwen3-1.7B --model_type qwen3 --template qwen3 --adapters outputs/stage3_qwen3_17b_dpo/v0-20260616-031625/checkpoint-30 --ref_adapters outputs/stage3_qwen3_17b_dpo/v0-20260616-031625/checkpoint-30 --quant_bits 4 --dataset data/stage3_dpo_stage2_corrections.jsonl --torch_dtype bfloat16 --num_train_epochs 1 --max_steps 40 --per_device_train_batch_size 1 --per_device_eval_batch_size 1 --learning_rate 5e-5 --lora_rank 16 --lora_alpha 32 --lora_dropout 0 --target_modules all-linear --gradient_accumulation_steps 4 --logging_steps 1 --save_steps 15 --save_total_limit 2 --max_length 768 --warmup_ratio 0.03 --beta 0.1 --rpo_alpha 0.1 --dataloader_num_workers 1 --dataset_num_proc 1 --output_dir outputs/stage3_qwen3_17b_dpo_corrections --save_only_model true`
+[INFO:swift] Successfully registered `/opt/conda/lib/python3.11/site-packages/swift/dataset/data/dataset_info.json`.
+[INFO:swift] rank: -1, local_rank: -1, world_size: 1, local_world_size: 1
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+[INFO:swift] Setting args.lazy_tokenize: False
+/opt/conda/lib/python3.11/site-packages/swift/rlhf_trainers/arguments.py:13: TRLExperimentalWarning: You are importing from 'trl.experimental'. APIs here are unstable and may change or be removed without notice. Silence this warning by setting environment variable TRL_EXPERIMENTAL_SILENCE=1.
+  from trl.experimental.cpo import CPOConfig as HfCPOConfig
+[transformers] warmup_ratio is deprecated and will be removed in v5.2. Use `warmup_steps` instead.
+[INFO:swift] output_dir: /workspace/qwen-qlora-lab/outputs/stage3_qwen3_17b_dpo_corrections/v0-20260616-034853
+[INFO:swift] args: RLHFArguments(
+acc_strategy=token,
+accelerator_config={'dispatch_batches': False},
+adalora_beta1=0.85,
+adalora_beta2=0.85,
+adalora_deltaT=1,
+adalora_init_r=12,
+adalora_orth_reg_weight=0.5,
+adalora_target_r=8,
+adalora_tfinal=0,
+adalora_tinit=0,
+adam_beta1=0.9,
+adam_beta2=0.95,
+adam_epsilon=1e-08,
+adapter_act=gelu,
+adapter_length=128,
+adapters=['/workspace/qwen-qlora-lab/outputs/stage3_qwen3_17b_dpo/v0-20260616-031625/checkpoint-30'],
+add_non_thinking_prefix=True,
+add_version=True,
+advantage_estimator=grpo,
+agent_template=None,
+aligner_lr=None,
+async_generate=False,
+attn_impl=None,
+auto_find_batch_size=False,
+average_tokens_across_devices=True,
+batch_eval_metrics=False,
+beta=0.1,
+bf16=True,
+bf16_full_eval=False,
+bnb_4bit_compute_dtype=torch.bfloat16,
+bnb_4bit_quant_storage=None,
+bnb_4bit_quant_type=nf4,
+bnb_4bit_use_double_quant=True,
+boft_block_num=0,
+boft_block_size=4,
+boft_dropout=0.0,
+boft_n_butterfly_factor=1,
+cached_dataset=[],
+cached_val_dataset=[],
+callbacks=[],
+center_rewards_coefficient=None,
+check_model=True,
+chord_enable_phi_function=False,
+chord_mu_decay_steps=None,
+chord_mu_peak=None,
+chord_mu_valley=None,
+chord_mu_warmup_steps=None,
+chord_sft_dataset=[],
+chord_sft_per_device_train_batch_size=None,
+cliprange=0.2,
+cliprange_value=0.2,
+columns={},
+completion_length_limit_scope=per_round,
+cosine_max_len=None,
+cosine_max_len_value_correct=0.5,
+cosine_max_len_value_wrong=0.0,
+cosine_min_len_value_correct=1.0,
+cosine_min_len_value_wrong=-0.5,
+cpo_alpha=1.0,
+create_checkpoint_symlink=False,
+custom_dataset_info=[],
+custom_register_path=[],
+data_seed=42,
+dataloader_drop_last=False,
+dataloader_num_workers=1,
+dataloader_persistent_workers=False,
+dataloader_pin_memory=True,
+dataloader_prefetch_factor=None,
+dataset=['data/stage3_dpo_stage2_corrections.jsonl'],
+dataset_num_proc=1,
+dataset_shuffle=True,
+ddp_backend=None,
+ddp_broadcast_buffers=None,
+ddp_bucket_cap_mb=None,
+ddp_find_unused_parameters=None,
+ddp_static_graph=None,
+ddp_timeout=18000000,
+debug=None,
+deepspeed=None,
+deepspeed_autotp_size=None,
+delta=None,
+desirable_weight=1.0,
+device_groups=None,
+device_map=None,
+disable_auto_column_mapping=False,
+disable_tqdm=None,
+discopop_tau=0.05,
+do_eval=False,
+do_predict=False,
+do_train=False,
+download_mode=reuse_dataset_if_exists,
+ds3_gather_for_generation=True,
+dynamic_sample=False,
+early_stop_interval=None,
+enable_channel_loss=False,
+enable_dft_loss=False,
+enable_flattened_weight_sync=True,
+enable_jit_checkpoint=False,
+enable_npu_model_patch=True,
+enable_thinking=None,
+epsilon=0.2,
+epsilon_high=None,
+eval_accumulation_steps=None,
+eval_dataset=[],
+eval_dataset_args=None,
+eval_delay=0,
+eval_do_concat_batches=True,
+eval_generation_config=None,
+eval_limit=None,
+eval_metric=None,
+eval_on_start=False,
+eval_steps=15.0,
+eval_strategy=no,
+eval_use_evalscope=False,
+eval_use_gather_object=False,
+experts_impl=None,
+external_plugins=[],
+extra_eval_args=None,
+fipo_clip_high_only=True,
+fipo_clip_range=0.2,
+fipo_decay_rate=32.0,
+fipo_safety_threshold=4.0,
+fourier_n_frequency=2000,
+fourier_scaling=300.0,
+fp16=False,
+fp16_full_eval=False,
+freeze_aligner=True,
+freeze_llm=False,
+freeze_parameters=[],
+freeze_parameters_ratio=0.0,
+freeze_parameters_regex=None,
+freeze_vit=True,
+fsdp=[],
+fsdp_config=None,
+full_determinism=False,
+galore_cos_threshold=0.4,
+galore_gamma_proj=2,
+galore_optim_per_parameter=False,
+galore_proj_bits=4,
+galore_proj_group_size=256,
+galore_proj_quant=False,
+galore_proj_type=std,
+galore_quantization=False,
+galore_queue_size=5,
+galore_rank=128,
+galore_scale=1.0,
+galore_target_modules=None,
+galore_update_proj_gap=50,
+galore_with_embedding=False,
+gamma=1.0,
+generation_batch_size=None,
+generation_config=None,
+generation_max_length=None,
+generation_num_beams=None,
+gkd_logits_topk=None,
+gradient_accumulation_steps=4,
+gradient_checkpointing=True,
+gradient_checkpointing_kwargs=None,
+greater_is_better=False,
+group_by_length=False,
+gym_env=None,
+hqq_axis=None,
+hub_always_push=False,
+hub_model_id=None,
+hub_private_repo=None,
+hub_revision=None,
+hub_strategy=every_save,
+hub_token=<HUB_TOKEN>,
+ignore_args_error=False,
+ignore_data_skip=False,
+importance_sampling_level=token,
+include_for_metrics=[],
+include_num_input_tokens_seen=False,
+init_strategy=None,
+init_weights=True,
+interleave_prob=None,
+is_binary_loss_scale=None,
+kl_coef=0.05,
+kl_in_reward=None,
+label_names=None,
+label_smoothing=0,
+label_smoothing_factor=0.0,
+lam=0.95,
+lazy_tokenize=False,
+ld_alpha=None,
+learning_rate=5e-05,
+length_column_name=length,
+liger_kernel_config=None,
+lisa_activated_layers=0,
+lisa_step_interval=20,
+llamapro_num_groups=None,
+llamapro_num_new_blocks=4,
+lmbda=0.5,
+load_args=False,
+load_best_model_at_end=False,
+load_data_args=False,
+load_from_cache_file=False,
+local_rank=-1,
+local_repo_path=None,
+local_rollout_forward_batch_size=64,
+log_completions=False,
+log_entropy=False,
+log_level=passive,
+log_level_replica=warning,
+log_on_each_node=True,
+log_rollout_offpolicy_metrics=False,
+logging_dir=/workspace/qwen-qlora-lab/outputs/stage3_qwen3_17b_dpo_corrections/v0-20260616-034853/runs,
+logging_first_step=True,
+logging_nan_inf_filter=True,
+logging_steps=1,
+logging_strategy=steps,
+logprobs=False,
+lora_alpha=32,
+lora_bias=none,
+lora_dropout=0.0,
+lora_dtype=None,
+lora_ga_batch_size=2,
+lora_ga_direction=ArB2r,
+lora_ga_iters=2,
+lora_ga_max_length=1024,
+lora_ga_scale=stable,
+lora_ga_stable_gamma=16,
+lora_rank=16,
+lorap_lr_ratio=None,
+loss_scale=last_round,
+loss_type=sigmoid,
+loss_weights=None,
+lr_scheduler_kwargs=None,
+lr_scheduler_type=cosine,
+max_completion_length=512,
+max_epochs=None,
+max_grad_norm=1.0,
+max_length=768,
+max_memory={},
+max_model_len=None,
+max_new_tokens=512,
+max_pixels=None,
+max_resample_times=3,
+max_shard_size=5GB,
+max_steps=40,
+max_turns=None,
+metric_for_best_model=loss,
+missing_eos_penalty=None,
+model=models/Qwen3-1.7B,
+model_author=None,
+model_kwargs={},
+model_name=None,
+model_revision=None,
+model_type=qwen3,
+modules_to_save=[],
+move_model_batches=None,
+multi_turn_scheduler=None,
+neftune_noise_alpha=None,
+new_special_tokens=[],
+norm_bbox=None,
+num_beams=1,
+num_generations=8,
+num_generations_eval=None,
+num_iterations=1,
+num_labels=None,
+num_mini_batches=1,
+num_ppo_epochs=4,
+num_sample_generations=10,
+num_train_epochs=1.0,
+off_policy_sequence_mask_delta=None,
+offload_model=False,
+offload_optimizer=False,
+offload_teacher_model=False,
+optim=adamw_torch,
+optim_args=None,
+optim_target_modules=None,
+optimizer=None,
+output_dir=/workspace/qwen-qlora-lab/outputs/stage3_qwen3_17b_dpo_corrections/v0-20260616-034853,
+overlong_filter=False,
+packing=False,
+packing_length=None,
+packing_num_proc=1,
+padding_free=False,
+padding_side=right,
+parallelism_config=None,
+per_device_eval_batch_size=1,
+per_device_train_batch_size=1,
+predict_with_generate=False,
+prediction_loss_only=False,
+preserve_thinking=None,
+problem_type=None,
+project=huggingface,
+push_to_hub=False,
+quant_bits=4,
+quant_method=None,
+ray_exp_name=None,
+real_tau=0.5,
+ref_adapters=['outputs/stage3_qwen3_17b_dpo/v0-20260616-031625/checkpoint-30'],
+ref_model=None,
+ref_model_mixup_alpha=0.6,
+ref_model_revision=None,
+ref_model_sync_steps=512,
+ref_model_type=None,
+reft_args=None,
+reft_intervention_type=LoreftIntervention,
+reft_layer_key=None,
+reft_layers=None,
+reft_rank=4,
+remove_unused_columns=True,
+repetition_max_penalty=-1.0,
+repetition_n_grams=3,
+repetition_penalty=1.0,
+report_to=['tensorboard'],
+response_length=512,
+response_prefix=None,
+restore_callback_states_from_checkpoint=False,
+resume_from_checkpoint=None,
+resume_only_model=False,
+reward_adapters=[],
+reward_funcs=[],
+reward_model=None,
+reward_model_plugin=None,
+reward_model_revision=None,
+reward_model_type=None,
+reward_template=None,
+reward_weights=None,
+rlhf_type=dpo,
+rollout_importance_sampling_mode=None,
+rollout_importance_sampling_threshold=2.0,
+rope_scaling=None,
+router_aux_loss_coef=0.0,
+rpo_alpha=0.1,
+run_name=/workspace/qwen-qlora-lab/outputs/stage3_qwen3_17b_dpo_corrections/v0-20260616-034853,
+safe_serialization=True,
+save_on_each_node=False,
+save_only_model=True,
+save_steps=15.0,
+save_strategy=steps,
+save_total_limit=2,
+scale_rewards=None,
+seed=42,
+seq_kd=False,
+sequence_parallel_size=1,
+sft_alpha=0,
+shuffle_buffer_size=1000,
+simpo_gamma=1,
+skip_memory_metrics=True,
+sleep_level=0,
+soft_cache_length=None,
+soft_max_length=None,
+sortish_sampler=False,
+split_dataset_ratio=0.0,
+steps_per_generation=None,
+stop_words=[],
+stopping_strategy=first_exhausted,
+stream=False,
+streaming=False,
+strict=False,
+structured_outputs_regex=None,
+swanlab_email_language=zh,
+swanlab_exp_name=None,
+swanlab_mode=cloud,
+swanlab_notification_method=None,
+swanlab_project=ms-swift,
+swanlab_receiver_email=None,
+swanlab_secret=None,
+swanlab_sender_email=None,
+swanlab_smtp_port=None,
+swanlab_smtp_server=None,
+swanlab_token=<SWANLAB_TOKEN>,
+swanlab_webhook_url=None,
+swanlab_workspace=None,
+sync_ref_model=False,
+system=None,
+target_modules=['all-linear'],
+target_parameters=None,
+target_regex=None,
+task_type=causal_lm,
+tau_neg=1.05,
+tau_pos=1.0,
+teacher_adapters=[],
+teacher_deepspeed=None,
+teacher_model=None,
+teacher_model_revision=None,
+teacher_model_server=None,
+teacher_model_type=None,
+temperature=0.9,
+template=qwen3,
+template_backend=swift,
+tf32=None,
+top_entropy_quantile=1.0,
+top_k=-1,
+top_logprobs=None,
+top_p=1.0,
+torch_compile=False,
+torch_compile_backend=None,
+torch_compile_mode=None,
+torch_dtype=torch.bfloat16,
+torch_empty_cache_steps=None,
+trackio_bucket_id=None,
+trackio_space_id=None,
+trackio_static_space_id=None,
+train_dataloader_shuffle=True,
+train_sampling_strategy=random,
+trainable_parameters=[],
+trainable_parameters_regex=None,
+truncation_strategy=delete,
+tuner_backend=peft,
+tuner_type=lora,
+undesirable_weight=1.0,
+use_cache=False,
+use_chat_template=True,
+use_cpu=False,
+use_dora=False,
+use_flash_ckpt=False,
+use_galore=False,
+use_gym_env=None,
+use_hf=False,
+use_liger_kernel=False,
+use_logits_to_keep=None,
+use_ray=False,
+use_rslora=False,
+use_swift_lora=False,
+use_vllm=False,
+val_dataset=[],
+val_dataset_shuffle=False,
+vera_d_initial=0.1,
+vera_dropout=0.0,
+vera_projection_prng_key=0,
+vera_rank=256,
+vf_coef=0.1,
+vit_gradient_checkpointing=False,
+vit_lr=None,
+vllm_data_parallel_size=1,
+vllm_disable_cascade_attn=False,
+vllm_disable_custom_all_reduce=True,
+vllm_enable_expert_parallel=False,
+vllm_enable_lora=False,
+vllm_enable_prefix_caching=True,
+vllm_enforce_eager=False,
+vllm_engine_kwargs={},
+vllm_gpu_memory_utilization=0.9,
+vllm_limit_mm_per_prompt=None,
+vllm_max_lora_rank=16,
+vllm_max_model_len=None,
+vllm_max_num_seqs=None,
+vllm_mm_processor_cache_gb=None,
+vllm_mode=None,
+vllm_pipeline_parallel_size=1,
+vllm_quantization=None,
+vllm_reasoning_parser=None,
+vllm_server_base_url=None,
+vllm_server_group_port=None,
+vllm_server_host=None,
+vllm_server_pass_dataset=False,
+vllm_server_port=[8000],
+vllm_server_timeout=240.0,
+vllm_speculative_config=None,
+vllm_tensor_parallel_size=1,
+vllm_use_async_engine=None,
+wandb_log_unique_prompts=None,
+warmup_ratio=0.03,
+warmup_steps=0,
+weight_decay=0.1,
+whiten_rewards=False,
+zero_hpz_partition_size=None,
+)
+[INFO:swift] Global seed set to 42
+[INFO:swift] model_kwargs: {'device_map': 'cuda:0', 'dtype': torch.bfloat16}
+Loading weights:   0%|          | 0/311 [00:00<?, ?it/s]Loading weights:  23%|██▎       | 71/311 [00:00<00:00, 709.56it/s]Loading weights:  46%|████▌     | 142/311 [00:00<00:00, 670.18it/s]Loading weights:  68%|██████▊   | 210/311 [00:00<00:00, 657.47it/s]Loading weights:  89%|████████▊ | 276/311 [00:00<00:00, 638.36it/s]Loading weights: 100%|██████████| 311/311 [00:00<00:00, 648.07it/s]
+[INFO:swift] model_info: ModelInfo(model_type='qwen3', model_dir='/workspace/qwen-qlora-lab/models/Qwen3-1.7B', torch_dtype=torch.bfloat16, max_model_len=40960, quant_method=None, quant_bits=None, rope_scaling={'rope_theta': 1000000, 'rope_type': 'default'}, is_moe_model=False, is_multimodal=False, config=Qwen3Config {
+  "architectures": [
+    "Qwen3ForCausalLM"
+  ],
+  "attention_bias": false,
+  "attention_dropout": 0.0,
+  "bos_token_id": 151643,
+  "dtype": "bfloat16",
+  "eos_token_id": 151645,
+  "head_dim": 128,
+  "hidden_act": "silu",
+  "hidden_size": 2048,
+  "initializer_range": 0.02,
+  "intermediate_size": 6144,
+  "layer_types": [
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention"
+  ],
+  "max_position_embeddings": 40960,
+  "max_window_layers": 28,
+  "model_type": "qwen3",
+  "num_attention_heads": 16,
+  "num_hidden_layers": 28,
+  "num_key_value_heads": 8,
+  "pad_token_id": null,
+  "rms_norm_eps": 1e-06,
+  "rope_parameters": {
+    "rope_theta": 1000000,
+    "rope_type": "default"
+  },
+  "sliding_window": null,
+  "tie_word_embeddings": true,
+  "transformers_version": "5.10.2",
+  "use_cache": true,
+  "use_sliding_window": false,
+  "vocab_size": 151936
+}
+, task_type='causal_lm', num_labels=None)
+[INFO:swift] model.generation_config: GenerationConfig {
+  "bos_token_id": 151643,
+  "do_sample": true,
+  "eos_token_id": [
+    151645,
+    151643
+  ],
+  "length_penalty": 1.0,
+  "max_new_tokens": 512,
+  "num_beams": 1,
+  "pad_token_id": 151643,
+  "repetition_penalty": 1.0,
+  "temperature": 0.9,
+  "top_k": 20,
+  "top_p": 1.0
+}
+
+[INFO:swift] default_system: None
+[INFO:swift] max_length: 768
+[INFO:swift] response_prefix: None
+[INFO:swift] agent_template: hermes
+[INFO:swift] Start time of running main: 2026-06-16 03:48:55.337493
+[INFO:swift] swift.__version__: 4.3.0
+Generating train split: 0 examples [00:00, ? examples/s]Generating train split: 8 examples [00:00, 3346.74 examples/s]
+Map (num_proc=1):   0%|          | 0/8 [00:00<?, ? examples/s]Map (num_proc=1): 100%|██████████| 8/8 [00:00<00:00, 40.28 examples/s]
+Map (num_proc=1):   0%|          | 0/8 [00:00<?, ? examples/s]Map (num_proc=1): 100%|██████████| 8/8 [00:03<00:00,  2.56 examples/s]Map (num_proc=1): 100%|██████████| 8/8 [00:03<00:00,  2.45 examples/s]
+[INFO:swift] train_dataset: Dataset({
+    features: ['messages', 'rejected_response', 'lengths'],
+    num_rows: 8
+})
+[INFO:swift] val_dataset: None
+[INFO:swift] [CHOSEN_INPUT_IDS] [151644, 8948, 198, 105043, 362, 23, 15, 15, 1207, 16948, 84141, 106, 47872, 100134, 102562, 1773, 102104, 100645, 101041, 5373, 102188, 5373, 30440, 58364, 99665, 3837, 104011, 101290, 32100, 30534, 100692, 109733, 1773, 151645, 198, 151644, 872, 198, 100678, 22112, 220, 17, 91417, 60949, 99689, 115163, 67338, 108259, 104949, 100672, 88991, 11319, 151645, 198, 151644, 77091, 198, 151667, 271, 151668, 271, 105291, 115163, 100009, 46842, 1779, 1773, 99652, 101097, 101071, 102104, 64471, 100347, 104760, 99689, 3837, 53153, 104317, 101290, 64471, 36587, 32664, 5373, 113597, 64471, 100680, 5373, 104710, 100320, 99353, 1773, 101912, 102104, 69249, 100347, 1909, 620, 5373, 34558, 5373, 100407, 5373, 107898, 3837, 108542, 99360, 1909, 620, 85122, 68862, 28726, 1773, 99999, 30534, 104465, 105966, 2033, 3837, 99190, 102249, 58364, 99665, 33108, 22045, 102206, 101042, 3837, 87256, 99360, 32100, 66017, 104387, 12857, 422, 2045, 17551, 92313, 14773, 2045, 36813, 10758, 1606, 6567, 225, 102, 100554, 47882, 1773, 151645, 198]
+[INFO:swift] [CHOSEN_INPUT] <|im_start|>system
+你是 A800 Qwen 微调学习教练。回答必须直接、准确、可复盘，遇到概念错误要明确纠正。<|im_end|>
+<|im_start|>user
+为什么 Stage 2 关键词评测通过不代表模型真的正确？<|im_end|>
+<|im_start|>assistant
+<think>
+
+</think>
+
+关键词评测只是 sanity check。它只能检查回答是否出现某些词，不能判断概念是否说对、因果是否成立、有没有幻觉。比如回答里出现 top_p、temperature、稳定、随机，也可能把 top_p 解释错。所以要保留原始 response，做人工复盘和失败案例分析，再把错误输出整理成 DPO rejected 或 GRPO forbidden/reward 惩罚项。<|im_end|>
+
+[INFO:swift] [CHOSEN_LABELS_IDS] [-100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, 151667, 271, 151668, 271, 105291, 115163, 100009, 46842, 1779, 1773, 99652, 101097, 101071, 102104, 64471, 100347, 104760, 99689, 3837, 53153, 104317, 101290, 64471, 36587, 32664, 5373, 113597, 64471, 100680, 5373, 104710, 100320, 99353, 1773, 101912, 102104, 69249, 100347, 1909, 620, 5373, 34558, 5373, 100407, 5373, 107898, 3837, 108542, 99360, 1909, 620, 85122, 68862, 28726, 1773, 99999, 30534, 104465, 105966, 2033, 3837, 99190, 102249, 58364, 99665, 33108, 22045, 102206, 101042, 3837, 87256, 99360, 32100, 66017, 104387, 12857, 422, 2045, 17551, 92313, 14773, 2045, 36813, 10758, 1606, 6567, 225, 102, 100554, 47882, 1773, 151645, 198]
+[INFO:swift] [CHOSEN_LABELS] [-100 * 57]<think>
+
+</think>
+
+关键词评测只是 sanity check。它只能检查回答是否出现某些词，不能判断概念是否说对、因果是否成立、有没有幻觉。比如回答里出现 top_p、temperature、稳定、随机，也可能把 top_p 解释错。所以要保留原始 response，做人工复盘和失败案例分析，再把错误输出整理成 DPO rejected 或 GRPO forbidden/reward 惩罚项。<|im_end|>
+
+[INFO:swift] [REJECTED_INPUT_IDS] [151644, 8948, 198, 105043, 362, 23, 15, 15, 1207, 16948, 84141, 106, 47872, 100134, 102562, 1773, 102104, 100645, 101041, 5373, 102188, 5373, 30440, 58364, 99665, 3837, 104011, 101290, 32100, 30534, 100692, 109733, 1773, 151645, 198, 151644, 872, 198, 100678, 22112, 220, 17, 91417, 60949, 99689, 115163, 67338, 108259, 104949, 100672, 88991, 11319, 151645, 198, 151644, 77091, 198, 151667, 271, 151668, 271, 100671, 105291, 115163, 5823, 3837, 80158, 66394, 104949, 99461, 101128, 105073, 3837, 104689, 87256, 50930, 105966, 102104, 1773, 151645, 198]
+[INFO:swift] [REJECTED_INPUT] <|im_start|>system
+你是 A800 Qwen 微调学习教练。回答必须直接、准确、可复盘，遇到概念错误要明确纠正。<|im_end|>
+<|im_start|>user
+为什么 Stage 2 关键词评测通过不代表模型真的正确？<|im_end|>
+<|im_start|>assistant
+<think>
+
+</think>
+
+只要关键词评测 passed，就说明模型已经理解这个问题，不需要再看原始回答。<|im_end|>
+
+[INFO:swift] [REJECTED_LABELS_IDS] [-100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, 151667, 271, 151668, 271, 100671, 105291, 115163, 5823, 3837, 80158, 66394, 104949, 99461, 101128, 105073, 3837, 104689, 87256, 50930, 105966, 102104, 1773, 151645, 198]
+[INFO:swift] [REJECTED_LABELS] [-100 * 57]<think>
+
+</think>
+
+只要关键词评测 passed，就说明模型已经理解这个问题，不需要再看原始回答。<|im_end|>
+
+[INFO:swift] Dataset Token Length: 166.000000±22.660538, min=142.000000, max=215.000000, size=8
+[INFO:swift] The RLHFArguments will be saved in: /workspace/qwen-qlora-lab/outputs/stage3_qwen3_17b_dpo_corrections/v0-20260616-034853/args.json
+[INFO:swift] model: PeftModelForCausalLM(
+  (base_model): LoraModel(
+    (model): Qwen3ForCausalLM(
+      (model): Qwen3Model(
+        (embed_tokens): Embedding(151936, 2048)
+        (layers): ModuleList(
+          (0-27): 28 x Qwen3DecoderLayer(
+            (self_attn): Qwen3Attention(
+              (q_proj): lora.Linear(
+                (base_layer): Linear(in_features=2048, out_features=2048, bias=False)
+                (lora_dropout): ModuleDict(
+                  (default): Identity()
+                  (ref_adapter): Identity()
+                )
+                (lora_A): ModuleDict(
+                  (default): Linear(in_features=2048, out_features=16, bias=False)
+                  (ref_adapter): Linear(in_features=2048, out_features=16, bias=False)
+                )
+                (lora_B): ModuleDict(
+                  (default): Linear(in_features=16, out_features=2048, bias=False)
+                  (ref_adapter): Linear(in_features=16, out_features=2048, bias=False)
+                )
+                (lora_embedding_A): ParameterDict()
+                (lora_embedding_B): ParameterDict()
+                (lora_magnitude_vector): ModuleDict()
+              )
+              (k_proj): lora.Linear(
+                (base_layer): Linear(in_features=2048, out_features=1024, bias=False)
+                (lora_dropout): ModuleDict(
+                  (default): Identity()
+                  (ref_adapter): Identity()
+                )
+                (lora_A): ModuleDict(
+                  (default): Linear(in_features=2048, out_features=16, bias=False)
+                  (ref_adapter): Linear(in_features=2048, out_features=16, bias=False)
+                )
+                (lora_B): ModuleDict(
+                  (default): Linear(in_features=16, out_features=1024, bias=False)
+                  (ref_adapter): Linear(in_features=16, out_features=1024, bias=False)
+                )
+                (lora_embedding_A): ParameterDict()
+                (lora_embedding_B): ParameterDict()
+                (lora_magnitude_vector): ModuleDict()
+              )
+              (v_proj): lora.Linear(
+                (base_layer): Linear(in_features=2048, out_features=1024, bias=False)
+                (lora_dropout): ModuleDict(
+                  (default): Identity()
+                  (ref_adapter): Identity()
+                )
+                (lora_A): ModuleDict(
+                  (default): Linear(in_features=2048, out_features=16, bias=False)
+                  (ref_adapter): Linear(in_features=2048, out_features=16, bias=False)
+                )
+                (lora_B): ModuleDict(
+                  (default): Linear(in_features=16, out_features=1024, bias=False)
+                  (ref_adapter): Linear(in_features=16, out_features=1024, bias=False)
+                )
+                (lora_embedding_A): ParameterDict()
+                (lora_embedding_B): ParameterDict()
+                (lora_magnitude_vector): ModuleDict()
+              )
+              (o_proj): lora.Linear(
+                (base_layer): Linear(in_features=2048, out_features=2048, bias=False)
+                (lora_dropout): ModuleDict(
+                  (default): Identity()
+                  (ref_adapter): Identity()
+                )
+                (lora_A): ModuleDict(
+                  (default): Linear(in_features=2048, out_features=16, bias=False)
+                  (ref_adapter): Linear(in_features=2048, out_features=16, bias=False)
+                )
+                (lora_B): ModuleDict(
+                  (default): Linear(in_features=16, out_features=2048, bias=False)
+                  (ref_adapter): Linear(in_features=16, out_features=2048, bias=False)
+                )
+                (lora_embedding_A): ParameterDict()
+                (lora_embedding_B): ParameterDict()
+                (lora_magnitude_vector): ModuleDict()
+              )
+              (q_norm): Qwen3RMSNorm((128,), eps=1e-06)
+              (k_norm): Qwen3RMSNorm((128,), eps=1e-06)
+            )
+            (mlp): Qwen3MLP(
+              (gate_proj): lora.Linear(
+                (base_layer): Linear(in_features=2048, out_features=6144, bias=False)
+                (lora_dropout): ModuleDict(
+                  (default): Identity()
+                  (ref_adapter): Identity()
+                )
+                (lora_A): ModuleDict(
+                  (default): Linear(in_features=2048, out_features=16, bias=False)
+                  (ref_adapter): Linear(in_features=2048, out_features=16, bias=False)
+                )
+                (lora_B): ModuleDict(
+                  (default): Linear(in_features=16, out_features=6144, bias=False)
+                  (ref_adapter): Linear(in_features=16, out_features=6144, bias=False)
+                )
+                (lora_embedding_A): ParameterDict()
+                (lora_embedding_B): ParameterDict()
+                (lora_magnitude_vector): ModuleDict()
+              )
+              (up_proj): lora.Linear(
+                (base_layer): Linear(in_features=2048, out_features=6144, bias=False)
+                (lora_dropout): ModuleDict(
+                  (default): Identity()
+                  (ref_adapter): Identity()
+                )
+                (lora_A): ModuleDict(
+                  (default): Linear(in_features=2048, out_features=16, bias=False)
+                  (ref_adapter): Linear(in_features=2048, out_features=16, bias=False)
+                )
+                (lora_B): ModuleDict(
+                  (default): Linear(in_features=16, out_features=6144, bias=False)
+                  (ref_adapter): Linear(in_features=16, out_features=6144, bias=False)
+                )
+                (lora_embedding_A): ParameterDict()
+                (lora_embedding_B): ParameterDict()
+                (lora_magnitude_vector): ModuleDict()
+              )
+              (down_proj): lora.Linear(
+                (base_layer): Linear(in_features=6144, out_features=2048, bias=False)
+                (lora_dropout): ModuleDict(
+                  (default): Identity()
+                  (ref_adapter): Identity()
+                )
+                (lora_A): ModuleDict(
+                  (default): Linear(in_features=6144, out_features=16, bias=False)
+                  (ref_adapter): Linear(in_features=6144, out_features=16, bias=False)
+                )
+                (lora_B): ModuleDict(
+                  (default): Linear(in_features=16, out_features=2048, bias=False)
+                  (ref_adapter): Linear(in_features=16, out_features=2048, bias=False)
+                )
+                (lora_embedding_A): ParameterDict()
+                (lora_embedding_B): ParameterDict()
+                (lora_magnitude_vector): ModuleDict()
+              )
+              (act_fn): SiLUActivation()
+            )
+            (input_layernorm): Qwen3RMSNorm((2048,), eps=1e-06)
+            (post_attention_layernorm): Qwen3RMSNorm((2048,), eps=1e-06)
+          )
+        )
+        (norm): Qwen3RMSNorm((2048,), eps=1e-06)
+        (rotary_emb): Qwen3RotaryEmbedding()
+      )
+      (lm_head): Linear(in_features=2048, out_features=151936, bias=False)
+    )
+  )
+)
+[INFO:swift] model_parameter_info: PeftModelForCausalLM: 1755.4401M Params (17.4326M Trainable [0.9931%]), 0.0001M Buffers.
+[RANK 0] Detected kernel version 4.19.90, which is below the recommended minimum of 5.5.0; this can cause the process to hang. It is recommended to upgrade the kernel to the minimum version or higher.
+[2026-06-16 03:49:03,620] [INFO] [real_accelerator.py:254:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+df: /root/.triton/autotune: No such file or directory
+[INFO:swift] use_reentrant: True
+[INFO:swift] The logging file will be saved in: /workspace/qwen-qlora-lab/outputs/stage3_qwen3_17b_dpo_corrections/v0-20260616-034853/logging.jsonl
+[transformers] The tokenizer has new PAD/BOS/EOS tokens that differ from the model config and generation config. The model config and generation config were aligned accordingly, being updated with the tokenizer's values. Updated tokens: {'bos_token_id': None}.
+Train:   0%|          | 0/40 [00:00<?, ?it/s][INFO:swift] use_logits_to_keep: True
+/opt/conda/lib/python3.11/site-packages/torch/utils/checkpoint.py:87: UserWarning: None of the inputs have requires_grad=True. Gradients will be None
+  warnings.warn(
+Train:   2%|▎         | 1/40 [00:03<02:01,  3.12s/it]                                                     {'loss': '1.082', 'grad_norm': '41.42', 'learning_rate': '2.5e-05', 'rewards/chosen': '0', 'rewards/rejected': '0', 'rewards/accuracies': '0', 'rewards/margins': '0', 'logps/chosen': '-384.9', 'logps/rejected': '-82.7', 'logits/chosen': '-0.2246', 'logits/rejected': '0.3399', 'nll_loss': '3.886', 'epoch': '0.5', 'global_step/max_steps': '1/40', 'elapsed_time': '3s', 'remaining_time': '2m 2s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '3.127'}
+Train:   2%|▎         | 1/40 [00:03<02:01,  3.12s/it]Train:   2%|▎         | 1/40 [00:03<02:01,  3.12s/it]Train:   5%|▌         | 2/40 [00:05<01:43,  2.72s/it]                                                     {'loss': '1.079', 'grad_norm': '42.64', 'learning_rate': '5e-05', 'rewards/chosen': '0', 'rewards/rejected': '0', 'rewards/accuracies': '0', 'rewards/margins': '0', 'logps/chosen': '-395.4', 'logps/rejected': '-105.9', 'logits/chosen': '-0.2992', 'logits/rejected': '-0.1184', 'nll_loss': '3.863', 'epoch': '1', 'global_step/max_steps': '2/40', 'elapsed_time': '6s', 'remaining_time': '1m 46s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.781'}
+Train:   5%|▌         | 2/40 [00:05<01:43,  2.72s/it]Train:   5%|▌         | 2/40 [00:05<01:43,  2.72s/it]Train:   8%|▊         | 3/40 [00:08<01:37,  2.63s/it]                                                     {'loss': '0.4582', 'grad_norm': '7.553', 'learning_rate': '4.991e-05', 'rewards/chosen': '2.248', 'rewards/rejected': '-0.2762', 'rewards/accuracies': '1', 'rewards/margins': '2.524', 'logps/chosen': '-373.6', 'logps/rejected': '-90.15', 'logits/chosen': '-0.102', 'logits/rejected': '0.1023', 'nll_loss': '3.673', 'epoch': '1.5', 'global_step/max_steps': '3/40', 'elapsed_time': '8s', 'remaining_time': '1m 40s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.693'}
+Train:   8%|▊         | 3/40 [00:08<01:37,  2.63s/it]Train:   8%|▊         | 3/40 [00:08<01:37,  2.63s/it]Train:  10%|█         | 4/40 [00:10<01:34,  2.61s/it]                                                     {'loss': '0.3607', 'grad_norm': '1.498', 'learning_rate': '4.966e-05', 'rewards/chosen': '4.035', 'rewards/rejected': '-0.4135', 'rewards/accuracies': '1', 'rewards/margins': '4.448', 'logps/chosen': '-343.8', 'logps/rejected': '-105.3', 'logits/chosen': '0.1949', 'logits/rejected': '0.6677', 'nll_loss': '3.453', 'epoch': '2', 'global_step/max_steps': '4/40', 'elapsed_time': '11s', 'remaining_time': '1m 36s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.668'}
+Train:  10%|█         | 4/40 [00:10<01:34,  2.61s/it]Train:  10%|█         | 4/40 [00:10<01:34,  2.61s/it]Train:  12%|█▎        | 5/40 [00:13<01:31,  2.61s/it]                                                     {'loss': '0.2559', 'grad_norm': '0.5026', 'learning_rate': '4.924e-05', 'rewards/chosen': '6.899', 'rewards/rejected': '-1.765', 'rewards/accuracies': '1', 'rewards/margins': '8.663', 'logps/chosen': '-249', 'logps/rejected': '-98.12', 'logits/chosen': '-0.05628', 'logits/rejected': '0.2033', 'nll_loss': '2.554', 'epoch': '2.5', 'global_step/max_steps': '5/40', 'elapsed_time': '13s', 'remaining_time': '1m 33s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.653'}
+Train:  12%|█▎        | 5/40 [00:13<01:31,  2.61s/it]Train:  12%|█▎        | 5/40 [00:13<01:31,  2.61s/it]Train:  15%|█▌        | 6/40 [00:15<01:27,  2.57s/it]                                                     {'loss': '0.3483', 'grad_norm': '0.4752', 'learning_rate': '4.865e-05', 'rewards/chosen': '10.41', 'rewards/rejected': '-0.9009', 'rewards/accuracies': '1', 'rewards/margins': '11.31', 'logps/chosen': '-358.2', 'logps/rejected': '-117.1', 'logits/chosen': '1.176', 'logits/rejected': '1.504', 'nll_loss': '3.482', 'epoch': '3', 'global_step/max_steps': '6/40', 'elapsed_time': '16s', 'remaining_time': '1m 29s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.625'}
+Train:  15%|█▌        | 6/40 [00:15<01:27,  2.57s/it]Train:  15%|█▌        | 6/40 [00:15<01:27,  2.57s/it]Train:  18%|█▊        | 7/40 [00:18<01:27,  2.64s/it]                                                     {'loss': '0.2844', 'grad_norm': '0.3844', 'learning_rate': '4.789e-05', 'rewards/chosen': '10.01', 'rewards/rejected': '-1.35', 'rewards/accuracies': '1', 'rewards/margins': '11.36', 'logps/chosen': '-284.1', 'logps/rejected': '-114.7', 'logits/chosen': '0.9264', 'logits/rejected': '1.277', 'nll_loss': '2.844', 'epoch': '3.5', 'global_step/max_steps': '7/40', 'elapsed_time': '19s', 'remaining_time': '1m 27s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.649'}
+Train:  18%|█▊        | 7/40 [00:18<01:27,  2.64s/it]Train:  18%|█▊        | 7/40 [00:18<01:27,  2.64s/it]Train:  20%|██        | 8/40 [00:21<01:24,  2.63s/it]                                                     {'loss': '0.2536', 'grad_norm': '0.3432', 'learning_rate': '4.699e-05', 'rewards/chosen': '13.82', 'rewards/rejected': '-2.423', 'rewards/accuracies': '1', 'rewards/margins': '16.24', 'logps/chosen': '-257.9', 'logps/rejected': '-111.6', 'logits/chosen': '1.029', 'logits/rejected': '1.194', 'nll_loss': '2.536', 'epoch': '4', 'global_step/max_steps': '8/40', 'elapsed_time': '21s', 'remaining_time': '1m 25s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.644'}
+Train:  20%|██        | 8/40 [00:21<01:24,  2.63s/it]Train:  20%|██        | 8/40 [00:21<01:24,  2.63s/it]Train:  22%|██▎       | 9/40 [00:23<01:22,  2.65s/it]                                                     {'loss': '0.2805', 'grad_norm': '0.3265', 'learning_rate': '4.593e-05', 'rewards/chosen': '15.6', 'rewards/rejected': '-1.637', 'rewards/accuracies': '1', 'rewards/margins': '17.24', 'logps/chosen': '-286.9', 'logps/rejected': '-114.3', 'logits/chosen': '1.461', 'logits/rejected': '1.624', 'nll_loss': '2.805', 'epoch': '4.5', 'global_step/max_steps': '9/40', 'elapsed_time': '24s', 'remaining_time': '1m 22s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.649'}
+Train:  22%|██▎       | 9/40 [00:23<01:22,  2.65s/it]Train:  22%|██▎       | 9/40 [00:23<01:22,  2.65s/it]Train:  25%|██▌       | 10/40 [00:26<01:18,  2.61s/it]                                                      {'loss': '0.211', 'grad_norm': '0.2881', 'learning_rate': '4.473e-05', 'rewards/chosen': '12.83', 'rewards/rejected': '-2.795', 'rewards/accuracies': '1', 'rewards/margins': '15.62', 'logps/chosen': '-209.1', 'logps/rejected': '-118.6', 'logits/chosen': '1.13', 'logits/rejected': '1.439', 'nll_loss': '2.11', 'epoch': '5', 'global_step/max_steps': '10/40', 'elapsed_time': '26s', 'remaining_time': '1m 19s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.637'}
+Train:  25%|██▌       | 10/40 [00:26<01:18,  2.61s/it]Train:  25%|██▌       | 10/40 [00:26<01:18,  2.61s/it]Train:  28%|██▊       | 11/40 [00:29<01:17,  2.67s/it]                                                      {'loss': '0.2421', 'grad_norm': '0.2884', 'learning_rate': '4.339e-05', 'rewards/chosen': '15.8', 'rewards/rejected': '-2.129', 'rewards/accuracies': '1', 'rewards/margins': '17.93', 'logps/chosen': '-231.7', 'logps/rejected': '-104.8', 'logits/chosen': '1.524', 'logits/rejected': '1.654', 'nll_loss': '2.421', 'epoch': '5.5', 'global_step/max_steps': '11/40', 'elapsed_time': '29s', 'remaining_time': '1m 17s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.652'}
+Train:  28%|██▊       | 11/40 [00:29<01:17,  2.67s/it]Train:  28%|██▊       | 11/40 [00:29<01:17,  2.67s/it]Train:  30%|███       | 12/40 [00:31<01:13,  2.64s/it]                                                      {'loss': '0.2133', 'grad_norm': '0.2766', 'learning_rate': '4.193e-05', 'rewards/chosen': '16.33', 'rewards/rejected': '-2.666', 'rewards/accuracies': '1', 'rewards/margins': '18.99', 'logps/chosen': '-227.3', 'logps/rejected': '-131.7', 'logits/chosen': '1.499', 'logits/rejected': '1.836', 'nll_loss': '2.133', 'epoch': '6', 'global_step/max_steps': '12/40', 'elapsed_time': '32s', 'remaining_time': '1m 14s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.646'}
+Train:  30%|███       | 12/40 [00:31<01:13,  2.64s/it]Train:  30%|███       | 12/40 [00:31<01:13,  2.64s/it]Train:  32%|███▎      | 13/40 [00:34<01:12,  2.67s/it]                                                      {'loss': '0.2408', 'grad_norm': '0.2781', 'learning_rate': '4.036e-05', 'rewards/chosen': '17.86', 'rewards/rejected': '-1.62', 'rewards/accuracies': '1', 'rewards/margins': '19.48', 'logps/chosen': '-246.2', 'logps/rejected': '-110.7', 'logits/chosen': '1.818', 'logits/rejected': '1.901', 'nll_loss': '2.408', 'epoch': '6.5', 'global_step/max_steps': '13/40', 'elapsed_time': '34s', 'remaining_time': '1m 12s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.652'}
+Train:  32%|███▎      | 13/40 [00:34<01:12,  2.67s/it]Train:  32%|███▎      | 13/40 [00:34<01:12,  2.67s/it]Train:  35%|███▌      | 14/40 [00:36<01:07,  2.61s/it]                                                      {'loss': '0.1862', 'grad_norm': '0.2513', 'learning_rate': '3.867e-05', 'rewards/chosen': '17.07', 'rewards/rejected': '-3.404', 'rewards/accuracies': '1', 'rewards/margins': '20.47', 'logps/chosen': '-184.8', 'logps/rejected': '-128.1', 'logits/chosen': '1.42', 'logits/rejected': '1.818', 'nll_loss': '1.862', 'epoch': '7', 'global_step/max_steps': '14/40', 'elapsed_time': '37s', 'remaining_time': '1m 9s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.64'}
+Train:  35%|███▌      | 14/40 [00:36<01:07,  2.61s/it]Train:  35%|███▌      | 14/40 [00:36<01:07,  2.61s/it]Train:  38%|███▊      | 15/40 [00:39<01:06,  2.64s/it]                                                      {'loss': '0.1863', 'grad_norm': '0.2408', 'learning_rate': '3.69e-05', 'rewards/chosen': '17.46', 'rewards/rejected': '-3.508', 'rewards/accuracies': '1', 'rewards/margins': '20.96', 'logps/chosen': '-186.9', 'logps/rejected': '-135', 'logits/chosen': '1.52', 'logits/rejected': '1.445', 'nll_loss': '1.863', 'epoch': '7.5', 'global_step/max_steps': '15/40', 'elapsed_time': '40s', 'remaining_time': '1m 6s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.645'}
+Train:  38%|███▊      | 15/40 [00:39<01:06,  2.64s/it]Train:  38%|███▊      | 15/40 [00:39<01:06,  2.64s/it][INFO:swift] Saving model checkpoint to /workspace/qwen-qlora-lab/outputs/stage3_qwen3_17b_dpo_corrections/v0-20260616-034853/checkpoint-15
+Train:  40%|████      | 16/40 [00:42<01:03,  2.64s/it]                                                      {'loss': '0.2141', 'grad_norm': '0.2641', 'learning_rate': '3.504e-05', 'rewards/chosen': '20.17', 'rewards/rejected': '-1.752', 'rewards/accuracies': '1', 'rewards/margins': '21.92', 'logps/chosen': '-217.1', 'logps/rejected': '-106.2', 'logits/chosen': '1.767', 'logits/rejected': '2.351', 'nll_loss': '2.141', 'epoch': '8', 'global_step/max_steps': '16/40', 'elapsed_time': '42s', 'remaining_time': '1m 3s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.644'}
+Train:  40%|████      | 16/40 [00:42<01:03,  2.64s/it]Train:  40%|████      | 16/40 [00:42<01:03,  2.64s/it]Train:  42%|████▎     | 17/40 [00:45<01:01,  2.69s/it]                                                      {'loss': '0.1939', 'grad_norm': '0.2481', 'learning_rate': '3.312e-05', 'rewards/chosen': '19.59', 'rewards/rejected': '-3.486', 'rewards/accuracies': '1', 'rewards/margins': '23.08', 'logps/chosen': '-204.7', 'logps/rejected': '-118.4', 'logits/chosen': '1.618', 'logits/rejected': '1.9', 'nll_loss': '1.939', 'epoch': '8.5', 'global_step/max_steps': '17/40', 'elapsed_time': '45s', 'remaining_time': '1m 1s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.655'}
+Train:  42%|████▎     | 17/40 [00:45<01:01,  2.69s/it]Train:  42%|████▎     | 17/40 [00:45<01:01,  2.69s/it]Train:  45%|████▌     | 18/40 [00:47<00:57,  2.63s/it]                                                      {'loss': '0.1847', 'grad_norm': '0.2398', 'learning_rate': '3.114e-05', 'rewards/chosen': '20.2', 'rewards/rejected': '-2.082', 'rewards/accuracies': '1', 'rewards/margins': '22.28', 'logps/chosen': '-177.7', 'logps/rejected': '-125.8', 'logits/chosen': '1.581', 'logits/rejected': '1.843', 'nll_loss': '1.847', 'epoch': '9', 'global_step/max_steps': '18/40', 'elapsed_time': '48s', 'remaining_time': '58s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.645'}
+Train:  45%|████▌     | 18/40 [00:47<00:57,  2.63s/it]Train:  45%|████▌     | 18/40 [00:47<00:57,  2.63s/it]Train:  48%|████▊     | 19/40 [00:50<00:55,  2.63s/it]                                                      {'loss': '0.1755', 'grad_norm': '0.2395', 'learning_rate': '2.911e-05', 'rewards/chosen': '20.51', 'rewards/rejected': '-2.703', 'rewards/accuracies': '1', 'rewards/margins': '23.21', 'logps/chosen': '-176.2', 'logps/rejected': '-102.1', 'logits/chosen': '1.437', 'logits/rejected': '1.867', 'nll_loss': '1.755', 'epoch': '9.5', 'global_step/max_steps': '19/40', 'elapsed_time': '50s', 'remaining_time': '56s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.644'}
+Train:  48%|████▊     | 19/40 [00:50<00:55,  2.63s/it]Train:  48%|████▊     | 19/40 [00:50<00:55,  2.63s/it]Train:  50%|█████     | 20/40 [00:52<00:52,  2.62s/it]                                                      {'loss': '0.183', 'grad_norm': '0.24', 'learning_rate': '2.706e-05', 'rewards/chosen': '21.34', 'rewards/rejected': '-3.272', 'rewards/accuracies': '1', 'rewards/margins': '24.61', 'logps/chosen': '-185.5', 'logps/rejected': '-146.2', 'logits/chosen': '1.591', 'logits/rejected': '1.769', 'nll_loss': '1.83', 'epoch': '10', 'global_step/max_steps': '20/40', 'elapsed_time': '53s', 'remaining_time': '53s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.643'}
+Train:  50%|█████     | 20/40 [00:52<00:52,  2.62s/it]Train:  50%|█████     | 20/40 [00:52<00:52,  2.62s/it]Train:  52%|█████▎    | 21/40 [00:55<00:49,  2.61s/it]                                                      {'loss': '0.195', 'grad_norm': '0.2398', 'learning_rate': '2.5e-05', 'rewards/chosen': '20.74', 'rewards/rejected': '-3.095', 'rewards/accuracies': '1', 'rewards/margins': '23.83', 'logps/chosen': '-185.9', 'logps/rejected': '-122.1', 'logits/chosen': '1.686', 'logits/rejected': '1.936', 'nll_loss': '1.95', 'epoch': '10.5', 'global_step/max_steps': '21/40', 'elapsed_time': '55s', 'remaining_time': '50s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.639'}
+Train:  52%|█████▎    | 21/40 [00:55<00:49,  2.61s/it]Train:  52%|█████▎    | 21/40 [00:55<00:49,  2.61s/it]Train:  55%|█████▌    | 22/40 [00:57<00:46,  2.58s/it]                                                      {'loss': '0.1459', 'grad_norm': '0.2413', 'learning_rate': '2.294e-05', 'rewards/chosen': '22.91', 'rewards/rejected': '-3.309', 'rewards/accuracies': '1', 'rewards/margins': '26.21', 'logps/chosen': '-157.9', 'logps/rejected': '-130.5', 'logits/chosen': '1.107', 'logits/rejected': '1.531', 'nll_loss': '1.459', 'epoch': '11', 'global_step/max_steps': '22/40', 'elapsed_time': '58s', 'remaining_time': '47s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.633'}
+Train:  55%|█████▌    | 22/40 [00:57<00:46,  2.58s/it]Train:  55%|█████▌    | 22/40 [00:57<00:46,  2.58s/it]Train:  57%|█████▊    | 23/40 [01:00<00:44,  2.59s/it]                                                      {'loss': '0.1903', 'grad_norm': '0.2496', 'learning_rate': '2.089e-05', 'rewards/chosen': '24.08', 'rewards/rejected': '-1.369', 'rewards/accuracies': '1', 'rewards/margins': '25.45', 'logps/chosen': '-185.6', 'logps/rejected': '-129.2', 'logits/chosen': '1.607', 'logits/rejected': '1.894', 'nll_loss': '1.903', 'epoch': '11.5', 'global_step/max_steps': '23/40', 'elapsed_time': '1m 1s', 'remaining_time': '45s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.632'}
+Train:  57%|█████▊    | 23/40 [01:00<00:44,  2.59s/it]Train:  57%|█████▊    | 23/40 [01:00<00:44,  2.59s/it]Train:  60%|██████    | 24/40 [01:03<00:41,  2.57s/it]                                                      {'loss': '0.1344', 'grad_norm': '0.2332', 'learning_rate': '1.886e-05', 'rewards/chosen': '21.18', 'rewards/rejected': '-5.425', 'rewards/accuracies': '1', 'rewards/margins': '26.6', 'logps/chosen': '-142', 'logps/rejected': '-127.3', 'logits/chosen': '0.9496', 'logits/rejected': '1.424', 'nll_loss': '1.344', 'epoch': '12', 'global_step/max_steps': '24/40', 'elapsed_time': '1m 3s', 'remaining_time': '42s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.628'}
+Train:  60%|██████    | 24/40 [01:03<00:41,  2.57s/it]Train:  60%|██████    | 24/40 [01:03<00:41,  2.57s/it]Train:  62%|██████▎   | 25/40 [01:05<00:38,  2.59s/it]                                                      {'loss': '0.1386', 'grad_norm': '0.2317', 'learning_rate': '1.688e-05', 'rewards/chosen': '23.89', 'rewards/rejected': '-4.187', 'rewards/accuracies': '1', 'rewards/margins': '28.07', 'logps/chosen': '-148.8', 'logps/rejected': '-120.8', 'logits/chosen': '0.9224', 'logits/rejected': '1.559', 'nll_loss': '1.386', 'epoch': '12.5', 'global_step/max_steps': '25/40', 'elapsed_time': '1m 6s', 'remaining_time': '39s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.628'}
+Train:  62%|██████▎   | 25/40 [01:05<00:38,  2.59s/it]Train:  62%|██████▎   | 25/40 [01:05<00:38,  2.59s/it]Train:  65%|██████▌   | 26/40 [01:08<00:36,  2.62s/it]                                                      {'loss': '0.1724', 'grad_norm': '0.2467', 'learning_rate': '1.496e-05', 'rewards/chosen': '22.72', 'rewards/rejected': '-2.992', 'rewards/accuracies': '1', 'rewards/margins': '25.71', 'logps/chosen': '-165.4', 'logps/rejected': '-139.5', 'logits/chosen': '1.404', 'logits/rejected': '1.592', 'nll_loss': '1.724', 'epoch': '13', 'global_step/max_steps': '26/40', 'elapsed_time': '1m 8s', 'remaining_time': '37s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.63'}
+Train:  65%|██████▌   | 26/40 [01:08<00:36,  2.62s/it]Train:  65%|██████▌   | 26/40 [01:08<00:36,  2.62s/it]Train:  68%|██████▊   | 27/40 [01:11<00:34,  2.68s/it]                                                      {'loss': '0.1621', 'grad_norm': '0.2441', 'learning_rate': '1.31e-05', 'rewards/chosen': '22.58', 'rewards/rejected': '-2.07', 'rewards/accuracies': '1', 'rewards/margins': '24.65', 'logps/chosen': '-147.6', 'logps/rejected': '-121.8', 'logits/chosen': '1.25', 'logits/rejected': '1.548', 'nll_loss': '1.621', 'epoch': '13.5', 'global_step/max_steps': '27/40', 'elapsed_time': '1m 11s', 'remaining_time': '34s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.637'}
+Train:  68%|██████▊   | 27/40 [01:11<00:34,  2.68s/it]Train:  68%|██████▊   | 27/40 [01:11<00:34,  2.68s/it]Train:  70%|███████   | 28/40 [01:13<00:32,  2.68s/it]                                                      {'loss': '0.1378', 'grad_norm': '0.2376', 'learning_rate': '1.133e-05', 'rewards/chosen': '25.21', 'rewards/rejected': '-5.534', 'rewards/accuracies': '1', 'rewards/margins': '30.74', 'logps/chosen': '-154.9', 'logps/rejected': '-142.8', 'logits/chosen': '0.8039', 'logits/rejected': '1.433', 'nll_loss': '1.378', 'epoch': '14', 'global_step/max_steps': '28/40', 'elapsed_time': '1m 14s', 'remaining_time': '32s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.639'}
+Train:  70%|███████   | 28/40 [01:13<00:32,  2.68s/it]Train:  70%|███████   | 28/40 [01:13<00:32,  2.68s/it]Train:  72%|███████▎  | 29/40 [01:16<00:29,  2.69s/it]                                                      {'loss': '0.1687', 'grad_norm': '0.2509', 'learning_rate': '9.64e-06', 'rewards/chosen': '24.36', 'rewards/rejected': '-2.007', 'rewards/accuracies': '1', 'rewards/margins': '26.36', 'logps/chosen': '-164.8', 'logps/rejected': '-132.2', 'logits/chosen': '1.258', 'logits/rejected': '1.571', 'nll_loss': '1.687', 'epoch': '14.5', 'global_step/max_steps': '29/40', 'elapsed_time': '1m 17s', 'remaining_time': '29s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.641'}
+Train:  72%|███████▎  | 29/40 [01:16<00:29,  2.69s/it]Train:  72%|███████▎  | 29/40 [01:16<00:29,  2.69s/it]Train:  75%|███████▌  | 30/40 [01:19<00:27,  2.73s/it]                                                      {'loss': '0.1219', 'grad_norm': '0.2379', 'learning_rate': '8.07e-06', 'rewards/chosen': '24.34', 'rewards/rejected': '-5.871', 'rewards/accuracies': '1', 'rewards/margins': '30.21', 'logps/chosen': '-128.5', 'logps/rejected': '-135.2', 'logits/chosen': '0.5931', 'logits/rejected': '1.266', 'nll_loss': '1.219', 'epoch': '15', 'global_step/max_steps': '30/40', 'elapsed_time': '1m 19s', 'remaining_time': '26s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.648'}
+Train:  75%|███████▌  | 30/40 [01:19<00:27,  2.73s/it]Train:  75%|███████▌  | 30/40 [01:19<00:27,  2.73s/it][INFO:swift] Saving model checkpoint to /workspace/qwen-qlora-lab/outputs/stage3_qwen3_17b_dpo_corrections/v0-20260616-034853/checkpoint-30
+Train:  78%|███████▊  | 31/40 [01:22<00:25,  2.81s/it]                                                      {'loss': '0.135', 'grad_norm': '0.2391', 'learning_rate': '6.61e-06', 'rewards/chosen': '21.81', 'rewards/rejected': '-4.448', 'rewards/accuracies': '1', 'rewards/margins': '26.26', 'logps/chosen': '-127.7', 'logps/rejected': '-143.5', 'logits/chosen': '0.8885', 'logits/rejected': '1.183', 'nll_loss': '1.35', 'epoch': '15.5', 'global_step/max_steps': '31/40', 'elapsed_time': '1m 22s', 'remaining_time': '24s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.658'}
+Train:  78%|███████▊  | 31/40 [01:22<00:25,  2.81s/it]Train:  78%|███████▊  | 31/40 [01:22<00:25,  2.81s/it]Train:  80%|████████  | 32/40 [01:25<00:22,  2.76s/it]                                                      {'loss': '0.1492', 'grad_norm': '0.2428', 'learning_rate': '5.27e-06', 'rewards/chosen': '27.52', 'rewards/rejected': '-3.686', 'rewards/accuracies': '1', 'rewards/margins': '31.21', 'logps/chosen': '-159.3', 'logps/rejected': '-126.3', 'logits/chosen': '0.8122', 'logits/rejected': '1.553', 'nll_loss': '1.492', 'epoch': '16', 'global_step/max_steps': '32/40', 'elapsed_time': '1m 25s', 'remaining_time': '21s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.658'}
+Train:  80%|████████  | 32/40 [01:25<00:22,  2.76s/it]Train:  80%|████████  | 32/40 [01:25<00:22,  2.76s/it]Train:  82%|████████▎ | 33/40 [01:27<00:18,  2.70s/it]                                                      {'loss': '0.148', 'grad_norm': '0.2368', 'learning_rate': '4.07e-06', 'rewards/chosen': '23.21', 'rewards/rejected': '-4.652', 'rewards/accuracies': '1', 'rewards/margins': '27.87', 'logps/chosen': '-149.5', 'logps/rejected': '-138.1', 'logits/chosen': '0.9855', 'logits/rejected': '1.43', 'nll_loss': '1.48', 'epoch': '16.5', 'global_step/max_steps': '33/40', 'elapsed_time': '1m 28s', 'remaining_time': '19s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.655'}
+Train:  82%|████████▎ | 33/40 [01:27<00:18,  2.70s/it]Train:  82%|████████▎ | 33/40 [01:27<00:18,  2.70s/it]Train:  85%|████████▌ | 34/40 [01:30<00:15,  2.65s/it]                                                      {'loss': '0.1317', 'grad_norm': '0.2418', 'learning_rate': '3.01e-06', 'rewards/chosen': '26.56', 'rewards/rejected': '-3.646', 'rewards/accuracies': '1', 'rewards/margins': '30.2', 'logps/chosen': '-133.1', 'logps/rejected': '-133.4', 'logits/chosen': '0.6082', 'logits/rejected': '1.231', 'nll_loss': '1.317', 'epoch': '17', 'global_step/max_steps': '34/40', 'elapsed_time': '1m 30s', 'remaining_time': '16s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.652'}
+Train:  85%|████████▌ | 34/40 [01:30<00:15,  2.65s/it]Train:  85%|████████▌ | 34/40 [01:30<00:15,  2.65s/it]Train:  88%|████████▊ | 35/40 [01:32<00:13,  2.63s/it]                                                      {'loss': '0.16', 'grad_norm': '0.2428', 'learning_rate': '2.11e-06', 'rewards/chosen': '26.38', 'rewards/rejected': '-4.465', 'rewards/accuracies': '1', 'rewards/margins': '30.85', 'logps/chosen': '-171', 'logps/rejected': '-150.7', 'logits/chosen': '1.056', 'logits/rejected': '1.59', 'nll_loss': '1.6', 'epoch': '17.5', 'global_step/max_steps': '35/40', 'elapsed_time': '1m 33s', 'remaining_time': '13s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.65'}
+Train:  88%|████████▊ | 35/40 [01:32<00:13,  2.63s/it]Train:  88%|████████▊ | 35/40 [01:32<00:13,  2.63s/it]Train:  90%|█████████ | 36/40 [01:35<00:10,  2.57s/it]                                                      {'loss': '0.1168', 'grad_norm': '0.2371', 'learning_rate': '1.35e-06', 'rewards/chosen': '23.68', 'rewards/rejected': '-3.906', 'rewards/accuracies': '1', 'rewards/margins': '27.59', 'logps/chosen': '-108.7', 'logps/rejected': '-121.6', 'logits/chosen': '0.4516', 'logits/rejected': '1.017', 'nll_loss': '1.168', 'epoch': '18', 'global_step/max_steps': '36/40', 'elapsed_time': '1m 35s', 'remaining_time': '11s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.643'}
+Train:  90%|█████████ | 36/40 [01:35<00:10,  2.57s/it]Train:  90%|█████████ | 36/40 [01:35<00:10,  2.57s/it]Train:  92%|█████████▎| 37/40 [01:37<00:07,  2.56s/it]                                                      {'loss': '0.148', 'grad_norm': '0.2466', 'learning_rate': '7.6e-07', 'rewards/chosen': '26.17', 'rewards/rejected': '-3.352', 'rewards/accuracies': '1', 'rewards/margins': '29.53', 'logps/chosen': '-153', 'logps/rejected': '-149.5', 'logits/chosen': '0.8815', 'logits/rejected': '1.371', 'nll_loss': '1.48', 'epoch': '18.5', 'global_step/max_steps': '37/40', 'elapsed_time': '1m 38s', 'remaining_time': '8s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.641'}
+Train:  92%|█████████▎| 37/40 [01:37<00:07,  2.56s/it]Train:  92%|█████████▎| 37/40 [01:37<00:07,  2.56s/it]Train:  95%|█████████▌| 38/40 [01:40<00:05,  2.54s/it]                                                      {'loss': '0.1268', 'grad_norm': '0.2366', 'learning_rate': '3.4e-07', 'rewards/chosen': '24.1', 'rewards/rejected': '-5.182', 'rewards/accuracies': '1', 'rewards/margins': '29.29', 'logps/chosen': '-124.5', 'logps/rejected': '-124.4', 'logits/chosen': '0.5867', 'logits/rejected': '1.22', 'nll_loss': '1.268', 'epoch': '19', 'global_step/max_steps': '38/40', 'elapsed_time': '1m 40s', 'remaining_time': '5s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.637'}
+Train:  95%|█████████▌| 38/40 [01:40<00:05,  2.54s/it]Train:  95%|█████████▌| 38/40 [01:40<00:05,  2.54s/it]Train:  98%|█████████▊| 39/40 [01:43<00:02,  2.63s/it]                                                      {'loss': '0.1092', 'grad_norm': '0.2401', 'learning_rate': '9e-08', 'rewards/chosen': '23.64', 'rewards/rejected': '-6.052', 'rewards/accuracies': '1', 'rewards/margins': '29.69', 'logps/chosen': '-116.7', 'logps/rejected': '-152', 'logits/chosen': '0.2717', 'logits/rejected': '0.8488', 'nll_loss': '1.092', 'epoch': '19.5', 'global_step/max_steps': '39/40', 'elapsed_time': '1m 43s', 'remaining_time': '3s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.642'}
+Train:  98%|█████████▊| 39/40 [01:43<00:02,  2.63s/it]Train:  98%|█████████▊| 39/40 [01:43<00:02,  2.63s/it]Train: 100%|██████████| 40/40 [01:45<00:00,  2.62s/it]                                                      {'loss': '0.1643', 'grad_norm': '0.2449', 'learning_rate': '0', 'rewards/chosen': '26.77', 'rewards/rejected': '-2.487', 'rewards/accuracies': '1', 'rewards/margins': '29.25', 'logps/chosen': '-159.5', 'logps/rejected': '-122', 'logits/chosen': '1.157', 'logits/rejected': '1.717', 'nll_loss': '1.643', 'epoch': '20', 'global_step/max_steps': '40/40', 'elapsed_time': '1m 46s', 'remaining_time': '0s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.641'}
+Train: 100%|██████████| 40/40 [01:45<00:00,  2.62s/it]Train: 100%|██████████| 40/40 [01:45<00:00,  2.62s/it][INFO:swift] Saving model checkpoint to /workspace/qwen-qlora-lab/outputs/stage3_qwen3_17b_dpo_corrections/v0-20260616-034853/checkpoint-40
+                                                      {'train_runtime': '105.9', 'train_samples_per_second': '1.511', 'train_steps_per_second': '0.378', 'train_loss': '0.2397', 'epoch': '20', 'global_step/max_steps': '40/40', 'elapsed_time': '1m 46s', 'remaining_time': '0s', 'memory(GiB)': '4.46', 'train_speed(s/it)': '2.647'}
+Train: 100%|██████████| 40/40 [01:45<00:00,  2.62s/it]Train: 100%|██████████| 40/40 [01:45<00:00,  2.62s/it]Train: 100%|██████████| 40/40 [01:45<00:00,  2.65s/it]
+[INFO:swift] last_model_checkpoint: /workspace/qwen-qlora-lab/outputs/stage3_qwen3_17b_dpo_corrections/v0-20260616-034853/checkpoint-40
+[INFO:swift] best_model_checkpoint: None
+[INFO:swift] images_dir: /workspace/qwen-qlora-lab/outputs/stage3_qwen3_17b_dpo_corrections/v0-20260616-034853/images
+[INFO:swift] End time of running main: 2026-06-16 03:50:54.486660
+latest_dpo_checkpoint=outputs/stage3_qwen3_17b_dpo_corrections/v0-20260616-034853/checkpoint-40

@@ -10,6 +10,7 @@
 | `troubleshooting_and_workflow.md` | 本次训练过程中遇到的难题、根因和解决方式 |
 | `beginner_finetune_learning_guide.md` | 面向小白的训练/微调完整学习路线，逐文件讲解数据、参数、日志、adapter 和推理 |
 | `round1_qwen3_17b_text_walkthrough/` | Round 1 训练脚本、`args.json`、`logging.jsonl`、checkpoint 配置的逐行/逐字段讲解 |
+| `stage2_infer_eval_export_sampling_plan.md` | 训练后继续学习推理、评测、采样和导出的明日执行计划 |
 | `local_webui_setup.md` | 在 Windows/WSL 本地打开 ms-swift 或 LLaMA-Factory WebUI 的学习指南 |
 | `wsl_local_finetune_setup.md` | 本地 WSL 已安装微调 WebUI 环境的路径、启动命令和排错记录 |
 | `local_snapshot_learning_guide.md` | 如何阅读本地同步的远端训练轻量快照 |

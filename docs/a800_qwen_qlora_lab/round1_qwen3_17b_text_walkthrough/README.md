@@ -26,6 +26,7 @@ round1_qwen3_17b_text
 | `scripts/train_rounds_inside.sh` | `01_train_script_line_by_line.md` |
 | `outputs/qwen3_17b_text/v1-20260613-211241/args.json` | `02_args_and_checkpoint_configs.md` |
 | `outputs/qwen3_17b_text/v1-20260613-211241/logging.jsonl` | `03_logging_jsonl_line_by_line.md` |
+| `logs/qwen3_17b_effective.train.log`、`outputs/qwen3_17b_text_effective/.../images/` | `04_effective_training_log_and_metrics.md` |
 | `checkpoint-10/adapter_config.json` | `02_args_and_checkpoint_configs.md` |
 | `checkpoint-10/additional_config.json` | `02_args_and_checkpoint_configs.md` |
 | `checkpoint-10/args.json` | `02_args_and_checkpoint_configs.md` |
@@ -71,7 +72,7 @@ checkpoint-10/args.json
 
 1. 先看 `01_train_script_line_by_line.md`，理解训练脚本每一行在干什么。
 2. 再看 `03_logging_jsonl_line_by_line.md`，理解训练过程中每一步发生了什么。
-3. 最后看 `02_args_and_checkpoint_configs.md`，理解框架自动保存的配置和 checkpoint 元数据。
+3. 再看 `04_effective_training_log_and_metrics.md`，理解 effective 训练日志、训练曲线、FLOPs 和 kernel warning。
+4. 最后看 `02_args_and_checkpoint_configs.md`，理解框架自动保存的配置和 checkpoint 元数据。
 
 不要先硬啃 367 行 `args.json`。它是框架快照，不是手写配置文件。先掌握核心字段，再知道其他字段大多是默认值或高级功能。
-

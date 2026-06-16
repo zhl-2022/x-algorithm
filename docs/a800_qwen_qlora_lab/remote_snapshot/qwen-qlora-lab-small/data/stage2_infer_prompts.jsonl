@@ -1,0 +1,6 @@
+{"messages": [{"role": "user", "content": "请用简洁中文解释：A800 共享训练。"}]}
+{"messages": [{"role": "user", "content": "学习笔记里怎样总结：adapter 推理？"}]}
+{"messages": [{"role": "user", "content": "为什么 QLoRA 适合在剩余显存不多的 A800 上学习微调？"}]}
+{"messages": [{"role": "user", "content": "训练日志里的 loss、token_acc、grad_norm 分别应该怎么看？"}]}
+{"messages": [{"role": "user", "content": "为什么不能只看 train loss 判断微调效果？"}]}
+{"messages": [{"role": "user", "content": "推理采样里的 temperature 和 top_p 分别影响什么？"}]}

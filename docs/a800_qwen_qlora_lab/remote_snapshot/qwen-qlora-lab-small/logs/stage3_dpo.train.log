@@ -1,0 +1,814 @@
+DPO dataset: data/stage3_dpo_preferences.jsonl
+Base model: models/Qwen3-1.7B
+Start adapter: outputs/qwen3_17b_text_effective/v0-20260615-102152/checkpoint-120
+Max steps: 30
+run sh: `/opt/conda/bin/python /opt/conda/lib/python3.11/site-packages/swift/cli/rlhf.py --rlhf_type dpo --tuner_backend peft --tuner_type lora --model models/Qwen3-1.7B --model_type qwen3 --template qwen3 --adapters outputs/qwen3_17b_text_effective/v0-20260615-102152/checkpoint-120 --ref_adapters outputs/qwen3_17b_text_effective/v0-20260615-102152/checkpoint-120 --quant_bits 4 --dataset data/stage3_dpo_preferences.jsonl --torch_dtype bfloat16 --num_train_epochs 1 --max_steps 30 --per_device_train_batch_size 1 --per_device_eval_batch_size 1 --learning_rate 5e-5 --lora_rank 16 --lora_alpha 32 --lora_dropout 0 --target_modules all-linear --gradient_accumulation_steps 4 --logging_steps 1 --save_steps 15 --save_total_limit 2 --max_length 768 --warmup_ratio 0.03 --beta 0.1 --rpo_alpha 0.1 --dataloader_num_workers 1 --dataset_num_proc 1 --output_dir outputs/stage3_qwen3_17b_dpo --save_only_model true`
+[INFO:swift] Successfully registered `/opt/conda/lib/python3.11/site-packages/swift/dataset/data/dataset_info.json`.
+[INFO:swift] rank: -1, local_rank: -1, world_size: 1, local_world_size: 1
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+[INFO:swift] Setting args.lazy_tokenize: False
+/opt/conda/lib/python3.11/site-packages/swift/rlhf_trainers/arguments.py:13: TRLExperimentalWarning: You are importing from 'trl.experimental'. APIs here are unstable and may change or be removed without notice. Silence this warning by setting environment variable TRL_EXPERIMENTAL_SILENCE=1.
+  from trl.experimental.cpo import CPOConfig as HfCPOConfig
+[transformers] warmup_ratio is deprecated and will be removed in v5.2. Use `warmup_steps` instead.
+[INFO:swift] output_dir: /workspace/qwen-qlora-lab/outputs/stage3_qwen3_17b_dpo/v0-20260616-031625
+[INFO:swift] args: RLHFArguments(
+acc_strategy=token,
+accelerator_config={'dispatch_batches': False},
+adalora_beta1=0.85,
+adalora_beta2=0.85,
+adalora_deltaT=1,
+adalora_init_r=12,
+adalora_orth_reg_weight=0.5,
+adalora_target_r=8,
+adalora_tfinal=0,
+adalora_tinit=0,
+adam_beta1=0.9,
+adam_beta2=0.95,
+adam_epsilon=1e-08,
+adapter_act=gelu,
+adapter_length=128,
+adapters=['/workspace/qwen-qlora-lab/outputs/qwen3_17b_text_effective/v0-20260615-102152/checkpoint-120'],
+add_non_thinking_prefix=True,
+add_version=True,
+advantage_estimator=grpo,
+agent_template=None,
+aligner_lr=None,
+async_generate=False,
+attn_impl=None,
+auto_find_batch_size=False,
+average_tokens_across_devices=True,
+batch_eval_metrics=False,
+beta=0.1,
+bf16=True,
+bf16_full_eval=False,
+bnb_4bit_compute_dtype=torch.bfloat16,
+bnb_4bit_quant_storage=None,
+bnb_4bit_quant_type=nf4,
+bnb_4bit_use_double_quant=True,
+boft_block_num=0,
+boft_block_size=4,
+boft_dropout=0.0,
+boft_n_butterfly_factor=1,
+cached_dataset=[],
+cached_val_dataset=[],
+callbacks=[],
+center_rewards_coefficient=None,
+check_model=True,
+chord_enable_phi_function=False,
+chord_mu_decay_steps=None,
+chord_mu_peak=None,
+chord_mu_valley=None,
+chord_mu_warmup_steps=None,
+chord_sft_dataset=[],
+chord_sft_per_device_train_batch_size=None,
+cliprange=0.2,
+cliprange_value=0.2,
+columns={},
+completion_length_limit_scope=per_round,
+cosine_max_len=None,
+cosine_max_len_value_correct=0.5,
+cosine_max_len_value_wrong=0.0,
+cosine_min_len_value_correct=1.0,
+cosine_min_len_value_wrong=-0.5,
+cpo_alpha=1.0,
+create_checkpoint_symlink=False,
+custom_dataset_info=[],
+custom_register_path=[],
+data_seed=42,
+dataloader_drop_last=False,
+dataloader_num_workers=1,
+dataloader_persistent_workers=False,
+dataloader_pin_memory=True,
+dataloader_prefetch_factor=None,
+dataset=['data/stage3_dpo_preferences.jsonl'],
+dataset_num_proc=1,
+dataset_shuffle=True,
+ddp_backend=None,
+ddp_broadcast_buffers=None,
+ddp_bucket_cap_mb=None,
+ddp_find_unused_parameters=None,
+ddp_static_graph=None,
+ddp_timeout=18000000,
+debug=None,
+deepspeed=None,
+deepspeed_autotp_size=None,
+delta=None,
+desirable_weight=1.0,
+device_groups=None,
+device_map=None,
+disable_auto_column_mapping=False,
+disable_tqdm=None,
+discopop_tau=0.05,
+do_eval=False,
+do_predict=False,
+do_train=False,
+download_mode=reuse_dataset_if_exists,
+ds3_gather_for_generation=True,
+dynamic_sample=False,
+early_stop_interval=None,
+enable_channel_loss=False,
+enable_dft_loss=False,
+enable_flattened_weight_sync=True,
+enable_jit_checkpoint=False,
+enable_npu_model_patch=True,
+enable_thinking=None,
+epsilon=0.2,
+epsilon_high=None,
+eval_accumulation_steps=None,
+eval_dataset=[],
+eval_dataset_args=None,
+eval_delay=0,
+eval_do_concat_batches=True,
+eval_generation_config=None,
+eval_limit=None,
+eval_metric=None,
+eval_on_start=False,
+eval_steps=15.0,
+eval_strategy=no,
+eval_use_evalscope=False,
+eval_use_gather_object=False,
+experts_impl=None,
+external_plugins=[],
+extra_eval_args=None,
+fipo_clip_high_only=True,
+fipo_clip_range=0.2,
+fipo_decay_rate=32.0,
+fipo_safety_threshold=4.0,
+fourier_n_frequency=2000,
+fourier_scaling=300.0,
+fp16=False,
+fp16_full_eval=False,
+freeze_aligner=True,
+freeze_llm=False,
+freeze_parameters=[],
+freeze_parameters_ratio=0.0,
+freeze_parameters_regex=None,
+freeze_vit=True,
+fsdp=[],
+fsdp_config=None,
+full_determinism=False,
+galore_cos_threshold=0.4,
+galore_gamma_proj=2,
+galore_optim_per_parameter=False,
+galore_proj_bits=4,
+galore_proj_group_size=256,
+galore_proj_quant=False,
+galore_proj_type=std,
+galore_quantization=False,
+galore_queue_size=5,
+galore_rank=128,
+galore_scale=1.0,
+galore_target_modules=None,
+galore_update_proj_gap=50,
+galore_with_embedding=False,
+gamma=1.0,
+generation_batch_size=None,
+generation_config=None,
+generation_max_length=None,
+generation_num_beams=None,
+gkd_logits_topk=None,
+gradient_accumulation_steps=4,
+gradient_checkpointing=True,
+gradient_checkpointing_kwargs=None,
+greater_is_better=False,
+group_by_length=False,
+gym_env=None,
+hqq_axis=None,
+hub_always_push=False,
+hub_model_id=None,
+hub_private_repo=None,
+hub_revision=None,
+hub_strategy=every_save,
+hub_token=<HUB_TOKEN>,
+ignore_args_error=False,
+ignore_data_skip=False,
+importance_sampling_level=token,
+include_for_metrics=[],
+include_num_input_tokens_seen=False,
+init_strategy=None,
+init_weights=True,
+interleave_prob=None,
+is_binary_loss_scale=None,
+kl_coef=0.05,
+kl_in_reward=None,
+label_names=None,
+label_smoothing=0,
+label_smoothing_factor=0.0,
+lam=0.95,
+lazy_tokenize=False,
+ld_alpha=None,
+learning_rate=5e-05,
+length_column_name=length,
+liger_kernel_config=None,
+lisa_activated_layers=0,
+lisa_step_interval=20,
+llamapro_num_groups=None,
+llamapro_num_new_blocks=4,
+lmbda=0.5,
+load_args=False,
+load_best_model_at_end=False,
+load_data_args=False,
+load_from_cache_file=False,
+local_rank=-1,
+local_repo_path=None,
+local_rollout_forward_batch_size=64,
+log_completions=False,
+log_entropy=False,
+log_level=passive,
+log_level_replica=warning,
+log_on_each_node=True,
+log_rollout_offpolicy_metrics=False,
+logging_dir=/workspace/qwen-qlora-lab/outputs/stage3_qwen3_17b_dpo/v0-20260616-031625/runs,
+logging_first_step=True,
+logging_nan_inf_filter=True,
+logging_steps=1,
+logging_strategy=steps,
+logprobs=False,
+lora_alpha=32,
+lora_bias=none,
+lora_dropout=0.0,
+lora_dtype=None,
+lora_ga_batch_size=2,
+lora_ga_direction=ArB2r,
+lora_ga_iters=2,
+lora_ga_max_length=1024,
+lora_ga_scale=stable,
+lora_ga_stable_gamma=16,
+lora_rank=16,
+lorap_lr_ratio=None,
+loss_scale=last_round,
+loss_type=sigmoid,
+loss_weights=None,
+lr_scheduler_kwargs=None,
+lr_scheduler_type=cosine,
+max_completion_length=512,
+max_epochs=None,
+max_grad_norm=1.0,
+max_length=768,
+max_memory={},
+max_model_len=None,
+max_new_tokens=512,
+max_pixels=None,
+max_resample_times=3,
+max_shard_size=5GB,
+max_steps=30,
+max_turns=None,
+metric_for_best_model=loss,
+missing_eos_penalty=None,
+model=models/Qwen3-1.7B,
+model_author=None,
+model_kwargs={},
+model_name=None,
+model_revision=None,
+model_type=qwen3,
+modules_to_save=[],
+move_model_batches=None,
+multi_turn_scheduler=None,
+neftune_noise_alpha=None,
+new_special_tokens=[],
+norm_bbox=None,
+num_beams=1,
+num_generations=8,
+num_generations_eval=None,
+num_iterations=1,
+num_labels=None,
+num_mini_batches=1,
+num_ppo_epochs=4,
+num_sample_generations=10,
+num_train_epochs=1.0,
+off_policy_sequence_mask_delta=None,
+offload_model=False,
+offload_optimizer=False,
+offload_teacher_model=False,
+optim=adamw_torch,
+optim_args=None,
+optim_target_modules=None,
+optimizer=None,
+output_dir=/workspace/qwen-qlora-lab/outputs/stage3_qwen3_17b_dpo/v0-20260616-031625,
+overlong_filter=False,
+packing=False,
+packing_length=None,
+packing_num_proc=1,
+padding_free=False,
+padding_side=right,
+parallelism_config=None,
+per_device_eval_batch_size=1,
+per_device_train_batch_size=1,
+predict_with_generate=False,
+prediction_loss_only=False,
+preserve_thinking=None,
+problem_type=None,
+project=huggingface,
+push_to_hub=False,
+quant_bits=4,
+quant_method=None,
+ray_exp_name=None,
+real_tau=0.5,
+ref_adapters=['outputs/qwen3_17b_text_effective/v0-20260615-102152/checkpoint-120'],
+ref_model=None,
+ref_model_mixup_alpha=0.6,
+ref_model_revision=None,
+ref_model_sync_steps=512,
+ref_model_type=None,
+reft_args=None,
+reft_intervention_type=LoreftIntervention,
+reft_layer_key=None,
+reft_layers=None,
+reft_rank=4,
+remove_unused_columns=True,
+repetition_max_penalty=-1.0,
+repetition_n_grams=3,
+repetition_penalty=1.0,
+report_to=['tensorboard'],
+response_length=512,
+response_prefix=None,
+restore_callback_states_from_checkpoint=False,
+resume_from_checkpoint=None,
+resume_only_model=False,
+reward_adapters=[],
+reward_funcs=[],
+reward_model=None,
+reward_model_plugin=None,
+reward_model_revision=None,
+reward_model_type=None,
+reward_template=None,
+reward_weights=None,
+rlhf_type=dpo,
+rollout_importance_sampling_mode=None,
+rollout_importance_sampling_threshold=2.0,
+rope_scaling=None,
+router_aux_loss_coef=0.0,
+rpo_alpha=0.1,
+run_name=/workspace/qwen-qlora-lab/outputs/stage3_qwen3_17b_dpo/v0-20260616-031625,
+safe_serialization=True,
+save_on_each_node=False,
+save_only_model=True,
+save_steps=15.0,
+save_strategy=steps,
+save_total_limit=2,
+scale_rewards=None,
+seed=42,
+seq_kd=False,
+sequence_parallel_size=1,
+sft_alpha=0,
+shuffle_buffer_size=1000,
+simpo_gamma=1,
+skip_memory_metrics=True,
+sleep_level=0,
+soft_cache_length=None,
+soft_max_length=None,
+sortish_sampler=False,
+split_dataset_ratio=0.0,
+steps_per_generation=None,
+stop_words=[],
+stopping_strategy=first_exhausted,
+stream=False,
+streaming=False,
+strict=False,
+structured_outputs_regex=None,
+swanlab_email_language=zh,
+swanlab_exp_name=None,
+swanlab_mode=cloud,
+swanlab_notification_method=None,
+swanlab_project=ms-swift,
+swanlab_receiver_email=None,
+swanlab_secret=None,
+swanlab_sender_email=None,
+swanlab_smtp_port=None,
+swanlab_smtp_server=None,
+swanlab_token=<SWANLAB_TOKEN>,
+swanlab_webhook_url=None,
+swanlab_workspace=None,
+sync_ref_model=False,
+system=None,
+target_modules=['all-linear'],
+target_parameters=None,
+target_regex=None,
+task_type=causal_lm,
+tau_neg=1.05,
+tau_pos=1.0,
+teacher_adapters=[],
+teacher_deepspeed=None,
+teacher_model=None,
+teacher_model_revision=None,
+teacher_model_server=None,
+teacher_model_type=None,
+temperature=0.9,
+template=qwen3,
+template_backend=swift,
+tf32=None,
+top_entropy_quantile=1.0,
+top_k=-1,
+top_logprobs=None,
+top_p=1.0,
+torch_compile=False,
+torch_compile_backend=None,
+torch_compile_mode=None,
+torch_dtype=torch.bfloat16,
+torch_empty_cache_steps=None,
+trackio_bucket_id=None,
+trackio_space_id=None,
+trackio_static_space_id=None,
+train_dataloader_shuffle=True,
+train_sampling_strategy=random,
+trainable_parameters=[],
+trainable_parameters_regex=None,
+truncation_strategy=delete,
+tuner_backend=peft,
+tuner_type=lora,
+undesirable_weight=1.0,
+use_cache=False,
+use_chat_template=True,
+use_cpu=False,
+use_dora=False,
+use_flash_ckpt=False,
+use_galore=False,
+use_gym_env=None,
+use_hf=False,
+use_liger_kernel=False,
+use_logits_to_keep=None,
+use_ray=False,
+use_rslora=False,
+use_swift_lora=False,
+use_vllm=False,
+val_dataset=[],
+val_dataset_shuffle=False,
+vera_d_initial=0.1,
+vera_dropout=0.0,
+vera_projection_prng_key=0,
+vera_rank=256,
+vf_coef=0.1,
+vit_gradient_checkpointing=False,
+vit_lr=None,
+vllm_data_parallel_size=1,
+vllm_disable_cascade_attn=False,
+vllm_disable_custom_all_reduce=True,
+vllm_enable_expert_parallel=False,
+vllm_enable_lora=False,
+vllm_enable_prefix_caching=True,
+vllm_enforce_eager=False,
+vllm_engine_kwargs={},
+vllm_gpu_memory_utilization=0.9,
+vllm_limit_mm_per_prompt=None,
+vllm_max_lora_rank=16,
+vllm_max_model_len=None,
+vllm_max_num_seqs=None,
+vllm_mm_processor_cache_gb=None,
+vllm_mode=None,
+vllm_pipeline_parallel_size=1,
+vllm_quantization=None,
+vllm_reasoning_parser=None,
+vllm_server_base_url=None,
+vllm_server_group_port=None,
+vllm_server_host=None,
+vllm_server_pass_dataset=False,
+vllm_server_port=[8000],
+vllm_server_timeout=240.0,
+vllm_speculative_config=None,
+vllm_tensor_parallel_size=1,
+vllm_use_async_engine=None,
+wandb_log_unique_prompts=None,
+warmup_ratio=0.03,
+warmup_steps=0,
+weight_decay=0.1,
+whiten_rewards=False,
+zero_hpz_partition_size=None,
+)
+[INFO:swift] Global seed set to 42
+[INFO:swift] model_kwargs: {'device_map': 'cuda:0', 'dtype': torch.bfloat16}
+Loading weights:   0%|          | 0/311 [00:00<?, ?it/s]Loading weights:  21%|██        | 65/311 [00:00<00:00, 646.62it/s]Loading weights:  43%|████▎     | 135/311 [00:00<00:00, 671.06it/s]Loading weights:  69%|██████▉   | 214/311 [00:00<00:00, 720.66it/s]Loading weights:  93%|█████████▎| 290/311 [00:00<00:00, 724.33it/s]Loading weights: 100%|██████████| 311/311 [00:00<00:00, 712.41it/s]
+[INFO:swift] model_info: ModelInfo(model_type='qwen3', model_dir='/workspace/qwen-qlora-lab/models/Qwen3-1.7B', torch_dtype=torch.bfloat16, max_model_len=40960, quant_method=None, quant_bits=None, rope_scaling={'rope_theta': 1000000, 'rope_type': 'default'}, is_moe_model=False, is_multimodal=False, config=Qwen3Config {
+  "architectures": [
+    "Qwen3ForCausalLM"
+  ],
+  "attention_bias": false,
+  "attention_dropout": 0.0,
+  "bos_token_id": 151643,
+  "dtype": "bfloat16",
+  "eos_token_id": 151645,
+  "head_dim": 128,
+  "hidden_act": "silu",
+  "hidden_size": 2048,
+  "initializer_range": 0.02,
+  "intermediate_size": 6144,
+  "layer_types": [
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention",
+    "full_attention"
+  ],
+  "max_position_embeddings": 40960,
+  "max_window_layers": 28,
+  "model_type": "qwen3",
+  "num_attention_heads": 16,
+  "num_hidden_layers": 28,
+  "num_key_value_heads": 8,
+  "pad_token_id": null,
+  "rms_norm_eps": 1e-06,
+  "rope_parameters": {
+    "rope_theta": 1000000,
+    "rope_type": "default"
+  },
+  "sliding_window": null,
+  "tie_word_embeddings": true,
+  "transformers_version": "5.10.2",
+  "use_cache": true,
+  "use_sliding_window": false,
+  "vocab_size": 151936
+}
+, task_type='causal_lm', num_labels=None)
+[INFO:swift] model.generation_config: GenerationConfig {
+  "bos_token_id": 151643,
+  "do_sample": true,
+  "eos_token_id": [
+    151645,
+    151643
+  ],
+  "length_penalty": 1.0,
+  "max_new_tokens": 512,
+  "num_beams": 1,
+  "pad_token_id": 151643,
+  "repetition_penalty": 1.0,
+  "temperature": 0.9,
+  "top_k": 20,
+  "top_p": 1.0
+}
+
+[INFO:swift] default_system: None
+[INFO:swift] max_length: 768
+[INFO:swift] response_prefix: None
+[INFO:swift] agent_template: hermes
+[INFO:swift] Start time of running main: 2026-06-16 03:16:27.340998
+[INFO:swift] swift.__version__: 4.3.0
+Generating train split: 0 examples [00:00, ? examples/s]Generating train split: 12 examples [00:00, 4645.71 examples/s]
+Map (num_proc=1):   0%|          | 0/12 [00:00<?, ? examples/s]Map (num_proc=1): 100%|██████████| 12/12 [00:00<00:00, 57.26 examples/s]
+Map (num_proc=1):   0%|          | 0/12 [00:00<?, ? examples/s]Map (num_proc=1): 100%|██████████| 12/12 [00:02<00:00,  4.25 examples/s]Map (num_proc=1): 100%|██████████| 12/12 [00:02<00:00,  4.07 examples/s]
+[INFO:swift] train_dataset: Dataset({
+    features: ['messages', 'rejected_response', 'lengths'],
+    num_rows: 12
+})
+[INFO:swift] val_dataset: None
+[INFO:swift] [CHOSEN_INPUT_IDS] [151644, 8948, 198, 105043, 362, 23, 15, 15, 1207, 16948, 84141, 106, 47872, 100134, 102562, 1773, 102104, 100645, 101041, 5373, 102188, 5373, 30440, 58364, 99665, 3837, 104747, 66394, 101052, 5373, 105652, 5373, 104118, 33108, 48927, 75768, 1773, 151645, 198, 151644, 872, 198, 100678, 64720, 20221, 26001, 1614, 220, 101056, 30534, 60726, 81167, 101459, 99665, 33108, 100466, 11319, 151645, 198, 151644, 77091, 198, 151667, 271, 151668, 271, 40354, 1614, 220, 36993, 43959, 100873, 112142, 3837, 110238, 99427, 107043, 6485, 5609, 12956, 1773, 64720, 20221, 24562, 30534, 81167, 6764, 481, 71, 608, 2888, 5373, 66017, 106130, 5373, 64471, 100672, 85106, 110487, 102121, 3837, 101034, 99670, 99360, 104949, 112142, 104738, 26939, 21120, 1773, 62244, 100009, 100134, 104877, 3837, 104747, 104465, 12956, 65197, 95, 28330, 1773, 151645, 198]
+[INFO:swift] [CHOSEN_INPUT] <|im_start|>system
+你是 A800 Qwen 微调学习教练。回答必须直接、准确、可复盘，优先说明风险、步骤、指标和验证方式。<|im_end|>
+<|im_start|>user
+为什么导出 merged model 之前要先确认磁盘和目的？<|im_end|>
+<|im_start|>assistant
+<think>
+
+</think>
+
+merged model 会生成完整权重，体积远大于 LoRA adapter。导出前要确认 df -h /root、输出目录、是否真的需要简化部署，以及不会把模型权重同步到 Git。如果只是学习对比，优先保留 adapter 形式。<|im_end|>
+
+[INFO:swift] [CHOSEN_LABELS_IDS] [-100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, 151667, 271, 151668, 271, 40354, 1614, 220, 36993, 43959, 100873, 112142, 3837, 110238, 99427, 107043, 6485, 5609, 12956, 1773, 64720, 20221, 24562, 30534, 81167, 6764, 481, 71, 608, 2888, 5373, 66017, 106130, 5373, 64471, 100672, 85106, 110487, 102121, 3837, 101034, 99670, 99360, 104949, 112142, 104738, 26939, 21120, 1773, 62244, 100009, 100134, 104877, 3837, 104747, 104465, 12956, 65197, 95, 28330, 1773, 151645, 198]
+[INFO:swift] [CHOSEN_LABELS] [-100 * 62]<think>
+
+</think>
+
+merged model 会生成完整权重，体积远大于 LoRA adapter。导出前要确认 df -h /root、输出目录、是否真的需要简化部署，以及不会把模型权重同步到 Git。如果只是学习对比，优先保留 adapter 形式。<|im_end|>
+
+[INFO:swift] [REJECTED_INPUT_IDS] [151644, 8948, 198, 105043, 362, 23, 15, 15, 1207, 16948, 84141, 106, 47872, 100134, 102562, 1773, 102104, 100645, 101041, 5373, 102188, 5373, 30440, 58364, 99665, 3837, 104747, 66394, 101052, 5373, 105652, 5373, 104118, 33108, 48927, 75768, 1773, 151645, 198, 151644, 872, 198, 100678, 64720, 20221, 26001, 1614, 220, 101056, 30534, 60726, 81167, 101459, 99665, 33108, 100466, 11319, 151645, 198, 151644, 77091, 198, 151667, 271, 151668, 271, 64720, 20221, 99486, 99360, 8903, 77128, 112401, 100158, 3837, 99670, 99571, 100430, 101054, 3837, 73670, 102422, 99190, 1773, 151645, 198]
+[INFO:swift] [REJECTED_INPUT] <|im_start|>system
+你是 A800 Qwen 微调学习教练。回答必须直接、准确、可复盘，优先说明风险、步骤、指标和验证方式。<|im_end|>
+<|im_start|>user
+为什么导出 merged model 之前要先确认磁盘和目的？<|im_end|>
+<|im_start|>assistant
+<think>
+
+</think>
+
+导出就是把日志打包一下，不会占多少空间，可以随时做。<|im_end|>
+
+[INFO:swift] [REJECTED_LABELS_IDS] [-100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, 151667, 271, 151668, 271, 64720, 20221, 99486, 99360, 8903, 77128, 112401, 100158, 3837, 99670, 99571, 100430, 101054, 3837, 73670, 102422, 99190, 1773, 151645, 198]
+[INFO:swift] [REJECTED_LABELS] [-100 * 62]<think>
+
+</think>
+
+导出就是把日志打包一下，不会占多少空间，可以随时做。<|im_end|>
+
+[INFO:swift] Dataset Token Length: 129.666667±11.078006, min=111.000000, max=152.000000, size=12
+[INFO:swift] The RLHFArguments will be saved in: /workspace/qwen-qlora-lab/outputs/stage3_qwen3_17b_dpo/v0-20260616-031625/args.json
+[INFO:swift] model: PeftModelForCausalLM(
+  (base_model): LoraModel(
+    (model): Qwen3ForCausalLM(
+      (model): Qwen3Model(
+        (embed_tokens): Embedding(151936, 2048)
+        (layers): ModuleList(
+          (0-27): 28 x Qwen3DecoderLayer(
+            (self_attn): Qwen3Attention(
+              (q_proj): lora.Linear(
+                (base_layer): Linear(in_features=2048, out_features=2048, bias=False)
+                (lora_dropout): ModuleDict(
+                  (default): Identity()
+                  (ref_adapter): Identity()
+                )
+                (lora_A): ModuleDict(
+                  (default): Linear(in_features=2048, out_features=16, bias=False)
+                  (ref_adapter): Linear(in_features=2048, out_features=16, bias=False)
+                )
+                (lora_B): ModuleDict(
+                  (default): Linear(in_features=16, out_features=2048, bias=False)
+                  (ref_adapter): Linear(in_features=16, out_features=2048, bias=False)
+                )
+                (lora_embedding_A): ParameterDict()
+                (lora_embedding_B): ParameterDict()
+                (lora_magnitude_vector): ModuleDict()
+              )
+              (k_proj): lora.Linear(
+                (base_layer): Linear(in_features=2048, out_features=1024, bias=False)
+                (lora_dropout): ModuleDict(
+                  (default): Identity()
+                  (ref_adapter): Identity()
+                )
+                (lora_A): ModuleDict(
+                  (default): Linear(in_features=2048, out_features=16, bias=False)
+                  (ref_adapter): Linear(in_features=2048, out_features=16, bias=False)
+                )
+                (lora_B): ModuleDict(
+                  (default): Linear(in_features=16, out_features=1024, bias=False)
+                  (ref_adapter): Linear(in_features=16, out_features=1024, bias=False)
+                )
+                (lora_embedding_A): ParameterDict()
+                (lora_embedding_B): ParameterDict()
+                (lora_magnitude_vector): ModuleDict()
+              )
+              (v_proj): lora.Linear(
+                (base_layer): Linear(in_features=2048, out_features=1024, bias=False)
+                (lora_dropout): ModuleDict(
+                  (default): Identity()
+                  (ref_adapter): Identity()
+                )
+                (lora_A): ModuleDict(
+                  (default): Linear(in_features=2048, out_features=16, bias=False)
+                  (ref_adapter): Linear(in_features=2048, out_features=16, bias=False)
+                )
+                (lora_B): ModuleDict(
+                  (default): Linear(in_features=16, out_features=1024, bias=False)
+                  (ref_adapter): Linear(in_features=16, out_features=1024, bias=False)
+                )
+                (lora_embedding_A): ParameterDict()
+                (lora_embedding_B): ParameterDict()
+                (lora_magnitude_vector): ModuleDict()
+              )
+              (o_proj): lora.Linear(
+                (base_layer): Linear(in_features=2048, out_features=2048, bias=False)
+                (lora_dropout): ModuleDict(
+                  (default): Identity()
+                  (ref_adapter): Identity()
+                )
+                (lora_A): ModuleDict(
+                  (default): Linear(in_features=2048, out_features=16, bias=False)
+                  (ref_adapter): Linear(in_features=2048, out_features=16, bias=False)
+                )
+                (lora_B): ModuleDict(
+                  (default): Linear(in_features=16, out_features=2048, bias=False)
+                  (ref_adapter): Linear(in_features=16, out_features=2048, bias=False)
+                )
+                (lora_embedding_A): ParameterDict()
+                (lora_embedding_B): ParameterDict()
+                (lora_magnitude_vector): ModuleDict()
+              )
+              (q_norm): Qwen3RMSNorm((128,), eps=1e-06)
+              (k_norm): Qwen3RMSNorm((128,), eps=1e-06)
+            )
+            (mlp): Qwen3MLP(
+              (gate_proj): lora.Linear(
+                (base_layer): Linear(in_features=2048, out_features=6144, bias=False)
+                (lora_dropout): ModuleDict(
+                  (default): Identity()
+                  (ref_adapter): Identity()
+                )
+                (lora_A): ModuleDict(
+                  (default): Linear(in_features=2048, out_features=16, bias=False)
+                  (ref_adapter): Linear(in_features=2048, out_features=16, bias=False)
+                )
+                (lora_B): ModuleDict(
+                  (default): Linear(in_features=16, out_features=6144, bias=False)
+                  (ref_adapter): Linear(in_features=16, out_features=6144, bias=False)
+                )
+                (lora_embedding_A): ParameterDict()
+                (lora_embedding_B): ParameterDict()
+                (lora_magnitude_vector): ModuleDict()
+              )
+              (up_proj): lora.Linear(
+                (base_layer): Linear(in_features=2048, out_features=6144, bias=False)
+                (lora_dropout): ModuleDict(
+                  (default): Identity()
+                  (ref_adapter): Identity()
+                )
+                (lora_A): ModuleDict(
+                  (default): Linear(in_features=2048, out_features=16, bias=False)
+                  (ref_adapter): Linear(in_features=2048, out_features=16, bias=False)
+                )
+                (lora_B): ModuleDict(
+                  (default): Linear(in_features=16, out_features=6144, bias=False)
+                  (ref_adapter): Linear(in_features=16, out_features=6144, bias=False)
+                )
+                (lora_embedding_A): ParameterDict()
+                (lora_embedding_B): ParameterDict()
+                (lora_magnitude_vector): ModuleDict()
+              )
+              (down_proj): lora.Linear(
+                (base_layer): Linear(in_features=6144, out_features=2048, bias=False)
+                (lora_dropout): ModuleDict(
+                  (default): Identity()
+                  (ref_adapter): Identity()
+                )
+                (lora_A): ModuleDict(
+                  (default): Linear(in_features=6144, out_features=16, bias=False)
+                  (ref_adapter): Linear(in_features=6144, out_features=16, bias=False)
+                )
+                (lora_B): ModuleDict(
+                  (default): Linear(in_features=16, out_features=2048, bias=False)
+                  (ref_adapter): Linear(in_features=16, out_features=2048, bias=False)
+                )
+                (lora_embedding_A): ParameterDict()
+                (lora_embedding_B): ParameterDict()
+                (lora_magnitude_vector): ModuleDict()
+              )
+              (act_fn): SiLUActivation()
+            )
+            (input_layernorm): Qwen3RMSNorm((2048,), eps=1e-06)
+            (post_attention_layernorm): Qwen3RMSNorm((2048,), eps=1e-06)
+          )
+        )
+        (norm): Qwen3RMSNorm((2048,), eps=1e-06)
+        (rotary_emb): Qwen3RotaryEmbedding()
+      )
+      (lm_head): Linear(in_features=2048, out_features=151936, bias=False)
+    )
+  )
+)
+[INFO:swift] model_parameter_info: PeftModelForCausalLM: 1755.4401M Params (17.4326M Trainable [0.9931%]), 0.0001M Buffers.
+[RANK 0] Detected kernel version 4.19.90, which is below the recommended minimum of 5.5.0; this can cause the process to hang. It is recommended to upgrade the kernel to the minimum version or higher.
+[2026-06-16 03:16:35,340] [INFO] [real_accelerator.py:254:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+df: /root/.triton/autotune: No such file or directory
+[INFO:swift] use_reentrant: True
+[INFO:swift] The logging file will be saved in: /workspace/qwen-qlora-lab/outputs/stage3_qwen3_17b_dpo/v0-20260616-031625/logging.jsonl
+[transformers] The tokenizer has new PAD/BOS/EOS tokens that differ from the model config and generation config. The model config and generation config were aligned accordingly, being updated with the tokenizer's values. Updated tokens: {'bos_token_id': None}.
+Train:   0%|          | 0/30 [00:00<?, ?it/s][INFO:swift] use_logits_to_keep: True
+/opt/conda/lib/python3.11/site-packages/torch/utils/checkpoint.py:87: UserWarning: None of the inputs have requires_grad=True. Gradients will be None
+  warnings.warn(
+Train:   3%|▎         | 1/30 [00:03<01:37,  3.36s/it]                                                     {'loss': '1.467', 'grad_norm': '66.9', 'learning_rate': '5e-05', 'rewards/chosen': '0', 'rewards/rejected': '0', 'rewards/accuracies': '0', 'rewards/margins': '0', 'logps/chosen': '-493.2', 'logps/rejected': '-141.1', 'logits/chosen': '-2.545', 'logits/rejected': '-2.165', 'nll_loss': '7.737', 'epoch': '0.3333', 'global_step/max_steps': '1/30', 'elapsed_time': '3s', 'remaining_time': '1m 38s', 'memory(GiB)': '4.29', 'train_speed(s/it)': '3.366'}
+Train:   3%|▎         | 1/30 [00:03<01:37,  3.36s/it]Train:   3%|▎         | 1/30 [00:03<01:37,  3.36s/it]Train:   7%|▋         | 2/30 [00:05<01:20,  2.87s/it]                                                     {'loss': '1.494', 'grad_norm': '72.38', 'learning_rate': '4.985e-05', 'rewards/chosen': '0', 'rewards/rejected': '0', 'rewards/accuracies': '0', 'rewards/margins': '0', 'logps/chosen': '-543.5', 'logps/rejected': '-177.9', 'logits/chosen': '-2.644', 'logits/rejected': '-2.141', 'nll_loss': '8.008', 'epoch': '0.6667', 'global_step/max_steps': '2/30', 'elapsed_time': '6s', 'remaining_time': '1m 23s', 'memory(GiB)': '4.29', 'train_speed(s/it)': '2.949'}
+Train:   7%|▋         | 2/30 [00:05<01:20,  2.87s/it]Train:   7%|▋         | 2/30 [00:05<01:20,  2.87s/it]Train:  10%|█         | 3/30 [00:08<01:13,  2.72s/it]                                                     {'loss': '0.7659', 'grad_norm': '17.71', 'learning_rate': '4.942e-05', 'rewards/chosen': '2.399', 'rewards/rejected': '0.2678', 'rewards/accuracies': '1', 'rewards/margins': '2.132', 'logps/chosen': '-469.7', 'logps/rejected': '-149.1', 'logits/chosen': '-2.664', 'logits/rejected': '-2.156', 'nll_loss': '6.396', 'epoch': '1', 'global_step/max_steps': '3/30', 'elapsed_time': '8s', 'remaining_time': '1m 16s', 'memory(GiB)': '4.29', 'train_speed(s/it)': '2.81'}
+Train:  10%|█         | 3/30 [00:08<01:13,  2.72s/it]Train:  10%|█         | 3/30 [00:08<01:13,  2.72s/it]Train:  13%|█▎        | 4/30 [00:11<01:11,  2.73s/it]                                                     {'loss': '0.6884', 'grad_norm': '1.595', 'learning_rate': '4.869e-05', 'rewards/chosen': '9.186', 'rewards/rejected': '-1.196', 'rewards/accuracies': '1', 'rewards/margins': '10.38', 'logps/chosen': '-469.2', 'logps/rejected': '-161.8', 'logits/chosen': '-2.767', 'logits/rejected': '-1.954', 'nll_loss': '6.879', 'epoch': '1.333', 'global_step/max_steps': '4/30', 'elapsed_time': '11s', 'remaining_time': '1m 13s', 'memory(GiB)': '4.29', 'train_speed(s/it)': '2.796'}
+Train:  13%|█▎        | 4/30 [00:11<01:11,  2.73s/it]Train:  13%|█▎        | 4/30 [00:11<01:11,  2.73s/it]Train:  17%|█▋        | 5/30 [00:13<01:05,  2.63s/it]                                                     {'loss': '0.541', 'grad_norm': '1.358', 'learning_rate': '4.769e-05', 'rewards/chosen': '11.66', 'rewards/rejected': '-0.04112', 'rewards/accuracies': '1', 'rewards/margins': '11.7', 'logps/chosen': '-367.5', 'logps/rejected': '-138.7', 'logits/chosen': '-2.622', 'logits/rejected': '-1.809', 'nll_loss': '5.409', 'epoch': '1.667', 'global_step/max_steps': '5/30', 'elapsed_time': '14s', 'remaining_time': '1m 8s', 'memory(GiB)': '4.29', 'train_speed(s/it)': '2.724'}
+Train:  17%|█▋        | 5/30 [00:13<01:05,  2.63s/it]Train:  17%|█▋        | 5/30 [00:13<01:05,  2.63s/it]Train:  20%|██        | 6/30 [00:16<01:02,  2.62s/it]                                                     {'loss': '0.5079', 'grad_norm': '1.093', 'learning_rate': '4.642e-05', 'rewards/chosen': '13.79', 'rewards/rejected': '0.1124', 'rewards/accuracies': '1', 'rewards/margins': '13.68', 'logps/chosen': '-347.5', 'logps/rejected': '-181.5', 'logits/chosen': '-2.555', 'logits/rejected': '-1.43', 'nll_loss': '5.079', 'epoch': '2', 'global_step/max_steps': '6/30', 'elapsed_time': '16s', 'remaining_time': '1m 5s', 'memory(GiB)': '4.29', 'train_speed(s/it)': '2.705'}
+Train:  20%|██        | 6/30 [00:16<01:02,  2.62s/it]Train:  20%|██        | 6/30 [00:16<01:02,  2.62s/it]Train:  23%|██▎       | 7/30 [00:18<01:00,  2.62s/it]                                                     {'loss': '0.4452', 'grad_norm': '0.9711', 'learning_rate': '4.49e-05', 'rewards/chosen': '16.76', 'rewards/rejected': '0.6122', 'rewards/accuracies': '1', 'rewards/margins': '16.15', 'logps/chosen': '-326.2', 'logps/rejected': '-145.7', 'logits/chosen': '-2.521', 'logits/rejected': '-1.569', 'nll_loss': '4.452', 'epoch': '2.333', 'global_step/max_steps': '7/30', 'elapsed_time': '19s', 'remaining_time': '1m 2s', 'memory(GiB)': '4.29', 'train_speed(s/it)': '2.695'}
+Train:  23%|██▎       | 7/30 [00:18<01:00,  2.62s/it]Train:  23%|██▎       | 7/30 [00:18<01:00,  2.62s/it]Train:  27%|██▋       | 8/30 [00:21<00:57,  2.62s/it]                                                     {'loss': '0.4687', 'grad_norm': '0.9887', 'learning_rate': '4.315e-05', 'rewards/chosen': '19.25', 'rewards/rejected': '0.9908', 'rewards/accuracies': '1', 'rewards/margins': '18.25', 'logps/chosen': '-300.8', 'logps/rejected': '-131.2', 'logits/chosen': '-2.029', 'logits/rejected': '-0.8645', 'nll_loss': '4.687', 'epoch': '2.667', 'global_step/max_steps': '8/30', 'elapsed_time': '21s', 'remaining_time': '59s', 'memory(GiB)': '4.29', 'train_speed(s/it)': '2.684'}
+Train:  27%|██▋       | 8/30 [00:21<00:57,  2.62s/it]Train:  27%|██▋       | 8/30 [00:21<00:57,  2.62s/it]Train:  30%|███       | 9/30 [00:24<00:54,  2.61s/it]                                                     {'loss': '0.4712', 'grad_norm': '0.9649', 'learning_rate': '4.118e-05', 'rewards/chosen': '22.39', 'rewards/rejected': '1.177', 'rewards/accuracies': '1', 'rewards/margins': '21.21', 'logps/chosen': '-319.6', 'logps/rejected': '-166.1', 'logits/chosen': '-1.768', 'logits/rejected': '-0.6313', 'nll_loss': '4.712', 'epoch': '3', 'global_step/max_steps': '9/30', 'elapsed_time': '24s', 'remaining_time': '56s', 'memory(GiB)': '4.29', 'train_speed(s/it)': '2.674'}
+Train:  30%|███       | 9/30 [00:24<00:54,  2.61s/it]Train:  30%|███       | 9/30 [00:24<00:54,  2.61s/it]Train:  33%|███▎      | 10/30 [00:26<00:52,  2.62s/it]                                                      {'loss': '0.4439', 'grad_norm': '0.9338', 'learning_rate': '3.903e-05', 'rewards/chosen': '24.32', 'rewards/rejected': '3.18', 'rewards/accuracies': '1', 'rewards/margins': '21.14', 'logps/chosen': '-315.2', 'logps/rejected': '-162.9', 'logits/chosen': '-1.462', 'logits/rejected': '-0.5368', 'nll_loss': '4.439', 'epoch': '3.333', 'global_step/max_steps': '10/30', 'elapsed_time': '27s', 'remaining_time': '53s', 'memory(GiB)': '4.29', 'train_speed(s/it)': '2.669'}
+Train:  33%|███▎      | 10/30 [00:26<00:52,  2.62s/it]Train:  33%|███▎      | 10/30 [00:26<00:52,  2.62s/it]Train:  37%|███▋      | 11/30 [00:29<00:49,  2.58s/it]                                                      {'loss': '0.3351', 'grad_norm': '0.6996', 'learning_rate': '3.671e-05', 'rewards/chosen': '21.72', 'rewards/rejected': '1.512', 'rewards/accuracies': '1', 'rewards/margins': '20.21', 'logps/chosen': '-223.7', 'logps/rejected': '-115', 'logits/chosen': '-1.846', 'logits/rejected': '-0.5236', 'nll_loss': '3.351', 'epoch': '3.667', 'global_step/max_steps': '11/30', 'elapsed_time': '29s', 'remaining_time': '50s', 'memory(GiB)': '4.29', 'train_speed(s/it)': '2.654'}
+Train:  37%|███▋      | 11/30 [00:29<00:49,  2.58s/it]Train:  37%|███▋      | 11/30 [00:29<00:49,  2.58s/it]Train:  40%|████      | 12/30 [00:31<00:46,  2.56s/it]                                                      {'loss': '0.374', 'grad_norm': '0.8259', 'learning_rate': '3.425e-05', 'rewards/chosen': '28.23', 'rewards/rejected': '2.159', 'rewards/accuracies': '1', 'rewards/margins': '26.07', 'logps/chosen': '-248.9', 'logps/rejected': '-124.4', 'logits/chosen': '-1.138', 'logits/rejected': '-0.2694', 'nll_loss': '3.74', 'epoch': '4', 'global_step/max_steps': '12/30', 'elapsed_time': '32s', 'remaining_time': '48s', 'memory(GiB)': '4.29', 'train_speed(s/it)': '2.642'}
+Train:  40%|████      | 12/30 [00:31<00:46,  2.56s/it]Train:  40%|████      | 12/30 [00:31<00:46,  2.56s/it]Train:  43%|████▎     | 13/30 [00:34<00:44,  2.61s/it]                                                      {'loss': '0.3325', 'grad_norm': '0.7482', 'learning_rate': '3.169e-05', 'rewards/chosen': '27.66', 'rewards/rejected': '2.93', 'rewards/accuracies': '1', 'rewards/margins': '24.73', 'logps/chosen': '-228', 'logps/rejected': '-121.8', 'logits/chosen': '-1.272', 'logits/rejected': '-0.3409', 'nll_loss': '3.325', 'epoch': '4.333', 'global_step/max_steps': '13/30', 'elapsed_time': '34s', 'remaining_time': '45s', 'memory(GiB)': '4.29', 'train_speed(s/it)': '2.648'}
+Train:  43%|████▎     | 13/30 [00:34<00:44,  2.61s/it]Train:  43%|████▎     | 13/30 [00:34<00:44,  2.61s/it]Train:  47%|████▋     | 14/30 [00:37<00:41,  2.60s/it]                                                      {'loss': '0.3717', 'grad_norm': '0.7515', 'learning_rate': '2.904e-05', 'rewards/chosen': '31.38', 'rewards/rejected': '2.932', 'rewards/accuracies': '1', 'rewards/margins': '28.45', 'logps/chosen': '-257.4', 'logps/rejected': '-126', 'logits/chosen': '-0.8514', 'logits/rejected': '0.1069', 'nll_loss': '3.717', 'epoch': '4.667', 'global_step/max_steps': '14/30', 'elapsed_time': '37s', 'remaining_time': '42s', 'memory(GiB)': '4.29', 'train_speed(s/it)': '2.643'}
+Train:  47%|████▋     | 14/30 [00:37<00:41,  2.60s/it]Train:  47%|████▋     | 14/30 [00:37<00:41,  2.60s/it]Train:  50%|█████     | 15/30 [00:39<00:39,  2.61s/it]                                                      {'loss': '0.2847', 'grad_norm': '0.6057', 'learning_rate': '2.635e-05', 'rewards/chosen': '26.45', 'rewards/rejected': '4.673', 'rewards/accuracies': '1', 'rewards/margins': '21.77', 'logps/chosen': '-190.1', 'logps/rejected': '-117.7', 'logits/chosen': '-0.6743', 'logits/rejected': '0.2957', 'nll_loss': '2.847', 'epoch': '5', 'global_step/max_steps': '15/30', 'elapsed_time': '40s', 'remaining_time': '40s', 'memory(GiB)': '4.29', 'train_speed(s/it)': '2.643'}
+Train:  50%|█████     | 15/30 [00:39<00:39,  2.61s/it]Train:  50%|█████     | 15/30 [00:39<00:39,  2.61s/it][INFO:swift] Saving model checkpoint to /workspace/qwen-qlora-lab/outputs/stage3_qwen3_17b_dpo/v0-20260616-031625/checkpoint-15
+Train:  53%|█████▎    | 16/30 [00:42<00:37,  2.68s/it]                                                      {'loss': '0.3304', 'grad_norm': '0.6289', 'learning_rate': '2.365e-05', 'rewards/chosen': '32.84', 'rewards/rejected': '4.288', 'rewards/accuracies': '1', 'rewards/margins': '28.55', 'logps/chosen': '-232.6', 'logps/rejected': '-122.6', 'logits/chosen': '-0.6524', 'logits/rejected': '0.218', 'nll_loss': '3.304', 'epoch': '5.333', 'global_step/max_steps': '16/30', 'elapsed_time': '42s', 'remaining_time': '37s', 'memory(GiB)': '4.29', 'train_speed(s/it)': '2.656'}
+Train:  53%|█████▎    | 16/30 [00:42<00:37,  2.68s/it]Train:  53%|█████▎    | 16/30 [00:42<00:37,  2.68s/it]Train:  57%|█████▋    | 17/30 [00:45<00:34,  2.65s/it]                                                      {'loss': '0.2848', 'grad_norm': '0.5879', 'learning_rate': '2.096e-05', 'rewards/chosen': '30.57', 'rewards/rejected': '4.248', 'rewards/accuracies': '1', 'rewards/margins': '26.32', 'logps/chosen': '-203.7', 'logps/rejected': '-115.2', 'logits/chosen': '-0.6608', 'logits/rejected': '0.2363', 'nll_loss': '2.848', 'epoch': '5.667', 'global_step/max_steps': '17/30', 'elapsed_time': '45s', 'remaining_time': '34s', 'memory(GiB)': '4.29', 'train_speed(s/it)': '2.651'}
+Train:  57%|█████▋    | 17/30 [00:45<00:34,  2.65s/it]Train:  57%|█████▋    | 17/30 [00:45<00:34,  2.65s/it]Train:  60%|██████    | 18/30 [00:47<00:31,  2.61s/it]                                                      {'loss': '0.2629', 'grad_norm': '0.6022', 'learning_rate': '1.831e-05', 'rewards/chosen': '29.56', 'rewards/rejected': '4.178', 'rewards/accuracies': '1', 'rewards/margins': '25.39', 'logps/chosen': '-164.5', 'logps/rejected': '-105.8', 'logits/chosen': '-0.2941', 'logits/rejected': '0.5598', 'nll_loss': '2.629', 'epoch': '6', 'global_step/max_steps': '18/30', 'elapsed_time': '48s', 'remaining_time': '32s', 'memory(GiB)': '4.29', 'train_speed(s/it)': '2.643'}
+Train:  60%|██████    | 18/30 [00:47<00:31,  2.61s/it]Train:  60%|██████    | 18/30 [00:47<00:31,  2.61s/it]Train:  63%|██████▎   | 19/30 [00:50<00:29,  2.65s/it]                                                      {'loss': '0.2521', 'grad_norm': '0.5384', 'learning_rate': '1.575e-05', 'rewards/chosen': '29.67', 'rewards/rejected': '3.588', 'rewards/accuracies': '1', 'rewards/margins': '26.09', 'logps/chosen': '-168.1', 'logps/rejected': '-96.71', 'logits/chosen': '-0.8383', 'logits/rejected': '0.3146', 'nll_loss': '2.521', 'epoch': '6.333', 'global_step/max_steps': '19/30', 'elapsed_time': '50s', 'remaining_time': '29s', 'memory(GiB)': '4.29', 'train_speed(s/it)': '2.648'}
+Train:  63%|██████▎   | 19/30 [00:50<00:29,  2.65s/it]Train:  63%|██████▎   | 19/30 [00:50<00:29,  2.65s/it]Train:  67%|██████▋   | 20/30 [00:52<00:26,  2.61s/it]                                                      {'loss': '0.28', 'grad_norm': '0.5451', 'learning_rate': '1.329e-05', 'rewards/chosen': '32.68', 'rewards/rejected': '4.829', 'rewards/accuracies': '1', 'rewards/margins': '27.85', 'logps/chosen': '-185.9', 'logps/rejected': '-111.4', 'logits/chosen': '0.07093', 'logits/rejected': '0.7833', 'nll_loss': '2.8', 'epoch': '6.667', 'global_step/max_steps': '20/30', 'elapsed_time': '53s', 'remaining_time': '26s', 'memory(GiB)': '4.29', 'train_speed(s/it)': '2.641'}
+Train:  67%|██████▋   | 20/30 [00:52<00:26,  2.61s/it]Train:  67%|██████▋   | 20/30 [00:52<00:26,  2.61s/it]Train:  70%|███████   | 21/30 [00:55<00:23,  2.57s/it]                                                      {'loss': '0.2795', 'grad_norm': '0.5711', 'learning_rate': '1.097e-05', 'rewards/chosen': '35.24', 'rewards/rejected': '5.737', 'rewards/accuracies': '1', 'rewards/margins': '29.5', 'logps/chosen': '-200.6', 'logps/rejected': '-121.1', 'logits/chosen': '-0.09716', 'logits/rejected': '0.5345', 'nll_loss': '2.795', 'epoch': '7', 'global_step/max_steps': '21/30', 'elapsed_time': '55s', 'remaining_time': '24s', 'memory(GiB)': '4.29', 'train_speed(s/it)': '2.634'}
+Train:  70%|███████   | 21/30 [00:55<00:23,  2.57s/it]Train:  70%|███████   | 21/30 [00:55<00:23,  2.57s/it]Train:  73%|███████▎  | 22/30 [00:58<00:21,  2.63s/it]                                                      {'loss': '0.2564', 'grad_norm': '0.5116', 'learning_rate': '8.82e-06', 'rewards/chosen': '33.41', 'rewards/rejected': '3.369', 'rewards/accuracies': '1', 'rewards/margins': '30.04', 'logps/chosen': '-176', 'logps/rejected': '-104.6', 'logits/chosen': '-0.1683', 'logits/rejected': '0.5819', 'nll_loss': '2.564', 'epoch': '7.333', 'global_step/max_steps': '22/30', 'elapsed_time': '58s', 'remaining_time': '21s', 'memory(GiB)': '4.29', 'train_speed(s/it)': '2.64'}
+Train:  73%|███████▎  | 22/30 [00:58<00:21,  2.63s/it]Train:  73%|███████▎  | 22/30 [00:58<00:21,  2.63s/it]Train:  77%|███████▋  | 23/30 [01:00<00:18,  2.58s/it]                                                      {'loss': '0.2333', 'grad_norm': '0.5253', 'learning_rate': '6.85e-06', 'rewards/chosen': '32.65', 'rewards/rejected': '4.803', 'rewards/accuracies': '1', 'rewards/margins': '27.85', 'logps/chosen': '-153.2', 'logps/rejected': '-105.3', 'logits/chosen': '-0.3655', 'logits/rejected': '0.5699', 'nll_loss': '2.333', 'epoch': '7.667', 'global_step/max_steps': '23/30', 'elapsed_time': '1m 1s', 'remaining_time': '18s', 'memory(GiB)': '4.29', 'train_speed(s/it)': '2.632'}
+Train:  77%|███████▋  | 23/30 [01:00<00:18,  2.58s/it]Train:  77%|███████▋  | 23/30 [01:00<00:18,  2.58s/it]Train:  80%|████████  | 24/30 [01:03<00:15,  2.54s/it]                                                      {'loss': '0.2832', 'grad_norm': '0.5474', 'learning_rate': '5.1e-06', 'rewards/chosen': '34.14', 'rewards/rejected': '6.608', 'rewards/accuracies': '1', 'rewards/margins': '27.53', 'logps/chosen': '-199.3', 'logps/rejected': '-113', 'logits/chosen': '0.03938', 'logits/rejected': '0.8165', 'nll_loss': '2.832', 'epoch': '8', 'global_step/max_steps': '24/30', 'elapsed_time': '1m 3s', 'remaining_time': '16s', 'memory(GiB)': '4.29', 'train_speed(s/it)': '2.625'}
+Train:  80%|████████  | 24/30 [01:03<00:15,  2.54s/it]Train:  80%|████████  | 24/30 [01:03<00:15,  2.54s/it]Train:  83%|████████▎ | 25/30 [01:05<00:12,  2.57s/it]                                                      {'loss': '0.2532', 'grad_norm': '0.4877', 'learning_rate': '3.58e-06', 'rewards/chosen': '33.71', 'rewards/rejected': '5.555', 'rewards/accuracies': '1', 'rewards/margins': '28.16', 'logps/chosen': '-173', 'logps/rejected': '-111.7', 'logits/chosen': '-0.2169', 'logits/rejected': '0.5564', 'nll_loss': '2.532', 'epoch': '8.333', 'global_step/max_steps': '25/30', 'elapsed_time': '1m 6s', 'remaining_time': '13s', 'memory(GiB)': '4.29', 'train_speed(s/it)': '2.625'}
+Train:  83%|████████▎ | 25/30 [01:05<00:12,  2.57s/it]Train:  83%|████████▎ | 25/30 [01:05<00:12,  2.57s/it]Train:  87%|████████▋ | 26/30 [01:08<00:10,  2.56s/it]                                                      {'loss': '0.2526', 'grad_norm': '0.4873', 'learning_rate': '2.31e-06', 'rewards/chosen': '32.26', 'rewards/rejected': '4.354', 'rewards/accuracies': '1', 'rewards/margins': '27.91', 'logps/chosen': '-175.9', 'logps/rejected': '-112.8', 'logits/chosen': '-0.165', 'logits/rejected': '0.8297', 'nll_loss': '2.526', 'epoch': '8.667', 'global_step/max_steps': '26/30', 'elapsed_time': '1m 8s', 'remaining_time': '10s', 'memory(GiB)': '4.29', 'train_speed(s/it)': '2.622'}
+Train:  87%|████████▋ | 26/30 [01:08<00:10,  2.56s/it]Train:  87%|████████▋ | 26/30 [01:08<00:10,  2.56s/it]Train:  90%|█████████ | 27/30 [01:10<00:07,  2.57s/it]                                                      {'loss': '0.2471', 'grad_norm': '0.5332', 'learning_rate': '1.31e-06', 'rewards/chosen': '35.57', 'rewards/rejected': '5.128', 'rewards/accuracies': '1', 'rewards/margins': '30.45', 'logps/chosen': '-166.1', 'logps/rejected': '-95.87', 'logits/chosen': '0.07527', 'logits/rejected': '0.726', 'nll_loss': '2.471', 'epoch': '9', 'global_step/max_steps': '27/30', 'elapsed_time': '1m 11s', 'remaining_time': '8s', 'memory(GiB)': '4.29', 'train_speed(s/it)': '2.62'}
+Train:  90%|█████████ | 27/30 [01:10<00:07,  2.57s/it]Train:  90%|█████████ | 27/30 [01:10<00:07,  2.57s/it]Train:  93%|█████████▎| 28/30 [01:13<00:05,  2.64s/it]                                                      {'loss': '0.2377', 'grad_norm': '0.5033', 'learning_rate': '5.8e-07', 'rewards/chosen': '32.94', 'rewards/rejected': '5.891', 'rewards/accuracies': '1', 'rewards/margins': '27.05', 'logps/chosen': '-155.7', 'logps/rejected': '-110.6', 'logits/chosen': '-0.1945', 'logits/rejected': '0.7214', 'nll_loss': '2.377', 'epoch': '9.333', 'global_step/max_steps': '28/30', 'elapsed_time': '1m 14s', 'remaining_time': '5s', 'memory(GiB)': '4.29', 'train_speed(s/it)': '2.627'}
+Train:  93%|█████████▎| 28/30 [01:13<00:05,  2.64s/it]Train:  93%|█████████▎| 28/30 [01:13<00:05,  2.64s/it]Train:  97%|█████████▋| 29/30 [01:16<00:02,  2.62s/it]                                                      {'loss': '0.266', 'grad_norm': '0.5052', 'learning_rate': '1.5e-07', 'rewards/chosen': '37.68', 'rewards/rejected': '4.256', 'rewards/accuracies': '1', 'rewards/margins': '33.42', 'logps/chosen': '-192.6', 'logps/rejected': '-110.7', 'logits/chosen': '0.08364', 'logits/rejected': '0.6568', 'nll_loss': '2.66', 'epoch': '9.667', 'global_step/max_steps': '29/30', 'elapsed_time': '1m 16s', 'remaining_time': '3s', 'memory(GiB)': '4.29', 'train_speed(s/it)': '2.625'}
+Train:  97%|█████████▋| 29/30 [01:16<00:02,  2.62s/it]Train:  97%|█████████▋| 29/30 [01:16<00:02,  2.62s/it]Train: 100%|██████████| 30/30 [01:18<00:00,  2.63s/it]                                                      {'loss': '0.242', 'grad_norm': '0.501', 'learning_rate': '0', 'rewards/chosen': '31.43', 'rewards/rejected': '4.985', 'rewards/accuracies': '1', 'rewards/margins': '26.44', 'logps/chosen': '-161.7', 'logps/rejected': '-98.11', 'logits/chosen': '-0.1627', 'logits/rejected': '0.7819', 'nll_loss': '2.42', 'epoch': '10', 'global_step/max_steps': '30/30', 'elapsed_time': '1m 19s', 'remaining_time': '0s', 'memory(GiB)': '4.29', 'train_speed(s/it)': '2.627'}
+Train: 100%|██████████| 30/30 [01:18<00:00,  2.63s/it]Train: 100%|██████████| 30/30 [01:18<00:00,  2.63s/it][INFO:swift] Saving model checkpoint to /workspace/qwen-qlora-lab/outputs/stage3_qwen3_17b_dpo/v0-20260616-031625/checkpoint-30
+                                                      {'train_runtime': '79.07', 'train_samples_per_second': '1.518', 'train_steps_per_second': '0.379', 'train_loss': '0.4317', 'epoch': '10', 'global_step/max_steps': '30/30', 'elapsed_time': '1m 19s', 'remaining_time': '0s', 'memory(GiB)': '4.29', 'train_speed(s/it)': '2.635'}
+Train: 100%|██████████| 30/30 [01:19<00:00,  2.63s/it]Train: 100%|██████████| 30/30 [01:19<00:00,  2.63s/it]Train: 100%|██████████| 30/30 [01:19<00:00,  2.64s/it]
+[INFO:swift] last_model_checkpoint: /workspace/qwen-qlora-lab/outputs/stage3_qwen3_17b_dpo/v0-20260616-031625/checkpoint-30
+[INFO:swift] best_model_checkpoint: None
+[INFO:swift] images_dir: /workspace/qwen-qlora-lab/outputs/stage3_qwen3_17b_dpo/v0-20260616-031625/images
+[INFO:swift] End time of running main: 2026-06-16 03:17:59.136694
+latest_dpo_checkpoint=outputs/stage3_qwen3_17b_dpo/v0-20260616-031625/checkpoint-30

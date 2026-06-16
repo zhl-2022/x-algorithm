@@ -1,0 +1,325 @@
+# Stage 2 Sampling Grid
+
+## sampling_a800_plan temp=0.0 top_p=0.8 repeat=1
+
+prompt:
+
+```text
+请给我一份明天学习 QLoRA 推理、评测、导出的清单。
+```
+
+response:
+
+```text
+<think>
+
+</think>
+
+可以这样理解：QLoRA 不能脱离基座模型单独推理；部署时需要先加载原始模型，再通过 LoRA adapter 映射接口；测试应固定换言、添加 prompt、增加样本并记录日志。 面试时要强调资源约束、参数选择和验证闭环。
+```
+
+## sampling_a800_plan temp=0.0 top_p=0.95 repeat=1
+
+prompt:
+
+```text
+请给我一份明天学习 QLoRA 推理、评测、导出的清单。
+```
+
+response:
+
+```text
+<think>
+
+</think>
+
+可以这样理解：QLoRA 不能脱离基座模型单独推理；部署时需要先加载原始模型，再通过 LoRA adapter 映射接口；测试应固定换言、添加 prompt、增加样本并记录日志。 面试时要强调资源约束、参数选择和验证闭环。
+```
+
+## sampling_a800_plan temp=0.2 top_p=0.8 repeat=1
+
+prompt:
+
+```text
+请给我一份明天学习 QLoRA 推理、评测、导出的清单。
+```
+
+response:
+
+```text
+<think>
+
+</think>
+
+可以这样理解：QLoRA 不能脱离基座模型单独推理；部署时需要先加载原始模型，再通过 LoRA adapter 映射接口；测试应固定换言、添加 prompt、增加样本并记录日志。 面试时要强调资源约束、参数选择和验证闭环。
+```
+
+## sampling_a800_plan temp=0.2 top_p=0.95 repeat=1
+
+prompt:
+
+```text
+请给我一份明天学习 QLoRA 推理、评测、导出的清单。
+```
+
+response:
+
+```text
+<think>
+
+</think>
+
+可以这样理解：QLoRA 不能脱离基座模型单独推理；部署时需要先加载原始模型，再通过 LoRA adapter 映射接口；测试应固定换言、添加 prompt、增加样本并记录日志。 面试时要强调资源约束、参数选择和验证闭环。
+```
+
+## sampling_a800_plan temp=0.8 top_p=0.8 repeat=1
+
+prompt:
+
+```text
+请给我一份明天学习 QLoRA 推理、评测、导出的清单。
+```
+
+response:
+
+```text
+<think>
+
+</think>
+
+可以这样理解：QLoRA 不能脱离基座模型单独推理；部署时需要先加载原始模型，再通过 LoRA adapter 映射接口；测试应固定换档 prompt 做对比。 面试时要强调资源约束、参数选择和验证闭环。
+```
+
+## sampling_a800_plan temp=0.8 top_p=0.95 repeat=1
+
+prompt:
+
+```text
+请给我一份明天学习 QLoRA 推理、评测、导出的清单。
+```
+
+response:
+
+```text
+<think>
+
+</think>
+
+建议：部署前要固定测试 prompt、checkpoint 路径和训练步数；部署时应先验检查 nvidia-smi，再限制 CUDA_VISIBLE_DEVICES 和 batch size；最终要保存日志、checkpoint 和接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口接口
+```
+
+## sampling_interview_answer temp=0.0 top_p=0.8 repeat=1
+
+prompt:
+
+```text
+请生成一段面试回答：我如何在 A800 上完成 Qwen3 QLoRA 微调和推理对比。
+```
+
+response:
+
+```text
+<think>
+
+</think>
+
+可以这样理解：部署时需要先加载并冻结基座模型，再通过 LoRA adapter 加载 checkpoint；训练时会固定 shard rank，单卡训练会先保存原始显存、优化器状态和训练步数，再删除无关文件；测试阶段只看参数、日志和输出。 面试时要强调资源约束、参数选择和验证闭环。
+```
+
+## sampling_interview_answer temp=0.0 top_p=0.95 repeat=1
+
+prompt:
+
+```text
+请生成一段面试回答：我如何在 A800 上完成 Qwen3 QLoRA 微调和推理对比。
+```
+
+response:
+
+```text
+<think>
+
+</think>
+
+可以这样理解：部署时需要先加载并冻结基座模型，再通过 LoRA adapter 加载 checkpoint；训练时会固定 shard rank，单卡训练会先保存原始显存、优化器状态和训练步数，再删除无关文件；测试阶段只看参数、日志和输出。 面试时要强调资源约束、参数选择和验证闭环。
+```
+
+## sampling_interview_answer temp=0.2 top_p=0.8 repeat=1
+
+prompt:
+
+```text
+请生成一段面试回答：我如何在 A800 上完成 Qwen3 QLoRA 微调和推理对比。
+```
+
+response:
+
+```text
+<think>
+
+</think>
+
+可以这样理解：部署时需要先加载并冻结基座模型，再通过 LoRA adapter 加载 checkpoint；训练时会固定 shard rank，单卡训练会先保存原始显存、优化器状态和训练步数，再删除无关文件；测试阶段只看参数、日志和输出。 面试时要强调资源约束、参数选择和验证闭环。
+```
+
+## sampling_interview_answer temp=0.2 top_p=0.95 repeat=1
+
+prompt:
+
+```text
+请生成一段面试回答：我如何在 A800 上完成 Qwen3 QLoRA 微调和推理对比。
+```
+
+response:
+
+```text
+<think>
+
+</think>
+
+可以这样理解：部署时需要先加载并冻结基座模型，再通过 LoRA adapter 加载 checkpoint；训练时会固定训练步数、学习率和 checkpoint 存储路径；测试时只保存训练损失和精度曲线。 面试时要强调资源约束、参数选择和验证闭环。
+```
+
+## sampling_interview_answer temp=0.8 top_p=0.8 repeat=1
+
+prompt:
+
+```text
+请生成一段面试回答：我如何在 A800 上完成 Qwen3 QLoRA 微调和推理对比。
+```
+
+response:
+
+```text
+<think>
+
+</think>
+
+可以这样理解：Qwen3 支持 LoRA rank、dropout 和 alpha 参数，适合共享 GPU 上小数据实验；单卡实验应先检查 nvidia-smi，再限制 CUDA_VISIBLE_DEVICES 和 batch size；验证时要保存日志、检查 loss、top-k 和 token shuffle。 面试时要强调资源约束、参数选择和验证闭环。
+```
+
+## sampling_interview_answer temp=0.8 top_p=0.95 repeat=1
+
+prompt:
+
+```text
+请生成一段面试回答：我如何在 A800 上完成 Qwen3 QLoRA 微调和推理对比。
+```
+
+response:
+
+```text
+<think>
+
+</think>
+
+可以这样理解：部署时需要先检查 nvidia-smi，确认 GPU 型号、已有进程和空闲空间；再下载模型、训练数据、checkpoint 文件，并挂载 NVMe 存储；最后保存命令、日志和显存记录，确保实验可复现、低风险。 面试时要强调资源约束、参数选择和验证闭环。
+```
+
+## sampling_short_explain temp=0.0 top_p=0.8 repeat=1
+
+prompt:
+
+```text
+请用小白能懂的话解释：为什么同一个模型每次回答可能不一样？
+```
+
+response:
+
+```text
+<think>
+
+</think>
+
+简洁回答：同一个模型在同一训练条件下测试多次，结果不会完全一样，但变化通常很小；这种现象叫“测试偏差”或“过拟合”。 如果效果不明显，应先检查数据质量和训练步数，而不是盲目换模型。
+```
+
+## sampling_short_explain temp=0.0 top_p=0.95 repeat=1
+
+prompt:
+
+```text
+请用小白能懂的话解释：为什么同一个模型每次回答可能不一样？
+```
+
+response:
+
+```text
+<think>
+
+</think>
+
+简洁回答：同一个模型在同一训练条件下测试多次，结果不会完全一样，但变化通常很小；这种现象叫“测试偏差”或“过拟合”。 如果效果不明显，应先检查数据质量和训练步数，而不是盲目换模型。
+```
+
+## sampling_short_explain temp=0.2 top_p=0.8 repeat=1
+
+prompt:
+
+```text
+请用小白能懂的话解释：为什么同一个模型每次回答可能不一样？
+```
+
+response:
+
+```text
+<think>
+
+</think>
+
+简洁回答：同一个模型在同一训练条件下测试多次，结果不会完全相同，但变化通常很小；这种现象叫“实验可复现性”，不是因为模型差，而是因为数据、参数、训练步数和测试环境容易被人为影响。 如果效果不明显，应先检查数据质量和训练步数，而不是盲目换模型。
+```
+
+## sampling_short_explain temp=0.2 top_p=0.95 repeat=1
+
+prompt:
+
+```text
+请用小白能懂的话解释：为什么同一个模型每次回答可能不一样？
+```
+
+response:
+
+```text
+<think>
+
+</think>
+
+简洁回答：同一个模型在同一训练条件下测试多次，结果不会完全一致；原因通常是随机种子固定、测试步数少或数据相关性低；多次测试时应保存日志、检查参数、对比训练步数和输出。 如果效果不明显，应先检查数据质量和训练步数，而不是盲目换模型。
+```
+
+## sampling_short_explain temp=0.8 top_p=0.8 repeat=1
+
+prompt:
+
+```text
+请用小白能懂的话解释：为什么同一个模型每次回答可能不一样？
+```
+
+response:
+
+```text
+<think>
+
+</think>
+
+简洁回答：同一个模型每次回答不固定，是因为每次会用当前训练数据随机打乱顺序重新训练一次；此外，模型容量有限，不能同时回答多个问题；最后，同一请求多次交互时，只能记录最相关的参数、输入、输出和时间，不能盲目换模型。 如果效果不明显，应先检查数据质量和训练步数，而不是随意换模型。
+```
+
+## sampling_short_explain temp=0.8 top_p=0.95 repeat=1
+
+prompt:
+
+```text
+请用小白能懂的话解释：为什么同一个模型每次回答可能不一样？
+```
+
+response:
+
+```text
+<think>
+
+</think>
+
+简洁回答：同一个模型每次回答不固定，是因为每次会用最新训练数据重新学习；短回答通常只说一个点；不同问题不能只靠一个样本判断。 如果效果不明显，应先检查数据质量和训练步数，而不是盲目换模型。
+```

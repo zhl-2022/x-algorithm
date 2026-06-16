@@ -1,0 +1,7 @@
+id,score,matched,total,passed,missed_groups,forbidden_hits,error,note
+a800_shared_training,0.5,2,4,False,batch / max_length / gradient_accumulation_steps | 日志 / checkpoint / 记录,,,检查模型是否学到共享 GPU 训练的安全流程。
+adapter_inference,1.0,4,4,True,,,,检查模型是否能讲清 adapter 推理不是重新训练。
+qlora_memory,1.0,4,4,True,,,,检查 QLoRA 的核心动机。
+training_log,1.0,4,4,True,,,,检查训练日志指标理解。
+eval_vs_train,0.75,3,4,True,固定评测 / 人工评估 / benchmark,,,检查评测意识。
+sampling_params,0.5,2,4,False,稳定 / 随机 | 发散 / 多样,,,检查采样参数理解。
