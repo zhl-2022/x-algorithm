@@ -1,0 +1,6 @@
+nvidia-smi unavailable inside container
+torch_cuda_available: True
+torch_cuda_device_count: 1
+torch_cuda_device_0: NVIDIA A800 80GB PCIe
+torch_cuda_mem_free_mib: 25575.38
+torch_cuda_mem_total_mib: 81155.75

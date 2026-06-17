@@ -1,0 +1,42 @@
+Stage 3 fixed-prompt evaluation
+project_dir=/workspace/qwen-qlora-lab
+wrote data/stage3_alignment_infer_prompts.jsonl rows=8
+
+## effective_sft
+base_model=models/Qwen3-1.7B
+adapter=outputs/qwen3_17b_text_effective/v0-20260615-102152/checkpoint-120
+dataset=data/stage3_alignment_infer_prompts.jsonl
+result_path=logs/stage3_alignment_eval_effective_sft.raw.jsonl
+max_new_tokens=256
+2026-06-17T07:01:43+00:00
+exit_code=0
+result_rows=8
+command_log=logs/stage3_alignment_eval_effective_sft.infer.log
+
+## dpo_v1
+base_model=models/Qwen3-1.7B
+adapter=outputs/stage3_qwen3_17b_dpo/v0-20260616-031625/checkpoint-30
+dataset=data/stage3_alignment_infer_prompts.jsonl
+result_path=logs/stage3_alignment_eval_dpo_v1.raw.jsonl
+max_new_tokens=256
+2026-06-17T07:02:57+00:00
+exit_code=0
+result_rows=8
+command_log=logs/stage3_alignment_eval_dpo_v1.infer.log
+
+## grpo_v1
+base_model=models/Qwen3-1.7B
+adapter=outputs/stage3_qwen3_17b_grpo/v1-20260617-063053/checkpoint-20
+dataset=data/stage3_alignment_infer_prompts.jsonl
+result_path=logs/stage3_alignment_eval_grpo_v1.raw.jsonl
+max_new_tokens=256
+2026-06-17T07:04:28+00:00
+exit_code=0
+result_rows=8
+command_log=logs/stage3_alignment_eval_grpo_v1.infer.log
+wrote logs/stage3_alignment_eval_effective_sft.scored.jsonl rows=8
+wrote logs/stage3_alignment_eval_dpo_v1.scored.jsonl rows=8
+wrote logs/stage3_alignment_eval_grpo_v1.scored.jsonl rows=8
+wrote logs/stage3_alignment_eval_compare.md
+wrote logs/stage3_alignment_eval_grpo_failures.md
+Stage 3 fixed-prompt evaluation complete.

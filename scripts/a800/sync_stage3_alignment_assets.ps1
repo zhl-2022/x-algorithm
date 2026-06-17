@@ -21,7 +21,9 @@ $Items = @(
     "scripts/stage3_prepare_alignment_assets.sh",
     "scripts/stage3_readiness_check.sh",
     "scripts/stage3_train_dpo_inside.sh",
-    "scripts/stage3_train_grpo_inside.sh"
+    "scripts/stage3_train_grpo_inside.sh",
+    "scripts/stage3_alignment_eval_compare.py",
+    "scripts/stage3_run_alignment_eval_inside.sh"
 )
 
 & tar -C $SnapshotRoot -cf $Archive @Items

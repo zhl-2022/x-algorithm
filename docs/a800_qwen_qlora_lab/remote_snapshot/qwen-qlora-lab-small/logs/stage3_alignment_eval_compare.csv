@@ -1,0 +1,25 @@
+id,model,score,passed,missed_groups,forbidden_hits,repeated_sentence_count,failure_types
+grpo_a800_safety,effective_sft,1.0,True,,,0,
+grpo_dpo_format,effective_sft,0.0,False,chosen | rejected | messages | 偏好,,0,missing_required
+grpo_reward_design,effective_sft,0.0,False,正确性 | 格式 | 安全 | 简洁,,0,missing_required
+grpo_eval_failure,effective_sft,0.0,False,失败案例 | reward | 过拟合 | 下一轮,,0,missing_required
+grpo_adapter_vs_merged,effective_sft,0.25,False,base | 合并 | 磁盘,,0,missing_required
+grpo_sampling,effective_sft,0.25,False,固定 prompt | temperature | 对比,,0,missing_required
+grpo_strict_report,effective_sft,0.2,False,数据 | 日志 | 评测 | 失败,,0,missing_required
+grpo_train_loss_limit,effective_sft,0.0,False,泛化 | 评测 | 过拟合 | 人工,,0,missing_required
+grpo_a800_safety,dpo_v1,1.0,True,,,0,
+grpo_dpo_format,dpo_v1,0.0,False,chosen | rejected | messages | 偏好,,0,missing_required
+grpo_reward_design,dpo_v1,0.0,False,正确性 | 格式 | 安全 | 简洁,,1,missing_required
+grpo_eval_failure,dpo_v1,0.25,False,reward | 过拟合 | 下一轮,,0,missing_required
+grpo_adapter_vs_merged,dpo_v1,0.25,False,base | 合并 | 磁盘,,0,missing_required
+grpo_sampling,dpo_v1,0.25,False,固定 prompt | temperature | 对比,,0,missing_required
+grpo_strict_report,dpo_v1,0.0,False,数据 | 命令 | 日志 | 评测 | 失败,,0,missing_required
+grpo_train_loss_limit,dpo_v1,0.0,False,泛化 | 评测 | 过拟合 | 人工,,0,missing_required
+grpo_a800_safety,grpo_v1,1.0,True,,,0,
+grpo_dpo_format,grpo_v1,0.0,False,chosen | rejected | messages | 偏好,,18,missing_required | repetition
+grpo_reward_design,grpo_v1,0.0,False,正确性 | 格式 | 安全 | 简洁,,0,missing_required
+grpo_eval_failure,grpo_v1,0.25,False,reward | 过拟合 | 下一轮,,1,missing_required
+grpo_adapter_vs_merged,grpo_v1,0.25,False,base | 合并 | 磁盘,,0,missing_required
+grpo_sampling,grpo_v1,0.75,True,对比,,0,missing_required
+grpo_strict_report,grpo_v1,0.2,False,数据 | 日志 | 评测 | 失败,,0,missing_required
+grpo_train_loss_limit,grpo_v1,0.0,False,泛化 | 评测 | 过拟合 | 人工,,0,missing_required

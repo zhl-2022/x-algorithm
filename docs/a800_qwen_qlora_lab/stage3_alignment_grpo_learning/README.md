@@ -32,6 +32,7 @@
 | `05_eval_and_failure_analysis.md` | 训练后评测、失败归因和复盘模板 |
 | `06_dpo_first_run_notes.md` | 记录本次 DPO 首跑结果和进入 GRPO 前的检查项 |
 | `07_stage2_sampling_and_dpo_correction_results.md` | 解释 `temperature/top_p` 原理，并复盘 DPO 修正是否真正变好 |
+| `08_grpo_first_run_notes.md` | 记录本次 GRPO 首跑结果、日志指标和下一步评测要求 |
 | `failure_cases.md` | 后续填写失败案例 |
 
 新增远端快照脚本：
@@ -54,6 +55,7 @@ docs/a800_qwen_qlora_lab/remote_snapshot/qwen-qlora-lab-small/scripts/stage3_tra
 .\scripts\a800\run_stage3_reward_selftest.ps1
 .\scripts\a800\run_stage3_dpo_train.ps1
 .\scripts\a800\run_stage3_grpo_train.ps1
+.\scripts\a800\sync_stage3_grpo_results.ps1
 ```
 
 ## 第一轮建议执行顺序
@@ -77,6 +79,7 @@ DPO 复盘完成后，再跑 GRPO：
 
 ```powershell
 .\scripts\a800\run_stage3_grpo_train.ps1 -ConfirmTrain -MaxSteps 20
+.\scripts\a800\sync_stage3_grpo_results.ps1
 ```
 
 ## 关键学习边界

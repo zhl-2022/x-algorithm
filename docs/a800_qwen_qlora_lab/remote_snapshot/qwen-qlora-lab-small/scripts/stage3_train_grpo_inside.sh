@@ -11,6 +11,14 @@ PROJECT_DIR="${PROJECT_DIR:-/workspace/qwen-qlora-lab}"
 cd "$PROJECT_DIR"
 mkdir -p logs outputs
 
+if command -v ldconfig >/dev/null 2>&1; then
+  ldconfig || true
+fi
+
+python3 - <<'PY' >/dev/null 2>&1 || python3 -m pip install -q msgspec -i https://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
+import msgspec  # noqa: F401
+PY
+
 DATASET="${DATASET:-data/stage3_grpo_prompts.jsonl}"
 OUT_DIR="${OUT_DIR:-outputs/stage3_qwen3_17b_grpo}"
 MAX_STEPS="${MAX_STEPS:-20}"
@@ -27,7 +35,28 @@ echo "Base model: $BASE_MODEL" | tee -a logs/stage3_grpo.train.log
 echo "Start adapter: $START_ADAPTER" | tee -a logs/stage3_grpo.train.log
 echo "Max steps: $MAX_STEPS" | tee -a logs/stage3_grpo.train.log
 python3 scripts/stage3_reward_plugin.py | tee logs/stage3_reward_selftest.log
-nvidia-smi > logs/stage3_grpo.before.nvidia-smi.txt
+
+write_gpu_snapshot() {
+  local out_file="$1"
+  if command -v nvidia-smi >/dev/null 2>&1; then
+    nvidia-smi > "$out_file"
+  else
+    python3 - <<'PY' > "$out_file"
+import torch
+
+print("nvidia-smi unavailable inside container")
+print("torch_cuda_available:", torch.cuda.is_available())
+print("torch_cuda_device_count:", torch.cuda.device_count())
+if torch.cuda.is_available():
+    print("torch_cuda_device_0:", torch.cuda.get_device_name(0))
+    free, total = torch.cuda.mem_get_info(0)
+    print("torch_cuda_mem_free_mib:", round(free / 1024 / 1024, 2))
+    print("torch_cuda_mem_total_mib:", round(total / 1024 / 1024, 2))
+PY
+  fi
+}
+
+write_gpu_snapshot logs/stage3_grpo.before.nvidia-smi.txt
 
 CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-0}" swift rlhf \
   --rlhf_type grpo \
@@ -70,6 +99,6 @@ CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-0}" swift rlhf \
   --log_completions true \
   2>&1 | tee -a logs/stage3_grpo.train.log
 
-nvidia-smi > logs/stage3_grpo.after.nvidia-smi.txt
+write_gpu_snapshot logs/stage3_grpo.after.nvidia-smi.txt
 latest_ckpt="$(find "$OUT_DIR" -type d -name 'checkpoint-*' 2>/dev/null | sort -V | tail -n1 || true)"
 echo "latest_grpo_checkpoint=$latest_ckpt" | tee -a logs/stage3_grpo.train.log

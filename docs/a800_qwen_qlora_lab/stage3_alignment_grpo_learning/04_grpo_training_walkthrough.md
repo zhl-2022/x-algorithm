@@ -211,7 +211,65 @@ GRPO：
 | completions | 模型生成的回答是否被 reward 正确区分 |
 | checkpoint | 是否按预期保存 |
 
-## 7. 第一轮不追求高分
+## 7. 同步 GRPO 结果到本地
+
+GRPO 训练完成后执行：
+
+```powershell
+.\scripts\a800\sync_stage3_grpo_results.ps1
+```
+
+这个脚本只同步安全学习文件：
+
+| 类型 | 示例 |
+|---|---|
+| 日志 | `logs/stage3_grpo.train.log` |
+| 参数 | `args.json` |
+| 结构化指标 | `logging.jsonl` |
+| checkpoint 元数据 | `trainer_state.json`、`adapter_config.json` |
+| 曲线图 | `images/train_reward.png`、`images/train_kl.png` |
+
+它不会同步：
+
+```text
+adapter_model.safetensors
+*.safetensors
+*.bin
+*.pt
+*.gguf
+*.onnx
+```
+
+如果归档里出现这些文件，脚本会拒绝解包。
+
+## 8. 本次 GRPO 首跑结果
+
+本次已经在 A800 上完成一轮小步 GRPO：
+
+| 项目 | 值 |
+|---|---|
+| 运行日期 | `2026-06-17` |
+| 起点 adapter | `outputs/stage3_qwen3_17b_dpo/v0-20260616-031625/checkpoint-30` |
+| 输出目录 | `outputs/stage3_qwen3_17b_grpo/v1-20260617-063053` |
+| 最终 checkpoint | `checkpoint-20` |
+| `global_step/max_steps` | `20/20` |
+| `train_runtime` | `241.5763s` |
+| `train_loss` | `0.00024549` |
+| `reward` 范围 | `0.25` 到 `1.0` |
+| `reward` 平均值 | `0.4884` |
+| `kl` 最大值 | `0.02504611` |
+| `completions/clipped_ratio` 最大值 | `0.25` |
+| 日志显存 | `4.35 GiB` |
+
+这说明训练链路和 reward 插件已经跑通，但还不能说明模型效果已经提升。原因是 GRPO 的指标只说明训练过程有信号，不等于固定问题上的回答质量更好。
+
+详细复盘见：
+
+```text
+docs/a800_qwen_qlora_lab/stage3_alignment_grpo_learning/08_grpo_first_run_notes.md
+```
+
+## 9. 第一轮不追求高分
 
 第一轮 DPO/GRPO 的目标是：
 
